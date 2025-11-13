@@ -16,12 +16,14 @@ class WaterQualityCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public WaterQualityData $waterQualityData;
+
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public function __construct(WaterQualityData $waterQualityData)
     {
-
+        $this->waterQualityData = $waterQualityData;
     }
 
     /**
@@ -33,6 +35,18 @@ class WaterQualityCreated implements ShouldBroadcastNow
     {
         return [
             new Channel('water-quality-data-created'),
+        ];
+    }
+
+    /**
+     * Get the data to broadcast.
+     *
+     * @return array
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'waterQualityData' => $this->waterQualityData->toArray(),
         ];
     }
 }

@@ -44,10 +44,10 @@ class WaterQualityDataController extends Controller
 
             // Check temperature condition
             if ($request->temperature != 85.0000) {
-                WaterQualityData::create($request->all());
+                $waterQualityData = WaterQualityData::create($request->all());
 
-                // Broadcast event
-                broadcast(new WaterQualityCreated());
+                // Broadcast event with the created data
+                broadcast(new WaterQualityCreated($waterQualityData));
                 Log::info('WaterQualityCreated event triggered.');
 
                 return response()->json(['success' => true], Response::HTTP_CREATED);

@@ -142,7 +142,7 @@
         @endif
 
         {{-- User Table Wrapper --}}
-        <div class="overflow-x-auto"> {{-- This div handles the horizontal scroll for the table --}}
+        <div class="overflow-x-auto relative"> {{-- This div handles the horizontal scroll for the table --}}
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
@@ -159,7 +159,7 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Water Type</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Password</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">API Key</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+                        <th scope="col" class="sticky right-0 z-10 bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
@@ -178,7 +178,7 @@
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->water_type }}</td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">********</td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->api_key ? '********' : '' }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                            <td class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
                                 <button wire:click="editUser({{ $user->user_id }})" class="text-indigo-600 hover:text-indigo-900">Edit</button>
                                 {{-- Changed wire:click, removed wire:confirm --}}
                                 <button wire:click="confirmDelete({{ $user->user_id }})" class="ml-2 text-red-600 hover:text-red-900">Delete</button>
