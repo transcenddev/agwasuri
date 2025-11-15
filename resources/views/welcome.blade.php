@@ -90,8 +90,8 @@
     class="relative font-sans antialiased transition-colors duration-300 bg-fixed bg-center bg-no-repeat bg-cover dark:bg-[#0a0a0a]"
     style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), linear-gradient(rgba(27, 101, 27, 0.2), rgba(27, 101, 27, 0.2)), url('{{ asset('assets/hidden_forest_lake.png') }}');">
 
-    <!-- Dark mode overlay -->
-    <div class="fixed inset-0 transition-opacity duration-300 bg-black pointer-events-none dark:opacity-60 opacity-0"></div>
+    <!-- Dark mode overlay (kept behind interactive elements so buttons stay bright) -->
+    <div class="fixed inset-0 transition-opacity duration-300 bg-black pointer-events-none dark:opacity-60 opacity-0 z-0"></div>
 
     <div class="relative z-10">
         <livewire:welcome.navigation />
