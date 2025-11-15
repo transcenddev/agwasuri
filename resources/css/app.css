@@ -6,28 +6,21 @@
 :root {
   --cvsu-300: #72b372;
   --cvsu-400: #2a7a2a;
-  --cvsu-500: #1B651B; /* primary brand accent */
+  --cvsu-500: #1B651B;
+  /* primary brand accent */
   --cvsu-600: #155414;
   --cvsu-700: #103f10;
   --cvsu-800: #0b2b0b;
 }
 
-/* Optional dark mode overrides */
-.dark {
-  --cvsu-300: #8ac48a;
-  --cvsu-400: #5fb65f;
-  --cvsu-500: #3f8f3f;
-  --cvsu-600: #368036;
-  --cvsu-700: #2e6b2e;
-  --cvsu-800: #265b26;
-}
+/* Note: no dark-mode overrides for cvsu colors so buttons keep brand color in dark mode */
 
 /* Wulkan Display Font Family */
 @font-face {
   font-family: 'Wulkan Display';
-    /* Prefer webfont (woff) when available; reference fonts in resources/fonts so Vite bundles them */
-    src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Medium.woff') format('woff'),
-      url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Medium.otf') format('opentype');
+  /* Prefer webfont (woff) when available; reference fonts in resources/fonts so Vite bundles them */
+  src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Medium.woff') format('woff'),
+    url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Medium.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -35,8 +28,8 @@
 
 @font-face {
   font-family: 'Wulkan Display';
-    src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Bold.woff') format('woff'),
-      url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Bold.otf') format('opentype');
+  src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Bold.woff') format('woff'),
+    url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -44,8 +37,8 @@
 
 @font-face {
   font-family: 'Wulkan Display';
-    src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Black.woff') format('woff'),
-      url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Black.otf') format('opentype');
+  src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Black.woff') format('woff'),
+    url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Black.otf') format('opentype');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
