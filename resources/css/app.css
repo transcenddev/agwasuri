@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Wulkan Display Font Family */
+@font-face {
+  font-family: 'Wulkan Display';
+    /* Prefer webfont (woff) when available; reference fonts in resources/fonts so Vite bundles them */
+    src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Medium.woff') format('woff'),
+      url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Wulkan Display';
+    src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Bold.woff') format('woff'),
+      url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Wulkan Display';
+    src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Black.woff') format('woff'),
+      url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Black.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Reserve vertical scrollbar space so page width stays constant across routes */
+html {
+  overflow-y: scroll;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Small utility to ensure logo text doesn't shift baseline */
+.nav-logo-text {
+  line-height: 1;
+  display: inline-block;
+}
