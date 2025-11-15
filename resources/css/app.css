@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Project color variables (cvsu) - used by Tailwind via CSS variables */
+:root {
+  --cvsu-300: #A5D6A7;
+  --cvsu-400: #66BB6A;
+  --cvsu-500: #4CAF50; /* primary */
+  --cvsu-600: #43A047;
+  --cvsu-700: #388E3C;
+  --cvsu-800: #2E7D32;
+}
+
+/* Optional dark mode overrides */
+.dark {
+  --cvsu-300: #8ac48a;
+  --cvsu-400: #5fb65f;
+  --cvsu-500: #3f8f3f;
+  --cvsu-600: #368036;
+  --cvsu-700: #2e6b2e;
+  --cvsu-800: #265b26;
+}
+
 /* Wulkan Display Font Family */
 @font-face {
   font-family: 'Wulkan Display';
