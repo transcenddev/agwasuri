@@ -4,12 +4,12 @@
 
 /* Project color variables (cvsu) - used by Tailwind via CSS variables */
 :root {
-  --cvsu-300: #A5D6A7;
-  --cvsu-400: #66BB6A;
-  --cvsu-500: #4CAF50; /* primary */
-  --cvsu-600: #43A047;
-  --cvsu-700: #388E3C;
-  --cvsu-800: #2E7D32;
+  --cvsu-300: #72b372;
+  --cvsu-400: #2a7a2a;
+  --cvsu-500: #1B651B; /* primary brand accent */
+  --cvsu-600: #155414;
+  --cvsu-700: #103f10;
+  --cvsu-800: #0b2b0b;
 }
 
 /* Optional dark mode overrides */
