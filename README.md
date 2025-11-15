@@ -1,105 +1,212 @@
 # Agwasuri
 
-Water quality monitoring system for fishponds with IoT sensors and AI fish recommendations.
+Water quality monitoring system for fishponds using IoT sensors, real-time broadcasting, and AI-driven fish recommendations.
 
-## What it does
+## Table of Contents
 
--   Monitors water quality in real-time (temperature, pH, dissolved oxygen, salinity)
--   Shows live charts and data on a dashboard
--   Recommends best fish species based on water conditions using AI
--   Connects to ESP32/Arduino IoT sensors via REST API
+-   [Background](#background)
+-   [Features](#features)
+-   [Requirements](#requirements)
+-   [Install](#install)
+-   [Usage](#usage)
+-   [Dev-start helper](#dev-start-helper)
+-   [API / Architecture](#api--architecture)
+-   [Testing](#testing)
+-   [Contributing](#contributing)
+-   [License](#license)
+
+## Background
+
+Agwasuri helps small-scale aquaculture operators, researchers, and municipal officers collect, visualize, and act on pond water-quality data. It combines sensor ingestion (ESP32/Arduino devices), real-time broadcasts (Laravel Reverb), and a lightweight ML service to recommend suitable fish species and reduce stock loss.
+
+Goals:
+
+-   Improve decision-making for pond management
+-   Provide reproducible data for research and evaluation
+-   Demonstrate a complete IoT → web → ML pipeline for aquaculture
+
+## Features
+
+-   Real-time ingestion of temperature, pH, dissolved oxygen, and salinity
+-   Live charts and dashboards (Livewire + Tailwind)
+-   AI-driven fish-species recommendations (external ML service)
+-   Web endpoint for sensor data ingestion: `POST /store-water-quality-data`
+-   Broadcasts new measurements on channel `water-quality-data-created`
 
 ## Requirements
 
--   PHP 8.2+
+-   PHP 8.3+
 -   Composer
 -   Node.js 18+
--   MySQL/PostgreSQL/SQLite
--   XAMPP (optional, includes PHP and MySQL)
+-   npm
+-   SQLite (recommended for quick local setup) or MySQL/PostgreSQL for production
+-   PowerShell (Windows) or bash (macOS/Linux)
 
-**New to Laravel?** Watch this: https://youtu.be/2qgS_MCvDfk
+## Install
 
-## Installation
+Follow these steps to get a development instance running. The PowerShell examples assume you're on Windows; for macOS/Linux use the POSIX equivalents shown.
 
-```bash
-composer global require laravel/installer
-```
+1. Clone and install dependencies
 
-Clone and setup:
-
-```bash
+```pwsh
 git clone https://github.com/lokodata/agwasuri_prod.git
 cd agwasuri_prod
 composer install
 npm install
+```
+
+2. Copy environment and generate app key
+
+```pwsh
+copy .env.example .env
+php artisan key:generate
+```
+
+On POSIX systems:
+
+```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-Configure database in `.env`:
+3. Configure the database in `.env` (SQLite quickstart)
 
 ```env
 DB_CONNECTION=sqlite
+DB_DATABASE=database/database.sqlite
 ```
 
-Run migrations and install packages:
+Create the SQLite file if it doesn't exist:
 
-```bash
-php artisan migrate
+```pwsh
+if (-not (Test-Path database\database.sqlite)) { New-Item database\database.sqlite -ItemType File }
+```
+
+4. Run migrations, seeders and install optional packages
+
+```pwsh
+php artisan migrate --seed
 php artisan reverb:install
 php artisan livewire-charts:install
 ```
 
-Start the server:
+5. (Optional) Create or reset the admin account
 
-```bash
+```pwsh
+pwsh ./scripts/create-admin.ps1
+```
+
+## Usage
+
+Start the full development stack (recommended):
+
+```pwsh
 composer run dev
 ```
 
-Open http://127.0.0.1:8000 and register an account.
+This runs the web server, Reverb (real-time) and Vite concurrently. Alternatively, start pieces manually:
 
-## API for IoT Devices
-
-Send data to: `POST /store-water-quality-data`
-
-Headers:
-
-```
-Authorization: Bearer YOUR_API_KEY
-Content-Type: application/json
+```pwsh
+php artisan serve --host=0.0.0.0 --port=8000
+php artisan reverb:start
+npm run dev
 ```
 
-Body:
+Open the app at `http://127.0.0.1:8000`.
+
+Sensor ingestion endpoint (sample):
+
+-   URL: `POST http://127.0.0.1:8000/store-water-quality-data`
+-   Headers: `Authorization: Bearer <API_KEY>`, `Content-Type: application/json`
+
+Example curl request:
+
+```bash
+curl -X POST http://127.0.0.1:8000/store-water-quality-data \\
+    -H "Authorization: Bearer <API_KEY>" \\
+    -H "Content-Type: application/json" \\
+    -d '{"user_id":1,"recorded_at":"2025-11-06 12:00:00","temperature":28.5,"ph_level":7.2,"dissolved_oxygen":6.8,"salinity":15.3}'
+```
+
+Real-time event channel: `water-quality-data-created` (event `App\\Events\\WaterQualityCreated`).
+
+## Dev-start helper
+
+Use the included cross-platform helper scripts to simplify starting and resetting local environments:
+
+```bash
+npm run dev-start
+```
+
+-   Default: runs non-destructive migrations/seeds and starts the dev stack.
+-   Destructive reset: `npm run dev-start -- --fresh` (POSIX) or `npm run dev-start -- -Fresh` (PowerShell) — this drops and rebuilds the DB after confirmation.
+
+See `scripts/` for platform-specific behaviour.
+
+## API / Architecture
+
+A brief overview of the main components and important files:
+
+-   Routes: `routes/web.php` — registers `POST /store-water-quality-data` and site routes
+-   Controller: `app/Http/Controllers/Api/WaterQualityDataController.php` — validates requests, authenticates via `Authorization: Bearer <API_KEY>` (matching `user_id` + `api_key`), creates `WaterQualityData` records and broadcasts `WaterQualityCreated` events
+-   Models: `app/Models/WaterQualityData.php`, `app/Models/User.php` (primary key: `user_id`), `app/Models/ModelMetadata.php`
+-   Events: `app/Events/WaterQualityCreated.php` — broadcasts on channel `water-quality-data-created` (ShouldBroadcastNow)
+-   Livewire: `app/Livewire/ClassifyFish.php` — calls external ML endpoints (`/predict` and `/train_model` at `https://api.agwasuri.app`)
+
+Event payload example:
 
 ```json
 {
-    "user_id": 1,
-    "recorded_at": "2025-11-06 12:00:00",
-    "temperature": 28.5,
-    "ph_level": 7.2,
-    "dissolved_oxygen": 6.8,
-    "salinity": 15.3
+    "waterQualityData": {
+        "recorded_at": "2025-11-06 12:00:00",
+        "temperature": 28.5,
+        "salinity": 15.3,
+        "dissolved_oxygen": 6.8,
+        "ph_level": 7.2,
+        "user_id": 1
+    }
 }
 ```
 
-## Troubleshooting
+See the architecture diagram in `docs/architecture.md` for a rendered Mermaid diagram and component explanations.
 
-**Composer not found**: Install Composer and restart terminal
+## Testing
 
-**npm not found**: Install Node.js and restart terminal
+Tests use Pest. Run the full test suite:
 
-**Database error**: Check .env file, make sure MySQL is running in XAMPP
+```pwsh
+php artisan test
+# or
+./vendor/bin/pest
+```
 
-**Port 8000 in use**: Run `php artisan serve --port=8001`
+Run a single test or filter by name:
 
-**Real-time not working**: Run `php artisan reverb:start` in separate terminal
+```pwsh
+php artisan test --filter=WaterQualityDataTest
+```
 
-## Tech Stack
+Notes:
 
-Laravel 11, Livewire 3, Tailwind CSS, Pest PHP, Laravel Reverb
+-   Ensure `.env.testing` is configured or your testing DB is available.
+-   Some feature tests that rely on real-time broadcasts may require `php artisan reverb:start`.
+
+## Contributing
+
+Contributions are welcome. Please follow these guidelines:
+
+-   File issues for bugs or feature requests.
+-   Fork the repo and create a branch named like `feat/short-description` or `fix/short-description`.
+-   Run tests and linters before opening a PR: `php artisan test`.
+-   Include screenshots and reproduction steps for UI changes.
+-   Use small, focused pull requests — maintainers will run CI (Pest tests, static analysis) before merging.
+
+See `CONTRIBUTORS.md` for project credits.
 
 ## License
 
-MIT License
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
-Built for fishpond operators in Ternate, Cavite, Philippines as part of a thesis project.
+---
+
+If you'd like, I can also add a short CONTRIBUTING.md or an ASCII/Mermaid file for the architecture diagram separately. Happy to patch those next.
