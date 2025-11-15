@@ -3,7 +3,10 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "dev-start": "node ./scripts/dev-start.js",
+        "dev-start:win": "pwsh ./scripts/dev-start.ps1",
+        "dev-reset": "npm run dev-start -- --fresh"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
