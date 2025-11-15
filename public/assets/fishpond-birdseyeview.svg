@@ -1,0 +1,74 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient definitions for realistic fishpond -->
+    <radialGradient id="pondWater" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" style="stop-color:#22d3ee;stop-opacity:0.8" />
+      <stop offset="30%" style="stop-color:#0891b2;stop-opacity:0.9" />
+      <stop offset="70%" style="stop-color:#155e75;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#164e63;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Pond edge gradient -->
+    <linearGradient id="pondEdge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14532d;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#166534;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#15803d;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background sky/environment -->
+  <rect width="1920" height="1080" fill="#87CEEB" opacity="0.3"/>
+  
+  <!-- Pond structure - main water body -->
+  <ellipse cx="960" cy="600" rx="800" ry="400" fill="url(#pondWater)" stroke="#155e75" stroke-width="4"/>
+  
+  <!-- Pond edges and banks -->
+  <ellipse cx="960" cy="600" rx="820" ry="420" fill="none" stroke="url(#pondEdge)" stroke-width="20" opacity="0.8"/>
+  
+  <!-- Smaller pond sections -->
+  <ellipse cx="600" cy="400" rx="200" ry="120" fill="#0891b2" opacity="0.7"/>
+  <ellipse cx="1320" cy="450" rx="180" ry="100" fill="#0891b2" opacity="0.7"/>
+  <ellipse cx="800" cy="800" rx="250" ry="140" fill="#0891b2" opacity="0.7"/>
+  
+  <!-- Pathways between ponds -->
+  <rect x="750" y="480" width="60" height="240" fill="#155e75" rx="30"/>
+  <rect x="1100" y="420" width="220" height="40" fill="#155e75" rx="20"/>
+  <rect x="850" y="660" width="40" height="120" fill="#155e75" rx="20"/>
+  
+  <!-- Fish silhouettes -->
+  <g opacity="0.4">
+    <!-- Fish group 1 -->
+    <ellipse cx="700" cy="550" rx="20" ry="6" fill="#164e63" transform="rotate(-30 700 550)"/>
+    <ellipse cx="720" cy="540" rx="18" ry="5" fill="#164e63" transform="rotate(-25 720 540)"/>
+    <ellipse cx="680" cy="560" rx="22" ry="7" fill="#164e63" transform="rotate(-35 680 560)"/>
+    
+    <!-- Fish group 2 -->
+    <ellipse cx="1200" cy="450" rx="25" ry="8" fill="#0c4a6e" transform="rotate(20 1200 450)"/>
+    <ellipse cx="1180" cy="460" rx="22" ry="7" fill="#0c4a6e" transform="rotate(15 1180 460)"/>
+    
+    <!-- Fish group 3 -->
+    <ellipse cx="900" cy="700" rx="28" ry="9" fill="#164e63" transform="rotate(45 900 700)"/>
+  </g>
+  
+  <!-- Aerators/equipment -->
+  <g opacity="0.6">
+    <circle cx="960" cy="600" r="8" fill="#4b5563"/>
+    <circle cx="600" cy="400" r="6" fill="#4b5563"/>
+    <circle cx="1320" cy="450" r="6" fill="#4b5563"/>
+  </g>
+  
+  <!-- Feeding areas -->
+  <g opacity="0.4">
+    <circle cx="400" cy="300" r="40" fill="#fbbf24" opacity="0.3"/>
+    <circle cx="1500" cy="400" r="35" fill="#fbbf24" opacity="0.3"/>
+    <circle cx="1100" cy="800" r="45" fill="#fbbf24" opacity="0.3"/>
+  </g>
+  
+  <!-- Vegetation around pond -->
+  <g opacity="0.5">
+    <ellipse cx="200" cy="200" rx="80" ry="40" fill="#16a34a"/>
+    <ellipse cx="1700" cy="250" rx="100" ry="50" fill="#16a34a"/>
+    <ellipse cx="150" cy="900" rx="90" ry="45" fill="#16a34a"/>
+    <ellipse cx="1750" cy="850" rx="85" ry="42" fill="#16a34a"/>
+  </g>
+</svg>
