@@ -23,6 +23,8 @@ $login = function () {
 ?>
 
 <div>
+    {{-- login page toggle removed to avoid duplicate toggles (header toggle remains) --}}
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -49,14 +51,14 @@ $login = function () {
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="text-sm text-gray-600 ms-2">{{ __('Remember me') }}</span>
+                <input wire:model="form.remember" id="remember" type="checkbox" class="text-cvsu border-gray-300 dark:border-gray-600 bg-white dark:!bg-gray-900 rounded shadow-sm focus:ring-cvsu-500 dark:focus:ring-cvsu-400" name="remember">
+                <span class="text-sm text-gray-600 dark:text-gray-300 ms-2">{{ __('Remember me') }}</span>
             </label>
         </div>
 
         <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="text-sm text-gray-600 underline rounded-md hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}" wire:navigate>
+                <a class="text-sm text-gray-600 dark:text-gray-400 underline rounded-md hover:text-cvsu-600 dark:hover:text-cvsu-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cvsu-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}" wire:navigate>
                     {{ __('Forgot your password?') }}
                 </a>
             @endif
