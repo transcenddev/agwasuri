@@ -100,7 +100,7 @@
             <div class="text-center max-w-4xl mx-auto">
 
                 <!-- Tagline -->
-                <p class="text-green-500 text-xs sm:text-sm font-semibold tracking-widest uppercase mb-4 drop-shadow-lg animate-on-load animate-fade-in-up delay-100">
+                <p class="text-cvsu-500 text-xs sm:text-sm font-semibold tracking-widest uppercase mb-4 drop-shadow-lg animate-on-load animate-fade-in-up delay-100">
                     IoT-Powered Water Quality Monitoring
                 </p>
 
