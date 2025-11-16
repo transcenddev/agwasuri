@@ -4,6 +4,9 @@
 
 /* Project color variables (cvsu) - used by Tailwind via CSS variables */
 :root {
+  --cvsu-50: #f4fbf4;
+  --cvsu-100: #e6f6e6;
+  --cvsu-200: #bfe9bf;
   --cvsu-300: #72b372;
   --cvsu-400: #2a7a2a;
   --cvsu-500: #1B651B;
@@ -11,6 +14,7 @@
   --cvsu-600: #155414;
   --cvsu-700: #103f10;
   --cvsu-800: #0b2b0b;
+  --cvsu-900: #061a06;
 }
 
 /* Note: no dark-mode overrides for cvsu colors so buttons keep brand color in dark mode */
