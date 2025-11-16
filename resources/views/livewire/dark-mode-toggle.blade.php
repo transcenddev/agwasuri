@@ -61,6 +61,7 @@
         type="button"
         data-variant="{{ $variant }}"
         onclick="window.toggleTheme && window.toggleTheme()"
+        {!! $inlineStyle !!}
         class="relative inline-flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-lg bg-transparent border-none shadow-none focus:outline-none focus:ring-2 focus:ring-white/50 dark:focus:ring-cvsu-500 {{ $colorClass }} {{ $hoverClass }} {{ $extraClasses }}"
         aria-label="Toggle dark mode"
         title="Toggle dark mode"
