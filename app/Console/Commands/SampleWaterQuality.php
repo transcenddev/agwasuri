@@ -4,8 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\User;
-use App\Models\WaterQualityData;
-use App\Events\WaterQualityCreated;
+use App\Services\SampleWaterQualityService;
 use Illuminate\Support\Carbon;
 
 class SampleWaterQuality extends Command
@@ -59,37 +58,16 @@ class SampleWaterQuality extends Command
         }
 
         $runCount = 0;
-
-        $generate = function($i, $user) use ($startOpt, $noBroadcast) {
-            $recordedAt = $startOpt ? Carbon::parse($startOpt)->addSeconds($i) : Carbon::now();
-
-            $temperature = round(24 + lcg_value() * 7, 1);
-            $ph = round(6 + lcg_value() * 2.5, 2);
-            $dissolvedOxygen = round(3 + lcg_value() * 6, 2);
-            $salinity = round(lcg_value() * 15, 2);
-
-            $data = WaterQualityData::create([
-                'user_id' => $user->user_id,
-                'recorded_at' => $recordedAt->toDateTimeString(),
-                'temperature' => $temperature,
-                'ph_level' => $ph,
-                'dissolved_oxygen' => $dissolvedOxygen,
-                'salinity' => $salinity,
-            ]);
-
-            if (!$noBroadcast) {
-                event(new WaterQualityCreated($data));
-            }
-
-            $this->line(sprintf('[%s] user=%s id=%d temp=%s pH=%s DO=%s sal=%s', $recordedAt->toDateTimeString(), $user->email, $data->id, $temperature, $ph, $dissolvedOxygen, $salinity));
-        };
+        $service = new SampleWaterQualityService();
 
         // If loop is true and count omitted, run until Ctrl+C
         if ($loop) {
             $i = 0;
             while (true) {
                 foreach ($users as $user) {
-                    $generate($i, $user);
+                    $recordedAt = $startOpt ? Carbon::parse($startOpt)->addSeconds($i) : Carbon::now();
+                    $data = $service->createSampleForUser($user, $recordedAt, $noBroadcast);
+                    $this->line(sprintf('[%s] user=%s id=%d temp=%s pH=%s DO=%s sal=%s', $recordedAt->toDateTimeString(), $user->email, $data->id, $data->temperature, $data->ph_level, $data->dissolved_oxygen, $data->salinity));
                 }
                 $i += $interval;
                 $runCount++;
@@ -106,7 +84,9 @@ class SampleWaterQuality extends Command
 
             for ($i = 0; $i < $count; $i++) {
                 foreach ($users as $user) {
-                    $generate($i * $interval, $user);
+                    $recordedAt = $startOpt ? Carbon::parse($startOpt)->addSeconds($i * $interval) : Carbon::now();
+                    $data = $service->createSampleForUser($user, $recordedAt, $noBroadcast);
+                    $this->line(sprintf('[%s] user=%s id=%d temp=%s pH=%s DO=%s sal=%s', $recordedAt->toDateTimeString(), $user->email, $data->id, $data->temperature, $data->ph_level, $data->dissolved_oxygen, $data->salinity));
                 }
                 if ($i < $count - 1) {
                     sleep($interval);
