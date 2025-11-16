@@ -2,19 +2,27 @@
    
     <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
-        {{-- Combined Filter Row --}}
-        <div class="flex flex-col mb-6 md:flex-row md:justify-between md:items-start gap-6">
-             {{-- User Filter (Only for Admin) - Takes up remaining space if needed --}}
-             @if(Auth::check() && auth()->user()->isAdmin())
-                <div class="flex-grow shadow-sm sm:rounded-lg"> {{-- removed p-6, mb-6, bg-white --}}
-                    <livewire:user-filter />
-                </div>
-             @endif
+        {{-- Top Filters — improved spacing and responsive layout --}}
+        <div class="bg-white shadow rounded-lg p-4 md:p-6 mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:space-x-6 space-y-3 md:space-y-0">
+                {{-- User Filter (Only for Admin) - flexible, takes remaining space --}}
+                @if(Auth::check() && auth()->user()->isAdmin())
+                    <div class="flex-1">
+                        <livewire:user-filter />
+                    </div>
+                @endif
 
-             {{-- Date Filter (For Everyone) - Adjust width as needed --}}
-             <div class="md:w-auto"> {{-- Or specify a fixed/relative width --}}
-                <livewire:date-filter />
-             </div>
+                {{-- Date Filter (For Everyone) — keeps natural width --}}
+                <div class="w-full md:w-auto">
+                    <livewire:date-filter />
+                </div>
+
+                {{-- Optional actions area (keeps layout consistent) --}}
+                <div class="flex items-center">
+                    <!-- Placeholder for action buttons (Apply / Reset) -->
+                    <button type="button" class="ml-auto hidden md:inline-flex px-4 py-2 rounded-lg bg-cvsu text-white hover:bg-cvsu-700 transition">Apply</button>
+                </div>
+            </div>
         </div>
 
 
