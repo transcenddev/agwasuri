@@ -22,27 +22,21 @@ $logout = function (Logout $logout) {
 
                 <!-- Navigation Links -->
                 <div class="hidden md:flex md:items-center md:space-x-2 h-full">
-                    <x-nav-link href="{{ Route::has('dashboard') ? route('dashboard') : url('/') }}" :active="request()->routeIs('dashboard')" wire:navigate>
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         Dashboard
                     </x-nav-link>
 
-                    @if (Route::has('manual-entry'))
-                        <x-nav-link href="{{ route('manual-entry') }}" :active="request()->routeIs('manual-entry')" wire:navigate>
-                            Manual Entry
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('manual-entry')" :active="request()->routeIs('manual-entry')" wire:navigate>
+                        Manual Entry
+                    </x-nav-link>
 
-                    @if (Route::has('optimal-fish'))
-                        <x-nav-link href="{{ route('optimal-fish') }}" :active="request()->routeIs('optimal-fish')" wire:navigate>
-                            Optimal Fish
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('optimal-fish')" :active="request()->routeIs('optimal-fish')" wire:navigate>
+                        Optimal Fish
+                    </x-nav-link>
 
-                    @if (Route::has('historical-data'))
-                        <x-nav-link href="{{ route('historical-data') }}" :active="request()->routeIs('historical-data')" wire:navigate>
-                            Historical Data
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('historical-data')" :active="request()->routeIs('historical-data')" wire:navigate>
+                        Historical Data
+                    </x-nav-link>
 
                     @if (auth()->user()->isAdmin())
                         <x-nav-link :href="route('account_management')" :active="request()->routeIs('account_management')" wire:navigate>
@@ -110,9 +104,9 @@ $logout = function (Logout $logout) {
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-                    <x-responsive-nav-link href="{{ Route::has('dashboard') ? route('dashboard') : url('/') }}" :active="request()->routeIs('dashboard')" wire:navigate>
-                        Dashboard
-                    </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                Dashboard
+            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->
