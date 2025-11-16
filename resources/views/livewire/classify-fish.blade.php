@@ -1,4 +1,4 @@
-<div class="p-4">
+<div class="p-4 w-full max-w-3xl mx-auto">
     {{-- Flash Messages for General Errors --}}
     @if($error)
         <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 border border-red-400 rounded">
@@ -20,7 +20,7 @@
 
 
     {{-- Buttons Row --}}
-    <div class="flex items-start justify-between mb-4 space-x-4"> {{-- Use flex for row layout --}}
+    <div class="flex items-start justify-between mb-4 space-x-4 flex-wrap"> {{-- Use flex for row layout --}}
         {{-- Predict Button (Keep blue) --}}
         <div>
             <button wire:click="predictFishType"
@@ -50,7 +50,7 @@
                 @elseif($lastTrainedTimestamp)
                      <p class="mt-1 text-xs text-red-500">{{ $lastTrainedTimestamp }}</p> {{-- Show errors/NA in red --}}
                  @endif
-            </div>
+                </div>
         @endif
     </div>
 
