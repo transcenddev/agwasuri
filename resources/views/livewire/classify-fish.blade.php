@@ -1,4 +1,4 @@
-<div class="p-4 w-full max-w-3xl mx-auto">
+<div class="p-4 w-full">
     {{-- Flash Messages for General Errors --}}
     @if($error)
         <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 border border-red-400 rounded">
@@ -20,7 +20,7 @@
 
 
     {{-- Buttons Row --}}
-    <div class="flex items-start justify-between mb-4 space-x-4 flex-wrap"> {{-- Use flex for row layout --}}
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 space-x-0 sm:space-x-4 gap-2"> {{-- Use flex for row layout; stack on mobile --}}
         {{-- Predict Button (Keep blue) --}}
         <div>
             <button wire:click="predictFishType"
@@ -58,50 +58,54 @@
     {{-- Show results or skeleton --}}
     @if(!empty($predictionResults) || !empty($modelMetrics))
         {{-- Actual Results Display --}}
-        <div class="mt-6">
-            {{-- Analysis Summary Card --}}
-            @if(!empty($explanations['predictions']))
-                <div class="p-6 mb-6 bg-white rounded-lg shadow-md">
-                    <h4 class="mb-3 text-xl font-semibold text-gray-800">Analysis Summary</h4>
-                    <p class="mb-2 text-gray-600 whitespace-pre-line">{{ $explanations['predictions'] }}</p>
-                    @if(!empty($explanations['top_prediction']))
-                        <p class="mb-2 font-semibold text-gray-600">{{ $explanations['top_prediction'] }}</p>
-                    @endif
-                    @if(!empty($explanations['confidence_context']))
-                        <p class="font-medium text-gray-700">
-                            Confidence Level:
-                            <span class="font-semibold"> {{ $explanations['confidence_context'] }}</span>
-                        </p>
-                    @endif
-                </div>
-            @endif
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {{-- Main column: Analysis + Predictions --}}
+            <div class="lg:col-span-2 space-y-6">
+                {{-- Analysis Summary Card --}}
+                @if(!empty($explanations['predictions']))
+                    <div class="p-6 bg-white rounded-lg shadow-md">
+                        <h4 class="mb-3 text-xl font-semibold text-gray-800">Analysis Summary</h4>
+                        <p class="mb-2 text-gray-600 whitespace-pre-line">{{ $explanations['predictions'] }}</p>
+                        @if(!empty($explanations['top_prediction']))
+                            <p class="mb-2 font-semibold text-gray-600">{{ $explanations['top_prediction'] }}</p>
+                        @endif
+                        @if(!empty($explanations['confidence_context']))
+                            <p class="font-medium text-gray-700">
+                                Confidence Level:
+                                <span class="font-semibold"> {{ $explanations['confidence_context'] }}</span>
+                            </p>
+                        @endif
+                    </div>
+                @endif
 
-            {{-- Detailed Predictions --}}
-            @if(!empty($predictionResults))
-                <div class="mb-6">
-                    <h4 class="mb-4 text-xl font-semibold text-gray-800">Detailed Predictions:</h4>
-                    @foreach($predictionResults as $prediction)
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-medium text-gray-700">{{ $prediction['species_name'] }}</span>
-                            <span class="text-sm text-gray-600">
-                                {{ number_format($prediction['confidence_percentage'], 2) }}%
-                            </span>
-                        </div>
-                        <div class="w-full h-4 bg-gray-200 rounded-full">
-                            <div class="h-4 transition-all duration-500 bg-blue-600 rounded-full" style="width: {{ $prediction['confidence_percentage'] }}%">
+                {{-- Detailed Predictions --}}
+                @if(!empty($predictionResults))
+                    <div>
+                        <h4 class="mb-4 text-xl font-semibold text-gray-800">Detailed Predictions:</h4>
+                        <div class="space-y-4">
+                        @foreach($predictionResults as $prediction)
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-medium text-gray-700">{{ $prediction['species_name'] }}</span>
+                                <span class="text-sm text-gray-600">
+                                    {{ number_format($prediction['confidence_percentage'], 2) }}%
+                                </span>
+                            </div>
+                            <div class="w-full h-4 bg-gray-200 rounded-full">
+                                <div class="h-4 transition-all duration-500 bg-blue-600 rounded-full" style="width: {{ $prediction['confidence_percentage'] }}%"></div>
                             </div>
                         </div>
+                        @endforeach
+                        </div>
                     </div>
-                    @endforeach
-                </div>
-            @endif
+                @endif
+            </div>
 
-            {{-- Model Performance Metrics --}}
-            @if(!empty($explanations['metrics']))
-                <div class="mt-6">
-                    <h4 class="mb-4 text-xl font-semibold text-gray-800">Model Performance Metrics:</h4>
-                    <div class="overflow-hidden bg-white rounded-lg shadow-md">
+            {{-- Side column: Metrics --}}
+            <div class="lg:col-span-1">
+                @if(!empty($explanations['metrics']))
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:sticky lg:top-24">
+                        <h4 class="mb-4 text-xl font-semibold text-gray-800">Model Performance Metrics:</h4>
                         <div class="divide-y divide-gray-200">
                              @if(isset($modelMetrics['accuracy']) && isset($explanations['metrics']['accuracy']))
                                 <div class="p-4">
@@ -141,8 +145,8 @@
                             @endif
                         </div>
                     </div>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
     @else
          {{-- Skeleton Loader - Shown when not loading and no results/error --}}
