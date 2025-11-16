@@ -10,39 +10,31 @@ $logout = function (Logout $logout) {
 
 ?>
 
-<nav x-data="{ open: false }" class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
+<nav x-data="{ open: false }" class="mb-7">
     <!-- Primary Navigation Menu -->
-    <div class="px-6 py-0 mx-auto max-w-7xl">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center space-x-8 h-full">
+    <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="px-4 flex items-center justify-between h-16 bg-white">
+            <div class="flex items-center">
                 <!-- Logo -->
-                <a href="{{ route('dashboard') }}" wire:navigate class="text-2xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-opacity">
-                    <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span>
-                </a>
+                <div class="flex items-center shrink-0">
+                    <a href="{{ route('dashboard') }}" wire:navigate>
+                        <x-application-logo class="block w-auto text-gray-800 fill-current h-9" />
+                    </a>
+                </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden md:flex md:items-center md:space-x-2 h-full">
-                    <x-nav-link href="{{ Route::has('dashboard') ? route('dashboard') : url('/') }}" :active="request()->routeIs('dashboard')" wire:navigate>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 lg:flex">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         Dashboard
                     </x-nav-link>
 
-                    @if (Route::has('manual-entry'))
-                        <x-nav-link href="{{ route('manual-entry') }}" :active="request()->routeIs('manual-entry')" wire:navigate>
-                            Manual Entry
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('optimal-fish')" :active="request()->routeIs('optimal-fish')" wire:navigate>
+                        Optimal Fish
+                    </x-nav-link>
 
-                    @if (Route::has('optimal-fish'))
-                        <x-nav-link href="{{ route('optimal-fish') }}" :active="request()->routeIs('optimal-fish')" wire:navigate>
-                            Optimal Fish
-                        </x-nav-link>
-                    @endif
-
-                    @if (Route::has('historical-data'))
-                        <x-nav-link href="{{ route('historical-data') }}" :active="request()->routeIs('historical-data')" wire:navigate>
-                            Historical Data
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('historical-data')" :active="request()->routeIs('historical-data')" wire:navigate>
+                        Historical Data
+                    </x-nav-link>
 
                     @if (auth()->user()->isAdmin())
                         <x-nav-link :href="route('account_management')" :active="request()->routeIs('account_management')" wire:navigate>
@@ -52,17 +44,13 @@ $logout = function (Logout $logout) {
                 </div>
             </div>
 
-            <!-- Right Side: Dark Mode Toggle + User Dropdown -->
-            <div class="hidden md:flex md:items-center md:space-x-4 h-full">
-                <!-- Dark Mode Toggle -->
-                <livewire:dark-mode-toggle variant="green" />
-                
-                <!-- User Dropdown -->
+            <!-- Settings Dropdown -->
+            <div class="hidden lg:flex lg:items-center lg:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
-                            class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-700 dark:text-gray-300 transition duration-150 ease-in-out bg-transparent border border-transparent rounded-md hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none">
-                            <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
+                            class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none">
+                            <div x-data="{{ json_encode(['name' => auth()->user()->first_name . ' ' . auth()->user()->last_name]) }}" x-text="name"
                                 x-on:profile-updated.window="name = $event.detail.name"></div>
 
                             <div class="ms-1">
@@ -92,7 +80,7 @@ $logout = function (Logout $logout) {
             </div>
 
             <!-- Hamburger -->
-            <div class="flex items-center -me-2 sm:hidden">
+            <div class="flex items-center -me-2 lg:hidden">
                 <button @click="open = ! open"
                     class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500">
                     <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -108,19 +96,30 @@ $logout = function (Logout $logout) {
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
+    <div :class="{ 'block': open, 'hidden': !open }" class="hidden lg:hidden">
         <div class="pt-2 pb-3 space-y-1">
-                    <x-responsive-nav-link href="{{ Route::has('dashboard') ? route('dashboard') : url('/') }}" :active="request()->routeIs('dashboard')" wire:navigate>
-                        Dashboard
-                    </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                Dashboard
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('optimal-fish')" :active="request()->routeIs('optimal-fish')" wire:navigate>
+                Optimal Fish
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('historical-data')" :active="request()->routeIs('historical-data')" wire:navigate>
+                Historical Data
+            </x-responsive-nav-link>
+            @if (auth()->user()->isAdmin())
+                <x-responsive-nav-link :href="route('account_management')" :active="request()->routeIs('account_management')" wire:navigate>
+                    Account Management
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-800">
+        <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
-                <div class="text-base font-medium text-gray-800 dark:text-gray-100" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
+                <div class="text-base font-medium text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
                     x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ auth()->user()->email }}</div>
+                <div class="text-sm font-medium text-gray-500">{{ auth()->user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
