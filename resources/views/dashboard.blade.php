@@ -3,7 +3,7 @@
     <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
         {{-- Top Filters — improved spacing and responsive layout --}}
-        <div class="bg-white shadow rounded-lg p-4 md:p-6 mb-6">
+        <div class="bg-white shadow rounded-lg pt-6 pb-4 md:pt-8 md:pb-6 px-4 md:px-6 mb-6">
             <div class="flex flex-col md:flex-row md:items-center md:space-x-6 space-y-3 md:space-y-0">
                 {{-- User Filter (Only for Admin) - flexible, takes remaining space --}}
                 @if(Auth::check() && auth()->user()->isAdmin())
