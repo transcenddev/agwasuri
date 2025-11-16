@@ -15,11 +15,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-        User::factory()->create([
+        User::updateOrCreate([
+            'email' => 'admin@admin.com'
+        ], [
             'first_name' => 'Admin',
             'last_name' => 'User',
             'account_type' => 'admin',
-            'email' => 'admin@admin.com',
             'password' => bcrypt('admin1234'),
             'barangay' => null,
             'municipality' => null,
@@ -31,12 +32,13 @@ class DatabaseSeeder extends Seeder
             'api_key' => Str::random(32),
         ]);
 
-        User::factory()->create([
+        User::updateOrCreate([
+            'email' => 'test@test.com'
+        ], [
             'first_name' => 'Test',
             'last_name' => 'Test',
             'account_type' => 'user',
             'fishpond_name' => 'Test Fishpond',
-            'email' => 'test@test.com',
             'password' => bcrypt('test1234'),
             'barangay' => 'Test Barangay',
             'municipality' => 'Test City',
@@ -47,18 +49,19 @@ class DatabaseSeeder extends Seeder
             'api_key' => Str::random(32),
         ]);
 
-        User::factory()->create([
+        User::updateOrCreate([
+            'email' => 'test_1@test.com'
+        ], [
             'first_name' => 'Test_1',
             'last_name' => 'Test_1',
             'account_type' => 'user',
             'fishpond_name' => 'Test Fishpond_1',
-            'email' => 'test_1@test.com',
             'password' => bcrypt('test1234'),
             'barangay' => 'Test Barangay_1',
             'municipality' => 'Test City_1',
             'province' => 'Test Province_1',
             'total_fishpond_area' => 10.50,
-            'species_cultured' => ['Tilapia', 'Bangus'],  
+            'species_cultured' => ['Tilapia', 'Bangus'],
             'water_type' => 'Saltwater',
             'api_key' => Str::random(32),
         ]);
