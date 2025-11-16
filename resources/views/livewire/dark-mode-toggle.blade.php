@@ -23,9 +23,10 @@
 
         // Determine color classes based on variant
         if ($variant === 'green') {
-            // Green/nav variant: use navbar logo green in light mode and lighter green in dark mode
-            $colorClass = 'text-[#1B651B] dark:text-[#47AF47]';
-            $hoverClass = 'hover:text-[#47AF47]';
+            // Green/nav variant: use the runtime `cvsu` color so the brand accent
+            // remains identical in light and dark modes (colors are driven by CSS vars).
+            $colorClass = 'text-cvsu-500';
+            $hoverClass = 'hover:text-cvsu-400';
             $extraClasses = 'bg-transparent border-none shadow-none';
             $showLabel = false;
         } elseif ($variant === 'logo') {
@@ -35,10 +36,10 @@
             $extraClasses = 'bg-transparent border-none shadow-none';
             $showLabel = false;
         } elseif ($variant === 'login') {
-            // Login page: simple style like the homepage header but use the
-            // navbar green for the icon so it matches the brand color on login.
-            $colorClass = 'text-[#1B651B] dark:text-[#47AF47]';
-            $hoverClass = 'hover:text-[#47AF47]';
+            // Login page: use the runtime `cvsu` color so it matches brand accent
+            // in both light and dark themes.
+            $colorClass = 'text-cvsu-500';
+            $hoverClass = 'hover:text-cvsu-400';
             $extraClasses = 'bg-transparent border-none shadow-none';
             $showLabel = false;
         } else {

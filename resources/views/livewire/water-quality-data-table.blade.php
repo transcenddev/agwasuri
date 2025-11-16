@@ -1,6 +1,6 @@
 <div>
-    <div class="w-full">
-        <table class="w-full text-center border-collapse">
+    <div class="w-full overflow-x-auto">
+        <table class="w-full text-center border-collapse min-w-[640px]">
             <thead>
                 <tr>
                     <th class="pb-4">Recorded At</th>
@@ -14,7 +14,7 @@
                 @if($water_quality_data->count() >= 1)
                     @foreach ($water_quality_data as $entry)
                         <tr>
-                            <td class="pb-3">{{ $entry->recorded_at }}</td>
+                            <td class="pb-3 whitespace-nowrap">{{ $entry->recorded_at }}</td>
                             <td class="pb-3">{{ $entry->temperature }}</td>
                             <td class="pb-3">{{ $entry->salinity }}</td>
                             <td class="pb-3">{{ $entry->dissolved_oxygen }}</td>
