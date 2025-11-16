@@ -5,11 +5,19 @@ export function toggleTheme() {
         ? "dark"
         : "light";
     const next = current === "dark" ? "light" : "dark";
-    try { localStorage.setItem('agwasuri_theme', next); } catch(e) {}
-    applyTheme(next);
-    try { document.cookie = `agwasuri_theme=${next}; path=/; max-age=${60*60*24*365}`; } catch(e) {}
     try {
-        window.dispatchEvent(new CustomEvent('agwasuri:theme-changed', { detail: next }));
+        localStorage.setItem("agwasuri_theme", next);
+    } catch (e) {}
+    applyTheme(next);
+    try {
+        document.cookie = `agwasuri_theme=${next}; path=/; max-age=${
+            60 * 60 * 24 * 365
+        }`;
+    } catch (e) {}
+    try {
+        window.dispatchEvent(
+            new CustomEvent("agwasuri:theme-changed", { detail: next })
+        );
     } catch (e) {}
 }
 
@@ -56,18 +64,30 @@ function applyTheme(theme) {
 export function initTheme() {
     try {
         const saved = (function () {
-            try { return localStorage.getItem('agwasuri_theme'); } catch(e) { return null; }
+            try {
+                return localStorage.getItem("agwasuri_theme");
+            } catch (e) {
+                return null;
+            }
         })();
         applyTheme(saved);
         // Notify listeners about the current theme on init
         try {
-            const cur = saved || (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-            window.dispatchEvent(new CustomEvent('agwasuri:theme-changed', { detail: cur }));
-        } catch(e) {}
+            const cur =
+                saved ||
+                (document.documentElement.classList.contains("dark")
+                    ? "dark"
+                    : "light");
+            window.dispatchEvent(
+                new CustomEvent("agwasuri:theme-changed", { detail: cur })
+            );
+        } catch (e) {}
         // Listen for system preference changes and update if user hasn't chosen
-        window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            if (!localStorage.getItem('agwasuri_theme')) applyTheme(null);
-        });
+        window
+            .matchMedia?.("(prefers-color-scheme: dark)")
+            .addEventListener("change", (e) => {
+                if (!localStorage.getItem("agwasuri_theme")) applyTheme(null);
+            });
     } catch (e) {}
 }
 
