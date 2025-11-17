@@ -67,12 +67,11 @@ Use a sitemap and simple wireframes before detailed design.
 ### Visual system
 
 -   Color palette suggestion:
-    -   Primary: #0B6E99 (deep blue)
-    -   Accent: #2AAE97 (teal)
-    -   Alert: #F59E0B (warning), #EF4444 (critical)
-    -   Background: #F3F4F6 (light gray)
--   Typography: Inter or Nunito; base 16px; headings 20–32px
--   Iconography: simple stroke icons (drop, thermometer, fish, wifi)
+    -   Background Color: White	Primary surface
+    -   Primary:	#1B651B	CvSU brand, headers, buttons, institutional identity
+    -   Typography: Inter or Wulkan Display, 16px body, 20-32px headings
+    -   Iconography: Simple stroke icons (drop, thermometer, fish, wifi)
+    -   Typography: Inter, Nunito or Wulkan Display; base 16px; headings 20–32px;
 
 ### Components to standardize
 
