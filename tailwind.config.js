@@ -39,18 +39,18 @@ export default {
                     muted: "#F9FAFB",
                 },
                 brand: {
-                    50: '#F3F8FF',
-                    500: '#2563EB',
+                    50: "#F3F8FF",
+                    500: "#2563EB",
                 },
             },
             borderRadius: {
-                'lg-2': '0.75rem',
+                "lg-2": "0.75rem",
             },
             boxShadow: {
-                card: '0 6px 18px rgba(15, 23, 42, 0.06)',
+                card: "0 6px 18px rgba(15, 23, 42, 0.06)",
             },
             maxWidth: {
-                'content-xl': '1100px',
+                "content-xl": "1100px",
             },
         },
     },
