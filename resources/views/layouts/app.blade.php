@@ -17,13 +17,14 @@
         @livewireChartsScripts
     </head>
     <body class="font-sans antialiased bg-slate-100">
-        <div class="min-h-screen pt-10 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <livewire:layout.navigation />
+        {{-- Navigation is fixed; render it above the content wrapper so header height CSS var can be used globally --}}
+        <livewire:layout.navigation />
 
-            <!-- Page Content -->
+        {{-- Wrap the slot with the shared x-container so every page receives the header offset --}}
+        <x-container>
             <main>
                 {{ $slot }}
             </main>
-        </div>
+        </x-container>
     </body>
 </html>
