@@ -1,9 +1,8 @@
 <x-app-layout>
-    <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+    <x-container>
         {{-- Button moved to UserTable component --}}
-        {{-- <div class="mb-4 flex justify-end"> ... button removed ... </div> --}}
+        {{-- The shared `x-container` provides consistent padding-top and max-width --}}
 
-        {{-- Include the User Table Livewire component --}}
-            <livewire:user-table />
-    </div>
+        <livewire:user-table />
+    </x-container>
 </x-app-layout>
