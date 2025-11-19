@@ -1,9 +1,15 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="p-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+    <x-container>
+        <div class="py-12">
+            <x-card>
+                <x-slot name="header">
+                    <x-card-header>
+                        <x-slot name="title">Historical Data</x-slot>
+                    </x-card-header>
+                </x-slot>
+
                 <livewire:water-quality-data-table />
-            </div>
+            </x-card>
         </div>
-    </div>
+    </x-container>
 </x-app-layout>
