@@ -33,6 +33,24 @@ export default {
                     800: "var(--cvsu-800)",
                     900: "var(--cvsu-900)",
                 },
+                // Surface and semantic tokens for consistent containers/cards
+                surface: {
+                    DEFAULT: "var(--surface, #ffffff)",
+                    muted: "#F9FAFB",
+                },
+                brand: {
+                    50: '#F3F8FF',
+                    500: '#2563EB',
+                },
+            },
+            borderRadius: {
+                'lg-2': '0.75rem',
+            },
+            boxShadow: {
+                card: '0 6px 18px rgba(15, 23, 42, 0.06)',
+            },
+            maxWidth: {
+                'content-xl': '1100px',
             },
         },
     },

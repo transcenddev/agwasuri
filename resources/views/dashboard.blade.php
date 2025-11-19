@@ -1,44 +1,56 @@
 <x-app-layout>
    
-    <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-
+    <x-container>
         {{-- Top Filters — improved spacing and responsive layout --}}
-        <div class="bg-white shadow rounded-lg pt-6 pb-4 md:pt-8 md:pb-6 px-4 md:px-6 mb-6">
+        <x-card class="mb-6">
+            <x-slot name="header">
+                <div class="w-full">
+                    {{-- header left area is intentionally blank; filters live in the body --}}
+                </div>
+            </x-slot>
+
             <div class="flex flex-col md:flex-row md:items-center md:space-x-6 space-y-3 md:space-y-0">
-                {{-- User Filter (Only for Admin) - flexible, takes remaining space --}}
                 @if(Auth::check() && auth()->user()->isAdmin())
                     <div class="flex-1">
                         <livewire:user-filter />
                     </div>
                 @endif
 
-                {{-- Date Filter (For Everyone) — keeps natural width --}}
                 <div class="w-full md:w-auto">
                     <livewire:date-filter />
                 </div>
 
-                {{-- Optional actions area (keeps layout consistent) --}}
                 <div class="flex items-center">
-                    <!-- Placeholder for action buttons (Apply / Reset) -->
                     <button type="button" class="ml-auto hidden md:inline-flex px-4 py-2 rounded-lg bg-cvsu text-white hover:bg-cvsu-700 transition">Apply</button>
                 </div>
             </div>
-        </div>
+        </x-card>
 
-
-        {{-- Data Display Components --}}
-        <div class="p-6 mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-            {{-- Pass the initial user ID (either logged-in user or potentially admin-selected) --}}
-            {{-- Note: The 'user-selected' event will override this later --}}
+        <x-card class="mb-6">
+            <x-slot name="header">
+                <x-card-header>
+                    <x-slot name="title">Water Quality Summary</x-slot>
+                </x-card-header>
+            </x-slot>
             <livewire:water-quality-card :userId="Auth::id()" />
-        </div>
+        </x-card>
 
-        <div class="p-6 mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+        <x-card class="mb-6">
+            <x-slot name="header">
+                <x-card-header>
+                    <x-slot name="title">Trends</x-slot>
+                </x-card-header>
+            </x-slot>
             <livewire:water-quality-chart :userId="Auth::id()" />
-        </div>
+        </x-card>
 
-        <div class="p-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+        <x-card>
+            <x-slot name="header">
+                <x-card-header>
+                    <x-slot name="title">Measurements</x-slot>
+                </x-card-header>
+            </x-slot>
             <livewire:water-quality-data-table :userId="Auth::id()" />
-        </div>
-    </div>
+        </x-card>
+    </x-container>
 </x-app-layout>
