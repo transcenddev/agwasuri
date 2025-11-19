@@ -1,11 +1,15 @@
 <x-app-layout>
-    <div class="py-8">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="w-full">
-                <div class="mx-auto w-full max-w-4xl bg-white shadow-sm sm:rounded-lg p-6">
-                    <livewire:classify-fish />
-                </div>
-            </div>
+    <x-container>
+        <div class="py-8">
+            <x-card class="max-w-4xl mx-auto">
+                <x-slot name="header">
+                    <x-card-header>
+                        <x-slot name="title">Optimal Fish</x-slot>
+                    </x-card-header>
+                </x-slot>
+
+                <livewire:classify-fish />
+            </x-card>
         </div>
-    </div>
+    </x-container>
 </x-app-layout>
