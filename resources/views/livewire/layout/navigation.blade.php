@@ -10,7 +10,7 @@ $logout = function (Logout $logout) {
 
 ?>
 
-<nav x-data="{ open: false }" class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
+<nav x-data="{ open: false }" style="--header-height:64px" class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
     <!-- Primary Navigation Menu -->
     <div class="px-6 py-0 mx-auto max-w-7xl">
         <div class="flex justify-between items-center h-16">
@@ -130,3 +130,28 @@ $logout = function (Logout $logout) {
         </div>
     </div>
 </nav>
+
+<script>
+    (function () {
+        function setHeaderHeight() {
+            var nav = document.querySelector('nav');
+            if (!nav) return;
+            var h = nav.getBoundingClientRect().height;
+            document.documentElement.style.setProperty('--header-height', h + 'px');
+        }
+        if (typeof window !== 'undefined') {
+            window.addEventListener('DOMContentLoaded', setHeaderHeight);
+            window.addEventListener('resize', setHeaderHeight);
+            // Use ResizeObserver when available to react to dynamic nav height changes
+            if (window.ResizeObserver) {
+                try {
+                    var ro = new ResizeObserver(setHeaderHeight);
+                    var navEl = document.querySelector('nav');
+                    if (navEl) ro.observe(navEl);
+                } catch (e) {
+                    // ignore
+                }
+            }
+        }
+    })();
+</script>
