@@ -1,7 +1,6 @@
 <x-app-layout>
     <x-container>
-        <div class="py-8">
-            <x-card class="max-w-4xl mx-auto">
+        <x-card class="mb-6">
                 <x-slot name="header">
                     <x-card-header>
                         <x-slot name="title">Optimal Fish</x-slot>
@@ -9,7 +8,6 @@
                 </x-slot>
 
                 <livewire:classify-fish />
-            </x-card>
-        </div>
+        </x-card>
     </x-container>
 </x-app-layout>
