@@ -25,10 +25,14 @@
                 /* current nav color -- will be switched by .dark */
                 --nav-bg: var(--nav-bg-light);
                 --nav-border: var(--nav-border-light);
+                /* Nav icon color variables (defaults). Override per-header as needed. */
+                --nav-icon-light: #1B651B; /* brand green for light mode by default */
+                --nav-icon-dark: #ffffff;  /* white for dark mode by default */
+                --nav-icon: var(--nav-icon-light);
             }
 
             /* Default header uses light nav background; .dark will override the vars */
-            .dark { --nav-bg: var(--nav-bg-dark); --nav-border: var(--nav-border-dark); }
+            .dark { --nav-bg: var(--nav-bg-dark); --nav-border: var(--nav-border-dark); --nav-icon: var(--nav-icon-dark); }
             .site-header{ background: var(--nav-bg); border-color: var(--nav-border); }
         </style>
         

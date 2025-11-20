@@ -1,4 +1,4 @@
-<nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md bg-white/10 dark:bg-gray-900/30 border-b border-white/20 dark:border-gray-700/30 px-6 py-0" style="--nav-logo: #ffffff">
+<nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md bg-white/10 dark:bg-gray-900/30 border-b border-white/20 dark:border-gray-700/30 px-6 py-0" style="--nav-logo: #ffffff; --nav-icon: #ffffff;">
     <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between h-16">
             <!-- Logo (shared partial) -->

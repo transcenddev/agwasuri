@@ -1,4 +1,4 @@
-<div>
+ <div>
     @php
     // Support both direct include (e.g. @include) and Livewire tag attribute
     // - when included via @include('...',['variant'=>'login']) $variant will be set
@@ -22,12 +22,18 @@
     }
 
         // Determine color classes based on variant
+        // default focus ring (can be overridden per-variant)
+        $focusRing = 'focus:ring-2 focus:ring-white/50 dark:focus:ring-cvsu-500/40';
+
         if ($variant === 'green') {
-            // Green/nav variant: use the runtime `cvsu` color so the brand accent
-            // remains identical in light and dark modes (colors are driven by CSS vars).
-            $colorClass = 'text-cvsu-500';
-            $hoverClass = 'hover:text-cvsu-400';
-            $extraClasses = 'bg-transparent border-none shadow-none';
+            // Dashboard/nav variant: high-contrast green pill on light mode
+            // - Light mode: use brand green background with white icons/text for strong contrast
+            // - Dark mode: keep transparent background and use a lighter green text so it reads on dark
+            $colorClass = 'text-white bg-cvsu-500 dark:bg-transparent dark:text-cvsu-300';
+            $hoverClass = 'hover:bg-cvsu-600 dark:hover:text-cvsu-200';
+            $extraClasses = 'border border-transparent dark:border-gray-700';
+            // stronger focus ring that uses the brand color with reduced opacity
+            $focusRing = 'focus:ring-4 focus:ring-cvsu-300/25 dark:focus:ring-cvsu-500/30';
             $showLabel = false;
         } elseif ($variant === 'logo') {
             // Logo variant: keep high-contrast white by default (used on homepage header)
@@ -48,12 +54,20 @@
             $extraClasses = '';
             $showLabel = false;
         }
-        $inlineStyle = $variant === 'login' ? 'style="background:var(--nav-bg); border-color:var(--nav-border);"' : '';
+        // Always prefer the nav-driven icon color; include nav background/border for the login variant.
+        if ($variant === 'login') {
+            $inlineStyle = 'style="background:var(--nav-bg); border-color:var(--nav-border); color:var(--nav-icon);"';
+        } else {
+            $inlineStyle = 'style="color:var(--nav-icon);"';
+        }
 
-        // For icons, when this is the login variant apply the color class so
-        // stroke="currentColor" resolves to the correct icon color. For the
-        // login pill we force white so the icon contrasts the brand background.
-        $iconTextClass = $variant === 'login' ? $colorClass : $colorClass;
+        // For icons, default to the color class but override for specific variants
+        // Dashboard ('green') uses a dark text color on light backgrounds for
+        // improved legibility (text-gray-900) while keeping white icons in dark mode.
+        $iconTextClass = $colorClass;
+        if ($variant === 'green') {
+            $iconTextClass = 'text-gray-900 dark:text-white';
+        }
     @endphp
 
     <button
@@ -62,12 +76,12 @@
         data-variant="{{ $variant }}"
         onclick="window.toggleTheme && window.toggleTheme()"
         {!! $inlineStyle !!}
-        class="relative inline-flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-lg bg-transparent border-none shadow-none focus:outline-none focus:ring-2 focus:ring-white/50 dark:focus:ring-cvsu-500 {{ $colorClass }} {{ $hoverClass }} {{ $extraClasses }}"
+        class="relative inline-flex items-center justify-center w-10 h-10 transition-all duration-300 rounded-lg bg-transparent border-none shadow-none focus:outline-none {{ $focusRing }} {{ $colorClass }} {{ $hoverClass }} {{ $extraClasses }}"
         aria-label="Toggle dark mode"
         title="Toggle dark mode"
     >
         <!-- Sun Icon (Light Mode) -->
-    <svg data-role="icon-sun" class="w-5 h-5 transition-all duration-300 opacity-100 scale-100 {{ $iconTextClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg data-role="icon-sun" class="w-5 h-5 transition-all duration-300 opacity-100 scale-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
 
@@ -76,9 +90,9 @@
         @endif
 
         <!-- Moon Icon (Dark Mode) -->
-    <svg data-role="icon-moon" class="w-5 h-5 transition-all duration-300 opacity-0 scale-0 absolute {{ $iconTextClass }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg data-role="icon-moon" class="w-5 h-5 transition-all duration-300 opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
+        </svg> 
     </button>
 
     <script>
