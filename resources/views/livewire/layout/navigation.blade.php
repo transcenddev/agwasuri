@@ -51,9 +51,13 @@ $logout = function (Logout $logout) {
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
-                            class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-700 dark:text-gray-300 transition duration-150 ease-in-out bg-transparent border border-transparent rounded-md hover:text-gray-900 dark:hover:text-gray-100 focus:outline-none">
-                            <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
-                                x-on:profile-updated.window="name = $event.detail.name"></div>
+                            class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-700 dark:text-gray-100 transition duration-150 ease-in-out bg-transparent border border-transparent rounded-md hover:text-cvsu dark:hover:text-cvsu-400 focus:outline-none">
+                            <div x-data='@json(["name" => (auth()->user()?->name ?? "User")])' x-text="name"
+                                x-on:profile-updated.window="name = $event.detail.name" aria-live="polite">User</div>
+
+                            <!-- <div x-data="{{ json_encode(['name' => trim((auth()->user()->first_name ?? '') . ' ' . (auth()->user()->last_name ?? '')) ?: 'User']) }}" x-text="name"
+                                x-on:profile-updated.window="name = $event.detail.name"></div> -->
+
 
                             <div class="ms-1">
                                 <svg class="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg"
@@ -108,8 +112,8 @@ $logout = function (Logout $logout) {
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-800">
             <div class="px-4">
-                <div class="text-base font-medium text-gray-800 dark:text-gray-100" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
-                    x-on:profile-updated.window="name = $event.detail.name"></div>
+                <div class="text-base font-medium text-gray-800 dark:text-gray-100" x-data='@json(["name" => (auth()->user()?->name ?? "User")])' x-text="name"
+                    x-on:profile-updated.window="name = $event.detail.name" aria-live="polite">User</div>
                 <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ auth()->user()->email }}</div>
             </div>
 
