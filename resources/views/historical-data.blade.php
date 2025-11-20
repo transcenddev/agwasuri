@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-container>
+    <x-container class="pt-20">
         <div class="py-12">
             <x-card>
                 <x-slot name="header">

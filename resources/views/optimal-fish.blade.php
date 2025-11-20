@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-container>
+    <x-container class="pt-20">
         <x-card class="mb-6">
                 <x-slot name="header">
                     <x-card-header>

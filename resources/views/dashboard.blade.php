@@ -1,6 +1,6 @@
 <x-app-layout>
    
-    <x-container>
+    <x-container class="pt-20">
         {{-- Top Filters — improved spacing and responsive layout --}}
         <x-card class="mb-6">
             <x-slot name="header">
