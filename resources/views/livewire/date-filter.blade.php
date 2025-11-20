@@ -39,16 +39,23 @@
 
                 {{-- Action buttons (Apply / Clear) --}}
                 <div class="flex items-center gap-2">
-                    <button type="button"
+                    <!-- <button type="button"
                             wire:click="applyFilters"
                             @if($currentUserId === null) disabled @endif
                             class="inline-flex items-center px-4 py-2 text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 disabled:opacity-50">
+                        Apply
+                    </button> -->
+
+                    <button type="button"
+                            wire:click="applyFilters"
+                            @if($currentUserId === null) disabled @endif
+                            class="inline-flex items-center px-4 py-2 text-white bg-cvsu rounded-xl hover:bg-cvsu-700 disabled:opacity-50 transition">
                         Apply
                     </button>
 
                     <button type="button"
                             wire:click="clearFilters"
-                            class="inline-flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200">
+                            class="inline-flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition">
                         Clear
                     </button>
                 </div>

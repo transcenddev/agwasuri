@@ -20,9 +20,9 @@
                     <livewire:date-filter />
                 </div>
 
-                <div class="flex items-center">
+                <!-- <div class="flex items-center">
                     <button type="button" class="ml-auto hidden md:inline-flex px-4 py-2 rounded-lg bg-cvsu text-white hover:bg-cvsu-700 transition">Apply</button>
-                </div>
+                </div> -->
             </div>
         </x-card>
 
