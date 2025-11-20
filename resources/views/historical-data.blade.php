@@ -1,6 +1,6 @@
 <x-app-layout>
-    <x-container class="pt-20">
-        <div class="pt-20 py-12">
+    <x-container class="pt-20 py-12">
+        <!-- <div class="pt-20 py-12"> -->
             <x-card>
                 <x-slot name="header">
                     <x-card-header>

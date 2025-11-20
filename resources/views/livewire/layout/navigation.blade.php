@@ -26,8 +26,6 @@ $logout = function (Logout $logout) {
                         Dashboard
                     </x-nav-link>
 
-                    <!-- Manual Entry link removed: route not present in this branch -->
-
                     <x-nav-link :href="route('optimal-fish')" :active="request()->routeIs('optimal-fish')" wire:navigate>
                         Optimal Fish
                     </x-nav-link>

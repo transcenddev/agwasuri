@@ -27,13 +27,13 @@
                 --nav-border: var(--nav-border-light);
                 /* Nav icon color variables (defaults). Override per-header as needed. */
                 --nav-icon-light: #1B651B; /* brand green for light mode by default */
-                --nav-icon-dark: #ffffff;  /* white for dark mode by default */
+                --nav-icon-dark: #1B651B;  /*  brand green for dark mode too8 */
                 --nav-icon: var(--nav-icon-light);
             }
 
             /* Default header uses light nav background; .dark will override the vars */
             .dark { --nav-bg: var(--nav-bg-dark); --nav-border: var(--nav-border-dark); --nav-icon: var(--nav-icon-dark); }
-            .site-header{ background: var(--nav-bg); border-color: var(--nav-border); }
+            .site-header{ background: var(--nav-bg); border-color: var(--nav-border); }                                                     
         </style>
         
         <!-- Override browser autofill styles -->
@@ -80,7 +80,7 @@
                         @include('partials.navbar-logo')
                     
                     <!-- Dark Mode Toggle (styled to match navbar logo) -->
-                    <livewire:dark-mode-toggle variant="login" />
+                    <livewire:dark-mode-toggle variant="login " />
                 </div>
             </nav>
         </header>
