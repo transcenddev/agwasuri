@@ -6,7 +6,7 @@
 
 <div>
     @if($mode === 'demo')
-        <button wire:click="insertDemoData" class="px-3 py-1 mb-2 rounded-lg border text-sm font-medium transition-colors focus:outline-none bg-cvsu-500 text-white hover:bg-cvsu-600">
+        <button wire:click="insertDemoData" class="px-3 py-1 mb-2 rounded-lg border text-sm font-medium transition-colors focus:outline-none bg-cvsu text-white hover:bg-cvsu-600">
             Simulate Data (Manual)
         </button>
         <span class="ml-2 text-xs text-gray-500">Auto-inserting every {{ $interval }} seconds</span>

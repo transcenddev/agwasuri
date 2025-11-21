@@ -5,10 +5,10 @@
 
 <div class="flex items-center gap-4">
     <span class="font-semibold text-gray-700 dark:text-gray-200">Data Source:</span>
-    <button wire:click="setMode('demo')" class="px-3 py-1 rounded-lg border text-sm font-medium transition-colors focus:outline-none {{ $mode === 'demo' ? 'bg-cvsu-500 text-white' : 'bg-white dark:bg-black text-cvsu-600 border-cvsu-500' }}">
+    <button wire:click="setMode('demo')" class="px-3 py-1 rounded-lg border text-sm font-medium transition-colors focus:outline-none {{ $mode === 'demo' ? 'bg-cvsu text-white' : 'bg-white dark:bg-black text-cvsu-600 border-cvsu-500' }}">
         Demo Mode
     </button>
-    <button wire:click="setMode('live')" class="px-3 py-1 rounded-lg border text-sm font-medium transition-colors focus:outline-none {{ $mode === 'live' ? 'bg-cvsu-500 text-white' : 'bg-white dark:bg-black text-cvsu-600 border-cvsu-500' }}">
+    <button wire:click="setMode('live')" class="px-3 py-1 rounded-lg border text-sm font-medium transition-colors focus:outline-none {{ $mode === 'live' ? 'bg-cvsu text-white' : 'bg-white dark:bg-black text-cvsu-600 border-cvsu-500' }}">
         Live Mode
     </button>
 </div>

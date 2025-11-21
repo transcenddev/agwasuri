@@ -27,14 +27,14 @@
         </div>
 
         {{-- Navigation --}}
-        <nav class="absolute top-0 left-0 right-0 z-20 px-6 py-6 bg-gradient-to-b from-ocean-900/90 to-transparent backdrop-blur-sm">
+        <nav class="absolute top-0 left-0 right-0 z-20 px-6 py-6 bg-gradient-to-b from-ocean-900/90 to-transparent backdrop-blur-sm" style="--nav-icon: #ffffff">
             <div class="max-w-7xl mx-auto flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <img src="{{ asset('assets/agwasuri_logo.svg') }}" alt="AgwaSuri Logo" class="h-12 drop-shadow-xl">
                     <span class="text-2xl font-bold text-white drop-shadow-lg">AgwaSuri</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <a href="/login" class="px-6 py-2.5 bg-gradient-to-r from-cvsu-500 to-cvsu-600 hover:from-cvsu-600 hover:to-cvsu-700 text-white font-semibold rounded-lg transition-all shadow-xl hover:shadow-2xl hover:scale-105">
+                    <a href="/login" class="px-6 py-2.5 bg-gradient-to-r from-water-500 to-water-600 hover:from-water-600 hover:to-water-700 text-white font-semibold rounded-lg transition-all shadow-xl hover:shadow-2xl hover:scale-105">
                         Login
                     </a>
                 </div>
@@ -46,7 +46,7 @@
             {{-- Main Headline --}}
             <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold text-white mb-6 leading-tight">
                 <span class="block drop-shadow-2xl">Stop Guessing.</span>
-                <span class="block drop-shadow-2xl bg-gradient-to-r from-cvsu-300 via-aqua-300 to-cvsu-400 bg-clip-text text-transparent">
+                <span class="block drop-shadow-2xl bg-gradient-to-r from-water-300 via-aqua-300 to-water-400 bg-clip-text text-transparent">
                     Start Growing.
                 </span>
             </h1>
@@ -58,7 +58,7 @@
 
             {{-- CTA Buttons --}}
             <div class="flex flex-col sm:flex-row gap-5 justify-center mb-24">
-                <a href="/register" class="group px-14 py-6 bg-gradient-to-r from-cvsu-500 via-cvsu-600 to-aqua-500 hover:from-cvsu-600 hover:via-cvsu-700 hover:to-aqua-600 text-white text-xl font-bold rounded-xl shadow-2xl hover:shadow-cvsu-500/50 transition-all duration-300 hover:scale-105 hover:-translate-y-1">
+                <a href="/register" class="group px-14 py-6 bg-gradient-to-r from-water-500 via-water-600 to-aqua-500 hover:from-water-600 hover:via-water-700 hover:to-aqua-600 text-white text-xl font-bold rounded-xl shadow-2xl hover:shadow-water-500/50 transition-all duration-300 hover:scale-105 hover:-translate-y-1">
                     <span class="flex items-center justify-center gap-3">
                         Try Free for 30 Days
                         <svg class="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,8 +73,8 @@
 
             {{-- Metrics Cards --}}
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                <div class="group bg-white/95 backdrop-blur-md rounded-2xl p-7 shadow-2xl border-2 border-cvsu-200 hover:border-cvsu-400 hover:shadow-cvsu-300/50 transition-all hover:scale-105 hover:-translate-y-1">
-                    <div class="w-14 h-14 mb-5 bg-gradient-to-br from-cvsu-400 to-cvsu-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform mx-auto">
+                <div class="group bg-white/95 backdrop-blur-md rounded-2xl p-7 shadow-2xl border-2 border-water-200 hover:border-water-400 hover:shadow-water-300/50 transition-all hover:scale-105 hover:-translate-y-1">
+                    <div class="w-14 h-14 mb-5 bg-gradient-to-br from-water-400 to-water-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform mx-auto">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>

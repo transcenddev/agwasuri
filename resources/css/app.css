@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Project color variables (cvsu) - used by Tailwind via CSS variables */
 :root {
   --cvsu-50: #f4fbf4;
@@ -16,6 +12,10 @@
   --cvsu-800: #0b2b0b;
   --cvsu-900: #061a06;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Note: no dark-mode overrides for cvsu colors so buttons keep brand color in dark mode */
 

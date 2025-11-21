@@ -29,7 +29,7 @@
             // Dashboard/nav variant: high-contrast green pill on light mode
             // - Light mode: use brand green background with white icons/text for strong contrast
             // - Dark mode: keep transparent background and use a lighter green text so it reads on dark
-            $colorClass = 'text-white bg-cvsu-500 dark:bg-transparent dark:text-cvsu-300';
+            $colorClass = 'text-white bg-cvsu dark:bg-transparent dark:text-cvsu-300';
             $hoverClass = 'hover:bg-cvsu-600 dark:hover:text-cvsu-200';
             $extraClasses = 'border border-transparent dark:border-gray-700';
             // stronger focus ring that uses the brand color with reduced opacity

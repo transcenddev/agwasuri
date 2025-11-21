@@ -4,8 +4,8 @@
             <x-slot name="title">Account Management</x-slot>
             <x-slot name="actions">
                 <div class="flex items-center space-x-2">
-                    <button wire:click="toggleFilters" class="rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700">Filters {{ $showFilters ? '▲' : '▼' }}</button>
-                    <button wire:click="createUser" class="rounded bg-blue-500 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700">Create User</button>
+                    <button wire:click="toggleFilters" class="rounded bg-cvsu-600 px-3 py-2 text-sm font-medium text-white hover:bg-cvsu-700">Filters {{ $showFilters ? '▲' : '▼' }}</button>
+                    <button wire:click="createUser" class="rounded bg-cvsu-600 px-3 py-2 text-sm font-medium text-white hover:bg-cvsu-700">Create User</button>
                 </div>
             </x-slot>
         </x-card-header>
@@ -26,7 +26,7 @@
 
         {{-- Conditionally render the Filter Section --}}
         @if ($showFilters)
-            <div class="mb-4 rounded border border-blue-200 bg-blue-50 px-4 py-3 shadow-inner">
+            <div class="mb-4 rounded border border-cvsu-200 bg-cvsu-50 px-4 py-3 shadow-inner">
                 <div class="grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <input wire:model.live.debounce.300ms="filterName" type="text" id="filterName" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Filter by name...">
@@ -66,7 +66,7 @@
                     </div>
 
                    <div class="md:col-span-2 lg:col-span-3 flex justify-center">
-                       <button wire:click="resetFilters" class="rounded bg-blue-200 px-4 py-2 text-sm font-medium text-blue-800 hover:bg-blue-300">Reset Filters</button>
+                       <button wire:click="resetFilters" class="rounded bg-cvsu-200 px-4 py-2 text-sm font-medium text-cvsu-700 hover:bg-cvsu-300">Reset Filters</button>
                    </div>
                 </div>
             </div>

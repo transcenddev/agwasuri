@@ -23,8 +23,8 @@
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 space-x-0 sm:space-x-4 gap-2"> {{-- Use flex for row layout; stack on mobile --}}
         {{-- Predict Button (Keep blue) --}}
         <div>
-            <button wire:click="predictFishType"
-                    class="px-4 py-2 text-white transition rounded {{ $canPredict ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed' }}"
+                <button wire:click="predictFishType"
+                    class="px-4 py-2 text-white transition rounded {{ $canPredict ? 'bg-cvsu hover:bg-cvsu-700' : 'bg-gray-400 cursor-not-allowed' }}"
                     {{ !$canPredict ? 'disabled' : '' }}
                     wire:loading.attr="disabled" wire:target="predictFishType, trainModel" {{-- Disable while predicting OR training --}}
                     title="{{ !$canPredict && $isAdminView ? 'Please select a user first' : 'Predict suitable fish type based on average water quality' }}">
@@ -38,7 +38,7 @@
             <div class="text-right"> {{-- Align content to the right --}}
                  {{-- Changed button color to blue --}}
                 <button wire:click="trainModel"
-                        class="px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        class="px-4 py-2 text-white transition bg-cvsu-600 rounded hover:bg-cvsu-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                         wire:loading.attr="disabled" wire:target="predictFishType, trainModel" {{-- Disable while predicting OR training --}}
                         {{ $isTraining ? 'disabled' : '' }}>
                     <span wire:loading.remove wire:target="trainModel">Train Model</span>
@@ -92,7 +92,7 @@
                                 </span>
                             </div>
                             <div class="w-full h-4 bg-gray-200 rounded-full">
-                                <div class="h-4 transition-all duration-500 bg-blue-600 rounded-full" style="width: {{ $prediction['confidence_percentage'] }}%"></div>
+                                <div class="h-4 transition-all duration-500 bg-cvsu rounded-full" style="width: {{ $prediction['confidence_percentage'] }}%"></div>
                             </div>
                         </div>
                         @endforeach
@@ -111,7 +111,7 @@
                                 <div class="p-4">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="font-medium text-gray-700">Accuracy</span>
-                                        <span class="font-semibold text-blue-600">{{ number_format($modelMetrics['accuracy'], 2) }}%</span>
+                                        <span class="font-semibold text-cvsu-500">{{ number_format($modelMetrics['accuracy'], 2) }}%</span>
                                     </div>
                                     <p class="text-sm text-gray-600">{{ $explanations['metrics']['accuracy'] }}</p>
                                 </div>
@@ -120,7 +120,7 @@
                                 <div class="p-4">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="font-medium text-gray-700">Precision</span>
-                                        <span class="font-semibold text-blue-600">{{ number_format($modelMetrics['precision'], 2) }}%</span>
+                                        <span class="font-semibold text-cvsu-500">{{ number_format($modelMetrics['precision'], 2) }}%</span>
                                     </div>
                                     <p class="text-sm text-gray-600">{{ $explanations['metrics']['precision'] }}</p>
                                 </div>
@@ -129,7 +129,7 @@
                                 <div class="p-4">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="font-medium text-gray-700">Recall</span>
-                                        <span class="font-semibold text-blue-600">{{ number_format($modelMetrics['recall'], 2) }}%</span>
+                                        <span class="font-semibold text-cvsu-500">{{ number_format($modelMetrics['recall'], 2) }}%</span>
                                     </div>
                                     <p class="text-sm text-gray-600">{{ $explanations['metrics']['recall'] }}</p>
                                 </div>
@@ -138,7 +138,7 @@
                                 <div class="p-4">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="font-medium text-gray-700">F1 Score</span>
-                                        <span class="font-semibold text-blue-600">{{ number_format($modelMetrics['f1_score'], 2) }}%</span>
+                                        <span class="font-semibold text-cvsu-500">{{ number_format($modelMetrics['f1_score'], 2) }}%</span>
                                     </div>
                                     <p class="text-sm text-gray-600">{{ $explanations['metrics']['f1_score'] }}</p>
                                 </div>
@@ -200,8 +200,8 @@
 
     {{-- Loading State for Prediction (Keep blue spinner) --}}
     <div wire:loading.flex wire:target="predictFishType" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75">
-        <div class="p-6 bg-white rounded-lg shadow-xl text-center">
-            <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div class="p-6 bg-white rounded-lg shadow-xl text-center">
+            <div class="inline-block w-8 h-8 border-4 border-cvsu border-t-transparent rounded-full animate-spin"></div>
             <p class="mt-3 text-gray-700 font-semibold">Processing Prediction...</p>
         </div>
     </div>
@@ -209,7 +209,7 @@
      {{-- Loading State specifically for Training (Changed spinner to blue) --}}
     <div wire:loading.flex wire:target="trainModel" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75">
         <div class="p-6 bg-white rounded-lg shadow-xl text-center">
-            <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <div class="inline-block w-8 h-8 border-4 border-cvsu border-t-transparent rounded-full animate-spin"></div>
             <p class="mt-3 text-gray-700 font-semibold">Initiating Model Training...</p>
         </div>
     </div>
