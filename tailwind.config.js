@@ -39,9 +39,9 @@ export default {
                     muted: "#F9FAFB",
                 },
                 brand: {
-                    50: "#F3F8FF",
-                    500: "#2563EB",
-                },
+                        50: "var(--cvsu-50)",
+                        500: "var(--cvsu-500)",
+                    },
             },
             borderRadius: {
                 "lg-2": "0.75rem",
