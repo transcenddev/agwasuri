@@ -147,51 +147,58 @@
             </div>
         </div>
     @else
-         {{-- Skeleton Loader - Shown when not loading and no results/error --}}
+         {{-- Skeleton Loader - mirrors results grid to avoid layout shift --}}
          <div wire:loading.remove wire:target="predictFishType, trainModel" class="mt-6">
 
-            {{-- Skeleton for Analysis Summary --}}
-            <div class="p-6 mb-6 bg-white rounded-lg shadow-md">
-                 <h4 class="mb-3 text-xl font-semibold text-gray-800">Analysis Summary</h4>
-                 <div class="space-y-2 animate-pulse">
-                    <div class="w-full h-4 bg-gray-300 rounded"></div>
-                    <div class="w-3/4 h-4 bg-gray-300 rounded"></div>
-                    <div class="w-1/2 h-4 bg-gray-300 rounded"></div>
-                    <div class="w-1/4 h-4 bg-gray-300 rounded"></div>
-                 </div>
-            </div>
+             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 {{-- Left/Main column (analysis + predictions) --}}
+                 <div class="lg:col-span-2 space-y-6">
+                     {{-- Analysis Summary Skeleton --}}
+                     <div class="p-6 bg-white rounded-lg shadow-md">
+                         <h4 class="mb-3 text-xl font-semibold text-gray-800">Analysis Summary</h4>
+                         <div class="space-y-2 animate-pulse">
+                             <div class="w-full h-4 bg-gray-300 rounded"></div>
+                             <div class="w-11/12 h-4 bg-gray-300 rounded"></div>
+                             <div class="w-3/4 h-4 bg-gray-300 rounded"></div>
+                             <div class="w-1/2 h-4 bg-gray-300 rounded"></div>
+                         </div>
+                     </div>
 
-            {{-- Skeleton for Detailed Predictions --}}
-            <div class="mb-6">
-                <h4 class="mb-4 text-xl font-semibold text-gray-800">Detailed Predictions:</h4>
-                @for ($i = 0; $i < 3; $i++)
-                    <div class="mb-4 animate-pulse">
-                        <div class="flex items-center justify-between mb-1">
-                            <div class="w-1/4 h-4 bg-gray-300 rounded"></div>
-                            <div class="w-1/6 h-4 bg-gray-300 rounded"></div>
-                        </div>
-                        <div class="w-full h-4 bg-gray-300 rounded-full"></div>
-                    </div>
-                @endfor
-            </div>
-
-            {{-- Skeleton for Model Performance --}}
-            <div class="mt-6">
-                 <h4 class="mb-4 text-xl font-semibold text-gray-800">Model Performance Metrics:</h4>
-                 <div class="overflow-hidden bg-white rounded-lg shadow-md">
-                     <div class="divide-y divide-gray-200">
-                          @for ($i = 0; $i < 4; $i++)
-                            <div class="p-4">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="font-medium text-gray-700">Accuracy</span>
-                                    <div class="w-1/6 h-4 bg-gray-300 rounded animate-pulse"></div>
-                                </div>
-                                <div class="w-full h-3 mt-1 bg-gray-300 rounded animate-pulse"></div>
-                            </div>
-                         @endfor
+                     {{-- Detailed Predictions Skeleton --}}
+                     <div class="bg-white p-6 rounded-lg shadow-md">
+                         <h4 class="mb-4 text-xl font-semibold text-gray-800">Detailed Predictions:</h4>
+                         <div class="space-y-4">
+                             @for ($i = 0; $i < 3; $i++)
+                                 <div class="animate-pulse">
+                                     <div class="flex items-center justify-between mb-2">
+                                         <div class="w-1/3 h-4 bg-gray-300 rounded"></div>
+                                         <div class="w-1/6 h-4 bg-gray-300 rounded"></div>
+                                     </div>
+                                     <div class="w-full h-4 bg-gray-300 rounded-full"></div>
+                                 </div>
+                             @endfor
+                         </div>
                      </div>
                  </div>
-            </div>
+
+                 {{-- Right/Side column (metrics) --}}
+                 <div class="lg:col-span-1">
+                     <div class="bg-white rounded-lg shadow-md p-4 lg:sticky lg:top-24">
+                         <h4 class="mb-4 text-xl font-semibold text-gray-800">Model Performance Metrics:</h4>
+                         <div class="divide-y divide-gray-200">
+                             @for ($i = 0; $i < 4; $i++)
+                                 <div class="p-4">
+                                     <div class="flex items-center justify-between mb-1">
+                                         <span class="font-medium text-gray-700">Metric</span>
+                                         <div class="w-1/6 h-4 bg-gray-300 rounded animate-pulse"></div>
+                                     </div>
+                                     <div class="w-full h-3 mt-1 bg-gray-300 rounded animate-pulse"></div>
+                                 </div>
+                             @endfor
+                         </div>
+                     </div>
+                 </div>
+             </div>
          </div>
     @endif
 
