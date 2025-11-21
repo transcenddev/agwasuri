@@ -38,7 +38,7 @@
             <div class="text-right"> {{-- Align content to the right --}}
                  {{-- Changed button color to blue --}}
                 <button wire:click="trainModel"
-                        class="px-4 py-2 text-white transition bg-cvsu-600 rounded hover:bg-cvsu-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            class="px-4 py-2 text-white transition bg-cvsu rounded hover:bg-cvsu-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                         wire:loading.attr="disabled" wire:target="predictFishType, trainModel" {{-- Disable while predicting OR training --}}
                         {{ $isTraining ? 'disabled' : '' }}>
                     <span wire:loading.remove wire:target="trainModel">Train Model</span>
@@ -67,7 +67,6 @@
                         <h4 class="mb-3 text-xl font-semibold text-gray-800">Analysis Summary</h4>
                         <p class="mb-2 text-gray-600 whitespace-pre-line">{{ $explanations['predictions'] }}</p>
                         @if(!empty($explanations['top_prediction']))
-                            <p class="mb-2 font-semibold text-gray-600">{{ $explanations['top_prediction'] }}</p>
                         @endif
                         @if(!empty($explanations['confidence_context']))
                             <p class="font-medium text-gray-700">
@@ -76,6 +75,7 @@
                             </p>
                         @endif
                     </div>
+
                 @endif
 
                 {{-- Detailed Predictions --}}
@@ -85,16 +85,14 @@
                         <div class="space-y-4">
                         @foreach($predictionResults as $prediction)
                         <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="font-medium text-gray-700">{{ $prediction['species_name'] }}</span>
+                            <span class="font-medium text-gray-700">{{ $prediction['species_name'] }}</span>
                                 <span class="text-sm text-gray-600">
                                     {{ number_format($prediction['confidence_percentage'], 2) }}%
                                 </span>
                             </div>
                             <div class="w-full h-4 bg-gray-200 rounded-full">
-                                <div class="h-4 transition-all duration-500 bg-cvsu rounded-full" style="width: {{ $prediction['confidence_percentage'] }}%"></div>
-                            </div>
-                        </div>
+                                <div class="h-4 transition-all duration-500 bg-cvsu rounded-full" style="width: {{ $prediction['confidence_percentage'] }}%;"></div>
+                                </div>
                         @endforeach
                         </div>
                     </div>
@@ -120,7 +118,7 @@
                                 <div class="p-4">
                                     <div class="flex items-center justify-between mb-1">
                                         <span class="font-medium text-gray-700">Precision</span>
-                                        <span class="font-semibold text-cvsu-500">{{ number_format($modelMetrics['precision'], 2) }}%</span>
+                                               <span class="font-semibold text-cvsu-500">{{ number_format($modelMetrics['precision'], 2) }}%</span>
                                     </div>
                                     <p class="text-sm text-gray-600">{{ $explanations['metrics']['precision'] }}</p>
                                 </div>
