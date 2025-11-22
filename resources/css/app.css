@@ -15,11 +15,14 @@
   /* Global nav / header variables so dark mode works consistently across layouts */
   --nav-bg-light: #ffffff;
   --nav-bg-dark: #000000;
-  --nav-border-light: #e5e7eb; /* gray-200 */
-  --nav-border-dark: #1f2937;  /* gray-800 */
+  --nav-border-light: #e5e7eb;
+  /* gray-200 */
+  --nav-border-dark: #1f2937;
+  /* gray-800 */
   --nav-bg: var(--nav-bg-light);
   --nav-border: var(--nav-border-light);
-  --nav-icon-light: #1B651B; /* brand green */
+  --nav-icon-light: #1B651B;
+  /* brand green */
   --nav-icon-dark: #1B651B;
   --nav-icon: var(--nav-icon-light);
 }
