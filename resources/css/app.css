@@ -79,6 +79,22 @@ body {
 
 /* Keep primary brand color intact: do not override cvsu utilities */
 
+/* Make common page-level light background utilities switch to the dark page background
+   so the surrounding page (dashboard body) turns dark in `.dark` mode. */
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.dark .bg-slate-50,
+.dark .bg-white,
+.dark .bg-gray-200 {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.dark .min-h-screen,
+.dark .min-h-full {
+  background-color: var(--bg) !important;
+}
+
 /* Make native datepicker/calendar icon visible in dark mode */
 input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
