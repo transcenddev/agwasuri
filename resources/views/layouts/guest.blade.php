@@ -95,29 +95,37 @@
         
         @livewireScripts
         
-        <!-- Dark Mode Toggle Script -->
+        <!-- Dark Mode Toggle Script (standardized) -->
         <script>
-            // Initialize dark mode from session/localStorage on page load
-            if (localStorage.getItem('darkMode') === 'true' || {{ session('darkMode', false) ? 'true' : 'false' }}) {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('darkMode', 'true');
-            } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('darkMode', 'false');
-            }
-            
-            // Listen for dark mode toggle events from Livewire
-            document.addEventListener('livewire:init', () => {
-                Livewire.on('dark-mode-toggled', (event) => {
-                    if (event.darkMode) {
+            // Use the shared key 'agwasuri_theme' so all layouts/components read the same value
+            (function(){
+                try {
+                    var saved = (function(){ try { return localStorage.getItem('agwasuri_theme'); } catch(e){ return null; } })();
+                    if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                         document.documentElement.classList.add('dark');
-                        localStorage.setItem('darkMode', 'true');
                     } else {
                         document.documentElement.classList.remove('dark');
-                        localStorage.setItem('darkMode', 'false');
                     }
+                } catch(e){}
+
+                // Keep Livewire listeners in sync with the shared helper
+                document.addEventListener('livewire:init', () => {
+                    Livewire.on('dark-mode-toggled', (event) => {
+                        if (event.darkMode) {
+                            document.documentElement.classList.add('dark');
+                            try { localStorage.setItem('agwasuri_theme', 'dark'); } catch(e){}
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                            try { localStorage.setItem('agwasuri_theme', 'light'); } catch(e){}
+                        }
+                    });
                 });
-            });
+
+                // Also listen for the shared DOM event if other modules dispatch it
+                window.addEventListener('agwasuri:theme-changed', (e) => {
+                    try { if (e?.detail === 'dark') document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark'); } catch(e){}
+                });
+            })();
         </script>
     </body>
 </html>

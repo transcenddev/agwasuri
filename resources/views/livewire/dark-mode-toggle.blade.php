@@ -122,50 +122,7 @@
             }
         }
 
-        // initial state: check localStorage first, then document class
-        const saved = localStorage.getItem('agwasuri_theme');
-        setIcons(saved);
-
-        // listen for theme change events
-        window.addEventListener('agwasuri:theme-changed', (e) => setIcons(e.detail));
-
-        // quick visual flip on click (immediate feedback)
-        btn.addEventListener('click', () => {
-            // determine what the next visual state should be (we've already toggled theme via toggleTheme)
-            const cur = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-            setIcons(cur);
-        });
-    })();
-    </script>
-
-    <script>
-    (function(){
-        const btn = document.getElementById('theme-toggle-btn');
-        if (!btn) return;
-
-        const sun = btn.querySelector('[data-role="icon-sun"]');
-        const moon = btn.querySelector('[data-role="icon-moon"]');
-
-        function setIcons(theme) {
-            const dark = theme === 'dark' || (!theme && document.documentElement.classList.contains('dark'));
-            if (dark) {
-                sun.classList.remove('opacity-100','scale-100');
-                sun.classList.add('opacity-0','scale-0','absolute');
-                moon.classList.remove('opacity-0','scale-0','absolute');
-                moon.classList.add('opacity-100','scale-100');
-                btn.setAttribute('title','Switch to Light Mode');
-                btn.setAttribute('aria-pressed','true');
-            } else {
-                moon.classList.remove('opacity-100','scale-100');
-                moon.classList.add('opacity-0','scale-0','absolute');
-                sun.classList.remove('opacity-0','scale-0','absolute');
-                sun.classList.add('opacity-100','scale-100');
-                btn.setAttribute('title','Switch to Dark Mode');
-                btn.setAttribute('aria-pressed','false');
-            }
-        }
-
-        // initial state: check localStorage first, then document class
+        // initial state: check shared localStorage key first, then document class
         const saved = localStorage.getItem('agwasuri_theme');
         setIcons(saved);
 
@@ -181,12 +138,11 @@
             }
         } catch (e) {}
 
-        // listen for theme change events
+        // listen for theme change events from shared helper
         window.addEventListener('agwasuri:theme-changed', (e) => setIcons(e.detail));
 
         // quick visual flip on click (immediate feedback)
         btn.addEventListener('click', () => {
-            // determine what the next visual state should be (we've already toggled theme via toggleTheme)
             const cur = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
             setIcons(cur);
         });
