@@ -55,7 +55,7 @@
 
                     <button type="button"
                             wire:click="clearFilters"
-                            class="inline-flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition">
+                            class="inline-flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-xl border border-gray-200 hover:bg-gray-200 transition dark:bg-transparent dark:text-white dark:border-white/20 hover:dark:bg-white/5">
                         Clear
                     </button>
                 </div>
