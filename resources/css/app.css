@@ -67,6 +67,24 @@ body {
 
 /* Keep primary brand color intact: do not override cvsu utilities */
 
+/* Make native datepicker/calendar icon visible in dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.95;
+  filter: none;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  /* In dark mode invert the indicator so it stands out against dark backgrounds */
+  filter: invert(1) brightness(2) saturate(0.9);
+  opacity: 0.95;
+}
+
+/* For Firefox/other UAs, ensure full opacity on the input itself */
+.dark input[type="date"] {
+  color: var(--text);
+}
+
 /* Ensure CSS variables switch globally when .dark is toggled on <html> */
 .dark {
   --nav-bg: var(--nav-bg-dark);
