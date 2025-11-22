@@ -16,12 +16,12 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireChartsScripts
     </head>
-    <body class="font-sans antialiased bg-slate-100">
+    <body class="font-sans antialiased min-h-screen">
         {{-- Navigation is fixed; render it above the content wrapper so header height CSS var can be used globally --}}
         <livewire:layout.navigation />
 
         {{-- Wrap the slot with the shared x-container so every page receives the header offset --}}
-        <x-container>
+        <x-container class="site-body">
             <main>
                 {{ $slot }}
             </main>

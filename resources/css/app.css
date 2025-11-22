@@ -56,23 +56,25 @@ body {
   color: var(--text);
 }
 
-/* Ensure the common 'white' card areas tone-down in dark mode while preserving brand color classes */
-.dark .bg-white {
+/* Ensure the common 'white' card areas tone-down in dark mode while preserving brand color classes
+   Scope these overrides to pages using the app layout (elements inside `.site-body`) so standalone
+   pages (landing, marketing pages) keep their intended backgrounds. */
+.dark .site-body .bg-white {
   background-color: var(--card-bg) !important;
 }
 
-.dark .text-gray-700,
-.dark .text-gray-800,
-.dark .text-gray-900 {
+.dark .site-body .text-gray-700,
+.dark .site-body .text-gray-800,
+.dark .site-body .text-gray-900 {
   color: var(--text) !important;
 }
 
-.dark .text-gray-500,
-.dark .text-gray-600 {
+.dark .site-body .text-gray-500,
+.dark .site-body .text-gray-600 {
   color: var(--muted) !important;
 }
 
-.dark .border-gray-200 {
+.dark .site-body .border-gray-200 {
   border-color: #1f2937 !important;
   /* gray-800 */
 }
@@ -115,6 +117,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   --nav-bg: var(--nav-bg-dark);
   --nav-border: var(--nav-border-dark);
   --nav-icon: var(--nav-icon-dark);
+}
+
+/* Site-body container uses CSS variables for background/text so pages using the app layout
+   get the minimal black/white dark theme while leaving standalone pages untouched. */
+.site-body {
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
 }
 
 @tailwind base;
