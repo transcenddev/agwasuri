@@ -96,7 +96,7 @@
     <div class="relative z-10">
         <livewire:welcome.navigation />
 
-        <div class="relative flex items-center justify-center min-h-screen px-4 mx-auto max-w-screen-xl lg:px-8 pt-32">
+        <div class="relative flex items-center justify-center min-h-screen px-4 mx-auto max-w-screen-xl lg:px-8 pt-32 hero-light">
             <div class="text-center max-w-4xl mx-auto">
 
                 <!-- Tagline -->
