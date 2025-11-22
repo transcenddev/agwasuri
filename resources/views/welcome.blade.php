@@ -8,7 +8,7 @@
     Route: http://127.0.0.1:8000/
 --}}
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ session('darkMode', false) ? 'dark' : '' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
@@ -96,7 +96,7 @@
     <div class="relative z-10">
         <livewire:welcome.navigation />
 
-        <div class="relative flex items-center justify-center min-h-screen px-4 mx-auto max-w-screen-xl lg:px-8 pt-32 hero-light">
+        <div class="relative flex items-center justify-center min-h-screen px-4 mx-auto max-w-screen-xl lg:px-8 pt-32">
             <div class="text-center max-w-4xl mx-auto">
 
                 <!-- Tagline -->
@@ -202,19 +202,7 @@
         });
     </script>
 
-    <!-- Dark Mode Toggle Script -->
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            // Listen for dark mode toggle event
-            Livewire.on('dark-mode-toggled', (event) => {
-                if (event.darkMode) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            });
-        });
-    </script>
+    <!-- Landing page does not sync global dark-mode by design -->
 </body>
 
 </html>
