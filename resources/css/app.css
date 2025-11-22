@@ -27,6 +27,46 @@
   --nav-icon: var(--nav-icon-light);
 }
 
+/* Minimal app-level color variables for light + minimal black/white dark mode */
+:root {
+  --bg: #ffffff; /* page background (light) */
+  --text: #111827; /* gray-900 */
+  --card-bg: #ffffff; /* card background (light) */
+  --muted: #6b7280; /* gray-500 */
+}
+
+.dark {
+  --bg: #000000; /* black page background for minimal dark */
+  --text: #ffffff; /* white text */
+  --card-bg: #0b0b0b; /* near-black card background */
+  --muted: #9ca3af; /* lighter muted in dark */
+}
+
+/* Apply variables to page + common structural elements */
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* Ensure the common 'white' card areas tone-down in dark mode while preserving brand color classes */
+.dark .bg-white {
+  background-color: var(--card-bg) !important;
+}
+.dark .text-gray-700,
+.dark .text-gray-800,
+.dark .text-gray-900 {
+  color: var(--text) !important;
+}
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: var(--muted) !important;
+}
+.dark .border-gray-200 {
+  border-color: #1f2937 !important; /* gray-800 */
+}
+
+/* Keep primary brand color intact: do not override cvsu utilities */
+
 /* Ensure CSS variables switch globally when .dark is toggled on <html> */
 .dark {
   --nav-bg: var(--nav-bg-dark);
