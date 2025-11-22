@@ -2,7 +2,7 @@
    
     <x-container class="pt-20 py-12">
         {{-- Top Filters — improved spacing and responsive layout --}}
-        <x-card class="mb-6">
+        <x-card class="mb-6 hero-light">
             <x-slot name="header">
                 <div class="w-full">
                     {{-- header left area is intentionally blank; filters live in the body --}}
