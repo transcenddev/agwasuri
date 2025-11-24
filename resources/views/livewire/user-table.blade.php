@@ -148,7 +148,7 @@
                             <td class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
                                 <button wire:click="showDetails({{ $user->user_id }})" class="text-cvsu-600 hover:text-cvsu-700 mr-2">Details</button>
 
-                                <div class="inline-block relative" x-data="{open:false, top:0, left:0, openMenu(e){ const r = e.target.getBoundingClientRect(); this.top = r.bottom + window.scrollY + 6; this.left = r.right + window.scrollX - 140; this.open = true }, closeMenu(){ this.open=false }}" @keydown.escape.window="open=false">
+                                <div class="inline-block relative" x-data="{open:false, top:0, left:0, openMenu(e){ const btn = (e.target.closest && e.target.closest('button')) || e.target; const r = btn.getBoundingClientRect(); let top = r.bottom + window.scrollY + 6; let left = r.right + window.scrollX - 140; const menuWidth = 144; const margin = 8; const maxLeft = window.scrollX + window.innerWidth - menuWidth - margin; left = Math.min(Math.max(left, window.scrollX + margin), maxLeft); const maxTop = window.scrollY + window.innerHeight - 120; top = Math.min(top, maxTop); this.top = Math.round(top); this.left = Math.round(left); this.open = true }, closeMenu(){ this.open=false }}" @keydown.escape.window="open=false">
                                     <button @click.prevent="openMenu($event)" class="px-2 py-1 rounded hover:bg-gray-100" aria-haspopup="true" :aria-expanded="open">⋮</button>
 
                                     <div x-cloak x-show="open" x-transition style="position: fixed;" :style="`top: ${top}px; left: ${left}px;`" @click.away="closeMenu()" class="w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
