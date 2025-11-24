@@ -24,6 +24,9 @@
         "vite": "^6.0"
     },
     "dependencies": {
-        "chart.js": "^4.4.9"
+        "chart.js": "^4.4.9",
+        "chartjs-plugin-zoom": "^2.0.1",
+        "luxon": "^3.4.0",
+        "chartjs-adapter-luxon": "^1.0.1"
     }
 }
