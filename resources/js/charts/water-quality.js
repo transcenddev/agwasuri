@@ -10,6 +10,16 @@ function isoToMs(iso) {
     return isNaN(t) ? null : t;
 }
 
+// Read chart color variables from CSS (fallbacks provided)
+function readChartColors() {
+    const doc = document.documentElement || document.body;
+    const style = getComputedStyle(doc);
+    const grid = (style.getPropertyValue('--chart-grid') || 'rgba(0,0,0,0.06)').trim();
+    const tick = (style.getPropertyValue('--chart-tick') || 'rgba(51,65,85,0.9)').trim();
+    const border = (style.getPropertyValue('--chart-border') || 'rgba(0,0,0,0.06)').trim();
+    return { grid, tick, border };
+}
+
 function initWaterCharts() {
     document.querySelectorAll("[data-chart]").forEach((canvas) => {
         // Avoid initializing the same canvas twice
@@ -41,6 +51,7 @@ function initWaterCharts() {
             const id = canvas.id || "";
                 if (id.endsWith("-main")) {
                 const ctx = canvas.getContext("2d");
+                const colors = readChartColors();
                 const mainChart = new Chart(ctx, {
                     type: "line",
                     data: { datasets },
@@ -50,13 +61,14 @@ function initWaterCharts() {
                             x: {
                                 type: "time",
                                 time: { tooltipFormat: "MMM d HH:mm" },
-                                    ticks: { autoSkip: true, maxTicksLimit: 6, maxRotation: 0, sampleSize: 150 },
+                                grid: { color: colors.grid, borderColor: colors.border },
+                                ticks: { autoSkip: true, maxTicksLimit: 6, maxRotation: 0, sampleSize: 150, color: colors.tick },
                             },
-                            y: { beginAtZero: false },
+                            y: { beginAtZero: false, grid: { color: colors.grid, borderColor: colors.border }, ticks: { color: colors.tick } },
                         },
                         plugins: {
                                 // hide Chart.js built-in legend; use Blade legend for controls
-                                legend: { display: false, position: "top" },
+                                legend: { display: false, position: "top", labels: { color: colors.tick } },
                             zoom: {
                                 pan: { enabled: true, mode: "x" },
                                 zoom: {
@@ -95,6 +107,7 @@ function initWaterCharts() {
                     hidden: !visible.includes(name),
                 }));
 
+                const miniColors = readChartColors();
                 const miniChart = new Chart(ctx, {
                     type: "line",
                     data: { datasets: miniDatasets },
@@ -108,11 +121,13 @@ function initWaterCharts() {
                                     tooltipFormat: "HH:mm",
                                     displayFormats: { hour: "HH:mm", minute: "HH:mm" },
                                 },
+                                grid: { color: miniColors.grid, borderColor: miniColors.border },
                                 ticks: {
                                     autoSkip: true,
                                     maxTicksLimit: 6,
                                     sampleSize: 150,
                                     font: { size: 10 },
+                                    color: miniColors.tick,
                                     callback: function(value, index, ticks) {
                                         try {
                                             const total = (ticks && ticks.length) || 1;
@@ -123,10 +138,10 @@ function initWaterCharts() {
                                     }
                                 }
                             },
-                            y: { display: false },
+                            y: { display: false, grid: { color: miniColors.grid } },
                         },
                         plugins: {
-                            legend: { display: false },
+                            legend: { display: false, labels: { color: miniColors.tick } },
                             tooltip: { enabled: false },
                         },
                         interaction: { mode: "nearest" },

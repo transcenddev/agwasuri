@@ -25,6 +25,10 @@
   /* brand green */
   --nav-icon-dark: #1B651B;
   --nav-icon: var(--nav-icon-light);
+  /* Chart color variables (used by Chart.js initializers) */
+  --chart-grid: rgba(0,0,0,0.06);
+  --chart-tick: rgba(51,65,85,0.9); /* slate-700 */
+  --chart-border: rgba(0,0,0,0.06);
 }
 
 /* Minimal app-level color variables for light + minimal black/white dark mode */
@@ -48,6 +52,10 @@
   /* near-black card background */
   --muted: #9ca3af;
   /* lighter muted in dark */
+  /* Dark-mode overrides: `.dark` or `.site-body.dark` are used in this project */
+  --chart-grid: rgba(255,255,255,0.06);
+  --chart-tick: rgba(255,255,255,0.78);
+  --chart-border: rgba(255,255,255,0.08);
 }
 
 /* Apply variables to page + common structural elements */
