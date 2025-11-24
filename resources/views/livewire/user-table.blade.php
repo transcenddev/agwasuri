@@ -154,8 +154,8 @@
                                     <template x-teleport="body">
                                         <div x-cloak x-show="open" x-transition style="position: absolute;" :style="`top: ${top}px; left: ${left}px;`" @click.away="closeMenu()" class="w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                                             <div class="py-1">
-                                                <a href="#" @click.prevent="closeMenu(); $dispatch('livewire-action', {name: 'edit', id: {{ $user->user_id }}})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
-                                                <a href="#" @click.prevent="closeMenu(); $dispatch('livewire-action', {name: 'delete', id: {{ $user->user_id }}})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
+                                                <a href="#" @click.prevent="closeMenu(); Livewire.emit('menuAction', 'edit', {{ $user->user_id }}, '{{ $this->id }}')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
+                                                <a href="#" @click.prevent="closeMenu(); Livewire.emit('menuAction', 'delete', {{ $user->user_id }}, '{{ $this->id }}')" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
                                             </div>
                                         </div>
                                     </template>

@@ -38,7 +38,9 @@ class UserTable extends Component
         'userSaved' => 'handleUserSaved',
         'closeForm' => 'closeForm',
         // Livewire Echo listener for admin broadcasts
-        'echo-private:admin.users,UserProfileUpdated' => 'handleUserProfileUpdated'
+        'echo-private:admin.users,UserProfileUpdated' => 'handleUserProfileUpdated',
+        // events from teleported menus
+        'menuAction' => 'handleMenuAction'
     ];
 
     // Reset pagination when any filter is updated
@@ -143,6 +145,25 @@ class UserTable extends Component
         $this->deletingUserName = null;
         $this->deleteConfirmName = null;
         $this->showDeleteModal = false;
+    }
+
+    // Handle actions emitted by teleported action menus
+    public function handleMenuAction($action, $userId, $componentId)
+    {
+        // Only handle events intended for this component instance
+        if ($componentId !== $this->id) {
+            return;
+        }
+
+        if ($action === 'edit') {
+            $this->editUser($userId);
+            return;
+        }
+
+        if ($action === 'delete') {
+            $this->confirmDelete($userId);
+            return;
+        }
     }
 
     public function destroyUser()
