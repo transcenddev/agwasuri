@@ -31,7 +31,9 @@ class UserTable extends Component
 
     protected $listeners = [
         'userSaved' => 'handleUserSaved',
-        'closeForm' => 'closeForm'
+        'closeForm' => 'closeForm',
+        // Livewire Echo listener for admin broadcasts
+        'echo-private:admin.users,UserProfileUpdated' => 'handleUserProfileUpdated'
     ];
 
     // Reset pagination when any filter is updated
@@ -55,6 +57,14 @@ class UserTable extends Component
     {
         $this->closeForm();
         session()->flash('message', 'User saved successfully.');
+        $this->resetPage();
+    }
+
+    public function handleUserProfileUpdated($payload)
+    {
+        // Payload: ['user_id' => ..., 'water_type' => ..., 'changes' => [...]]
+        // Trigger a re-render so updated data is fetched in render().
+        // If desired, we could update an in-memory row instead.
         $this->resetPage();
     }
 
