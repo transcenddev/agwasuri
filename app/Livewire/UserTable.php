@@ -66,6 +66,8 @@ class UserTable extends Component
         // Trigger a re-render so updated data is fetched in render().
         // If desired, we could update an in-memory row instead.
         $this->resetPage();
+        // Dispatch a browser event so admin clients can log and debug incoming payloads
+        $this->dispatchBrowserEvent('user-profile-updated', $payload);
     }
 
     public function closeForm()

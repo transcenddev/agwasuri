@@ -23,8 +23,8 @@ class UserProfileUpdated implements ShouldBroadcastNow
 
     public function broadcastOn()
     {
-        // Broadcast to admin channel and user's personal channel if needed
-        return new PrivateChannel('admin.users');
+        // Broadcast to admin channel and the user's personal private channel
+        return [new PrivateChannel('admin.users'), new PrivateChannel('App.Models.User.' . $this->user->user_id)];
     }
 
     public function broadcastWith(): array
