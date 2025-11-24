@@ -12,6 +12,36 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
+        <!-- Inline theme init: read saved preference (localStorage 'agwasuri_theme') or system preference
+             Run before CSS loads to avoid flash-of-incorrect-theme -->
+        <script>
+            (function(){
+                try {
+                    var saved = null;
+                    try { saved = localStorage.getItem('agwasuri_theme'); } catch(e) { saved = null; }
+                    if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                    // helper to toggle theme from other scripts/components
+                    window.agwasuriSetDark = function(on) {
+                        try {
+                            if (on) {
+                                document.documentElement.classList.add('dark');
+                                localStorage.setItem('agwasuri_theme','dark');
+                            } else {
+                                document.documentElement.classList.remove('dark');
+                                localStorage.setItem('agwasuri_theme','light');
+                            }
+                            // also dispatch a DOM event so other scripts can react
+                            try { window.dispatchEvent(new CustomEvent('agwasuri:theme-changed',{detail: on ? 'dark' : 'light'})); } catch(e){}
+                        } catch(e){}
+                    };
+                } catch(e){}
+            })();
+        </script>
+
         @livewireStyles
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireChartsScripts
@@ -27,4 +57,33 @@
             </main>
         </x-container>
     </body>
+        <!-- Livewire bridge: keep localStorage and document class in sync when Livewire toggles theme -->
+        <script>
+            (function(){
+                try {
+                    document.addEventListener('livewire:init', function(){
+                        if (window.Livewire && typeof Livewire.on === 'function') {
+                            Livewire.on('dark-mode-toggled', function(event){
+                                try {
+                                    if (event && event.darkMode) {
+                                        document.documentElement.classList.add('dark');
+                                        try { localStorage.setItem('agwasuri_theme','dark'); } catch(e){}
+                                    } else {
+                                        document.documentElement.classList.remove('dark');
+                                        try { localStorage.setItem('agwasuri_theme','light'); } catch(e){}
+                                    }
+                                } catch(e){}
+                            });
+                        }
+                    });
+                    // Also listen for DOM-level helper events
+                    window.addEventListener('agwasuri:theme-changed', function(e){
+                        try {
+                            if (e && e.detail === 'dark') { document.documentElement.classList.add('dark'); }
+                            else { document.documentElement.classList.remove('dark'); }
+                        } catch(e){}
+                    });
+                } catch(e){}
+            })();
+        </script>
 </html>
