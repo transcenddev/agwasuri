@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination; // Make sure this is used
 
@@ -15,6 +16,8 @@ class UserTable extends Component
 
     public $showDeleteModal = false;
     public $deletingUserId = null;
+    public $deletingUserName = null; // full name for confirmation UI
+    public $deleteConfirmName = null; // input typed by admin to confirm
 
     public $showFilters = false;
 
@@ -128,29 +131,53 @@ class UserTable extends Component
     public function confirmDelete($userId)
     {
         $this->deletingUserId = $userId;
+        $user = User::find($userId);
+        $this->deletingUserName = $user ? ($user->first_name . ' ' . $user->last_name) : null;
+        $this->deleteConfirmName = null;
         $this->showDeleteModal = true;
     }
 
     public function cancelDelete()
     {
         $this->deletingUserId = null;
+        $this->deletingUserName = null;
+        $this->deleteConfirmName = null;
         $this->showDeleteModal = false;
     }
 
     public function destroyUser()
     {
-        if ($this->deletingUserId) {
-            $user = User::find($this->deletingUserId);
-            if ($user) {
-                $user->delete();
-                session()->flash('message', 'User deleted successfully.'); // Changed to message for consistency
-                $this->resetPage();
-            } else {
-                 session()->flash('error', 'User not found.');
-            }
-        } else {
+        if (! $this->deletingUserId) {
             session()->flash('error', 'Could not determine user to delete.');
+            return;
         }
+
+        $user = User::find($this->deletingUserId);
+        if (! $user) {
+            session()->flash('error', 'User not found.');
+            $this->cancelDelete();
+            return;
+        }
+
+        // Disallow deleting currently authenticated admin (safety)
+        $current = Auth::user();
+        if ($current && $current->user_id === $user->user_id) {
+            session()->flash('error', 'You cannot delete the account you are currently signed in with.');
+            $this->cancelDelete();
+            return;
+        }
+
+        // Require type-to-confirm matching full name
+        $expected = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+        if (trim($this->deleteConfirmName ?? '') !== $expected) {
+            session()->flash('error', 'Confirmation name does not match. Type the full name to confirm deletion.');
+            return;
+        }
+
+        // All good — delete
+        $user->delete();
+        session()->flash('message', 'User deleted successfully.');
+        $this->resetPage();
         $this->cancelDelete();
     }
 
