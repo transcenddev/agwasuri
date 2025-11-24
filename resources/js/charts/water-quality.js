@@ -448,32 +448,54 @@ function setupMiniToggle() {
 document.addEventListener('DOMContentLoaded', setupMiniToggle);
 document.addEventListener('livewire:load', setupMiniToggle);
 
-// Delegated click handler for the Timeline toggle so it works even after Livewire re-renders the component.
-document.addEventListener('click', (e) => {
+// Robust delegated handlers for the Timeline toggle so it works after Livewire re-renders
+function _toggleMiniFromButton(btn) {
+    const wrap = document.getElementById('waterChart-mini-wrap');
+    if (!wrap || !btn) return;
+    const chevron = document.getElementById('waterChart-mini-toggle-chevron');
+    const nowHidden = wrap.classList.contains('hidden');
+    if (nowHidden) {
+        wrap.classList.remove('hidden');
+        btn.setAttribute('aria-expanded', 'true');
+        if (chevron) chevron.classList.remove('rotate-180');
+        try { localStorage.setItem('waterChartMiniCollapsed', '0'); } catch (e) {}
+        tryInitWithRetries(6, 150);
+        requestAnimationFrame(() => { try { window._waterChartMain?.resize(); } catch (e) {} });
+    } else {
+        wrap.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+        if (chevron) chevron.classList.add('rotate-180');
+        try { localStorage.setItem('waterChartMiniCollapsed', '1'); } catch (e) {}
+    }
+}
+
+// Click/pointer delegation — cover cases where click lands on SVG child, or Livewire has re-rendered the button
+['click','pointerdown'].forEach((evtName) => {
+    document.addEventListener(evtName, (e) => {
+        try {
+            const target = e.target;
+            // Use both id match and a permissive attribute selector in case structure changes
+            const btn = (target.closest && target.closest('#waterChart-mini-toggle')) || (target.closest && target.closest('[data-mini-toggle]'));
+            if (!btn) return;
+            // If this is pointerdown, don't prevent default; we handle toggle on either event
+            _toggleMiniFromButton(btn);
+        } catch (err) {
+            // non-fatal
+        }
+    }, { passive: true });
+});
+
+// Keyboard accessibility: toggle on Enter/Space when button is focused
+document.addEventListener('keydown', (e) => {
     try {
+        if (!e.target) return;
         const btn = e.target.closest && e.target.closest('#waterChart-mini-toggle');
         if (!btn) return;
-        const wrap = document.getElementById('waterChart-mini-wrap');
-        if (!wrap) return;
-        const chevron = document.getElementById('waterChart-mini-toggle-chevron');
-
-        const nowHidden = wrap.classList.contains('hidden');
-        if (nowHidden) {
-            wrap.classList.remove('hidden');
-            btn.setAttribute('aria-expanded', 'true');
-            if (chevron) chevron.classList.remove('rotate-180');
-            try { localStorage.setItem('waterChartMiniCollapsed', '0'); } catch (e) {}
-            tryInitWithRetries(6, 150);
-            requestAnimationFrame(() => { try { window._waterChartMain?.resize(); } catch (e) {} });
-        } else {
-            wrap.classList.add('hidden');
-            btn.setAttribute('aria-expanded', 'false');
-            if (chevron) chevron.classList.add('rotate-180');
-            try { localStorage.setItem('waterChartMiniCollapsed', '1'); } catch (e) {}
+        if (e.key === 'Enter' || e.key === ' ' || e.code === 'Space') {
+            e.preventDefault();
+            _toggleMiniFromButton(btn);
         }
-    } catch (e) {
-        // swallow - non-critical
-    }
+    } catch (err) {}
 });
 
 export {};
