@@ -148,13 +148,8 @@ class UserTable extends Component
     }
 
     // Handle actions emitted by teleported action menus
-    public function handleMenuAction($action, $userId, $componentId)
+    public function handleMenuAction($action, $userId)
     {
-        // Only handle events intended for this component instance
-        if ($componentId !== $this->id) {
-            return;
-        }
-
         if ($action === 'edit') {
             $this->editUser($userId);
             return;
