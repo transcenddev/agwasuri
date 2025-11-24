@@ -18,6 +18,8 @@ class UserTable extends Component
 
     public $showFilters = false;
 
+    // Selected user for details modal
+    public $selectedUser = null;
     // Filter properties
     public $filterName = '';
     public $filterEmail = '';
@@ -68,6 +70,18 @@ class UserTable extends Component
         $this->resetPage();
         // Dispatch a browser event so admin clients can log and debug incoming payloads
         $this->dispatchBrowserEvent('user-profile-updated', $payload);
+    }
+
+    // Show details modal for a specific user
+    public function showDetails($userId)
+    {
+        $this->selectedUser = User::find($userId);
+    }
+
+    // Close details modal
+    public function closeDetails()
+    {
+        $this->selectedUser = null;
     }
 
     public function closeForm()

@@ -119,16 +119,8 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">ID</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Full Name</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Account Type</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Fishpond Name</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Barangay</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Municipality</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Province</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Fishpond Area</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Species Cultured</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Water Type</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Password</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">API Key</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Location</th>
                         <th scope="col" class="sticky right-0 z-10 bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                     </tr>
                 </thead>
@@ -137,26 +129,29 @@
                         <tr>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->user_id }}</td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->first_name }} {{ $user->last_name }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->email }}</td>
+                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 truncate max-w-[18rem]" title="{{ $user->email }}">{{ $user->email }}</td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->account_type }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->fishpond_name }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->barangay }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->municipality }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->province }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->total_fishpond_area }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ is_array($user->species_cultured) ? implode(', ', $user->species_cultured) : $user->species_cultured }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->water_type }}</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">********</td>
-                            <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->api_key ? '********' : '' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">
+                                <div class="font-medium">{{ $user->fishpond_name ?: ($user->barangay ? $user->barangay : '—') }}</div>
+                                <div class="text-xs text-gray-500">{{ $user->municipality }}{{ $user->municipality && $user->province ? ', ' : '' }}{{ $user->province }}</div>
+                            </td>
                             <td class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
-                                <button wire:click="editUser({{ $user->user_id }})" class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                                {{-- Changed wire:click, removed wire:confirm --}}
-                                <button wire:click="confirmDelete({{ $user->user_id }})" class="ml-2 text-red-600 hover:text-red-900">Delete</button>
+                                <button wire:click="showDetails({{ $user->user_id }})" class="text-cvsu-600 hover:text-cvsu-700 mr-2">Details</button>
+
+                                <div class="inline-block relative" x-data="{open:false}">
+                                    <button @click.prevent="open = !open" class="px-2 py-1 rounded hover:bg-gray-100">⋮</button>
+                                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                                        <div class="py-1">
+                                            <a href="#" wire:click.prevent="editUser({{ $user->user_id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
+                                            <a href="#" wire:click.prevent="confirmDelete({{ $user->user_id }})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="14" class="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">No users found.</td>
+                            <td colspan="6" class="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">No users found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -168,6 +163,107 @@
         <div class="mt-4">
             {{ $users->links() }}
         </div>
+
+    </div>
+
+    {{-- Details Modal --}}
+    @if($selectedUser)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="closeDetails"></div>
+                <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
+                <div class="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:align-middle">
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                                <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">User Details</h3>
+                                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <div class="text-xs text-gray-500">ID</div>
+                                        <div class="font-medium">{{ $selectedUser->user_id }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-500">Full Name</div>
+                                        <div class="font-medium">{{ $selectedUser->first_name }} {{ $selectedUser->last_name }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-500">Email</div>
+                                        <div class="font-medium">{{ $selectedUser->email }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-500">Account Type</div>
+                                        <div class="font-medium">{{ $selectedUser->account_type }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-500">Fishpond Name</div>
+                                        <div class="font-medium">{{ $selectedUser->fishpond_name }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-500">Location</div>
+                                        <div class="font-medium">{{ $selectedUser->barangay }} {{ $selectedUser->municipality ? ', ' . $selectedUser->municipality : '' }}{{ $selectedUser->province ? ', ' . $selectedUser->province : '' }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-500">Fishpond Area</div>
+                                        <div class="font-medium">{{ $selectedUser->total_fishpond_area }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-500">Species Cultured</div>
+                                        <div class="font-medium">{{ is_array($selectedUser->species_cultured) ? implode(', ', $selectedUser->species_cultured) : $selectedUser->species_cultured }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-500">Water Type</div>
+                                        <div class="font-medium">{{ $selectedUser->water_type }}</div>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <div class="text-xs text-gray-500">API Key</div>
+                                        <div class="flex items-center space-x-2">
+                                            <div id="api-key-text" class="font-mono text-sm">{{ $selectedUser->api_key ? '********' : '' }}</div>
+                                            @if($selectedUser->api_key)
+                                                <button type="button" id="reveal-api" class="text-sm text-cvsu-600 hover:underline">Reveal</button>
+                                                <button type="button" id="copy-api" class="text-sm text-gray-700">Copy</button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                        <button type="button" wire:click="closeDetails" class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        document.addEventListener('alpine:init', () => {});
+        // Simple copy/reveal handlers for modal (only when modal exists)
+        (function(){
+            const reveal = document.getElementById('reveal-api');
+            const copyBtn = document.getElementById('copy-api');
+            const textEl = document.getElementById('api-key-text');
+            if (reveal && textEl) {
+                reveal.addEventListener('click', function(){
+                    textEl.textContent = '{{ $selectedUser->api_key }}';
+                    this.style.display = 'none';
+                });
+            }
+            if (copyBtn && textEl) {
+                copyBtn.addEventListener('click', function(){
+                    const text = textEl.textContent;
+                    navigator.clipboard?.writeText(text).then(()=>{
+                        this.textContent = 'Copied';
+                        setTimeout(()=> this.textContent = 'Copy', 1500);
+                    }).catch(()=>{
+                        // fallback
+                        const ta = document.createElement('textarea');
+                        ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                    });
+                });
+            }
+        })();
+        </script>
+    @endif
 
     </div>
 </x-card>
