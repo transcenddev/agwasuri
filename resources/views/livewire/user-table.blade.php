@@ -122,7 +122,7 @@
         </div>
         @endif
 
-        <div class="overflow-x-auto relative"> {{-- This div handles the horizontal scroll for the table --}}
+        <div class="overflow-x-auto relative overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
@@ -150,22 +150,10 @@
 
                                 <div class="inline-block relative" x-data="{open:false}">
                                     <button @click.prevent="open = !open" class="px-2 py-1 rounded hover:bg-gray-100">⋮</button>
-                                    <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95" class="absolute right-0 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                                    <div x-cloak x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                                         <div class="py-1">
-                                            <a href="#" wire:click.prevent="editUser({{ $user->user_id }})" class="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-gray-100">
-                                                <!-- Pencil icon (Heroicon) -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 0 1 3.182 3.182L7.5 19.213 3 20.25l1.037-4.5L16.862 3.487z" />
-                                                </svg>
-                                                <span class="font-medium">Edit</span>
-                                            </a>
-                                            <a href="#" wire:click.prevent="confirmDelete({{ $user->user_id }})" wire:confirm.prompt="Are you sure you want to delete this user?" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                                <!-- Trash icon (Heroicon) -->
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                                                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166M7.5 6h9M5.25 6h13.5M6 6l1 14.25A2.25 2.25 0 0 0 9.25 22h5.5A2.25 2.25 0 0 0 17 20.25L18 6" />
-                                                </svg>
-                                                <span class="font-medium">Delete</span>
-                                            </a>
+                                            <a href="#" wire:click.prevent="editUser({{ $user->user_id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
+                                            <a href="#" wire:click.prevent="confirmDelete({{ $user->user_id }})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
                                         </div>
                                     </div>
                                 </div>
