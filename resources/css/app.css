@@ -12,7 +12,7 @@
   --cvsu-800: #0b2b0b;
   --cvsu-900: #061a06;
   --cvsu-green: #1B651B;
-  --cvsu-green-rgb: 27,101,27;
+  --cvsu-green-rgb: 27, 101, 27;
 
   /* Global nav / header variables so dark mode works consistently across layouts */
   --nav-bg-light: #ffffff;
