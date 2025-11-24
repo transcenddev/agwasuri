@@ -448,4 +448,32 @@ function setupMiniToggle() {
 document.addEventListener('DOMContentLoaded', setupMiniToggle);
 document.addEventListener('livewire:load', setupMiniToggle);
 
+// Delegated click handler for the Timeline toggle so it works even after Livewire re-renders the component.
+document.addEventListener('click', (e) => {
+    try {
+        const btn = e.target.closest && e.target.closest('#waterChart-mini-toggle');
+        if (!btn) return;
+        const wrap = document.getElementById('waterChart-mini-wrap');
+        if (!wrap) return;
+        const chevron = document.getElementById('waterChart-mini-toggle-chevron');
+
+        const nowHidden = wrap.classList.contains('hidden');
+        if (nowHidden) {
+            wrap.classList.remove('hidden');
+            btn.setAttribute('aria-expanded', 'true');
+            if (chevron) chevron.classList.remove('rotate-180');
+            try { localStorage.setItem('waterChartMiniCollapsed', '0'); } catch (e) {}
+            tryInitWithRetries(6, 150);
+            requestAnimationFrame(() => { try { window._waterChartMain?.resize(); } catch (e) {} });
+        } else {
+            wrap.classList.add('hidden');
+            btn.setAttribute('aria-expanded', 'false');
+            if (chevron) chevron.classList.add('rotate-180');
+            try { localStorage.setItem('waterChartMiniCollapsed', '1'); } catch (e) {}
+        }
+    } catch (e) {
+        // swallow - non-critical
+    }
+});
+
 export {};
