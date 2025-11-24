@@ -148,14 +148,17 @@
                             <td class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
                                 <button wire:click="showDetails({{ $user->user_id }})" class="text-cvsu-600 hover:text-cvsu-700 mr-2">Details</button>
 
-                                <div class="inline-block relative" x-data="{open:false}">
-                                    <button @click.prevent="open = !open" class="px-2 py-1 rounded hover:bg-gray-100">⋮</button>
-                                    <div x-cloak x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                                        <div class="py-1">
-                                            <a href="#" wire:click.prevent="editUser({{ $user->user_id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
-                                            <a href="#" wire:click.prevent="confirmDelete({{ $user->user_id }})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
+                                <div class="inline-block relative" x-data="{open:false, top:0, left:0, openMenu(e){ const r = e.target.getBoundingClientRect(); this.top = r.bottom + window.scrollY + 6; this.left = r.right + window.scrollX - 140; this.open = true }, closeMenu(){ this.open=false }}" @keydown.escape.window="open=false">
+                                    <button @click.prevent="openMenu($event)" class="px-2 py-1 rounded hover:bg-gray-100" aria-haspopup="true" :aria-expanded="open">⋮</button>
+
+                                    <template x-teleport="body">
+                                        <div x-cloak x-show="open" x-transition style="position: absolute;" :style="`top: ${top}px; left: ${left}px;`" @click.away="closeMenu()" class="w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                                            <div class="py-1">
+                                                <a href="#" @click.prevent="closeMenu(); $dispatch('livewire-action', {name: 'edit', id: {{ $user->user_id }}})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
+                                                <a href="#" @click.prevent="closeMenu(); $dispatch('livewire-action', {name: 'delete', id: {{ $user->user_id }}})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </template>
                                 </div>
                             </td>
                         </tr>
