@@ -90,6 +90,7 @@ function initWaterCharts() {
                     borderColor: payload.colors[name] || "#aaa",
                     backgroundColor: "rgba(0,0,0,0)",
                     pointRadius: 0,
+                    borderWidth: 1.2,
                     tension: 0.2,
                     hidden: !visible.includes(name),
                 }));

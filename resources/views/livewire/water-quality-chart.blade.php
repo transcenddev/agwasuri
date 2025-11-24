@@ -43,7 +43,7 @@
                 </div>
 
                 <!-- Overview / mini-map below (compact scrubber) -->
-                <div id="waterChart-mini-wrap" class="w-full h-14 p-2 hidden sm:block">
+                <div id="waterChart-mini-wrap" class="w-full h-12 md:h-16 p-2 hidden sm:block transition-all duration-200">
                     <canvas id="waterChart-mini" data-chart='@json($chartData)'></canvas>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                     <canvas id="waterChart-main" data-chart='@json($payload)'></canvas>
                 </div>
 
-                <div id="waterChart-mini-wrap" class="w-full h-1/4 p-4 hidden sm:block">
+                <div id="waterChart-mini-wrap" class="w-full h-12 md:h-16 p-4 hidden sm:block transition-all duration-200">
                     <canvas id="waterChart-mini" data-chart='@json($payload)'></canvas>
                 </div>
 
