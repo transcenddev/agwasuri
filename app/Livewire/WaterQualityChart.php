@@ -97,6 +97,10 @@ class WaterQualityChart extends Component
         // If neither is set, no date filter applied.
 
         $this->water_quality_data = $query->latest('recorded_at')->get(); // Apply ordering *after* filtering
+        // Notify the frontend that chart data was (re)loaded so client can initialize or re-init charts.
+        // Use the Livewire `dispatch` helper available via HandlesEvents trait which stores
+        // a dispatched event that the Livewire runtime will forward to the browser.
+        $this->dispatch('waterchart-mounted');
     }
 
     // Method to toggle series visibility via state change
@@ -112,6 +116,21 @@ class WaterQualityChart extends Component
         }
         // Livewire's reactivity will trigger a re-render automatically
         // No need to dispatch event: $this->dispatch('toggle-chart-series', ...);
+    }
+
+    #[On('toggle-chart-series')]
+    public function handleToggleChartSeries(string $seriesName)
+    {
+        $this->toggleSeries($seriesName);
+    }
+
+    #[On('set-series-visibility')]
+    public function handleSetSeriesVisibility(string $mode)
+    {
+        if ($mode === 'all') {
+            $this->visibleSeries = ['Temperature', 'pH Level', 'Dissolved Oxygen', 'Salinity'];
+        }
+        // Add other modes if needed
     }
 
     public function render()
@@ -190,9 +209,37 @@ class WaterQualityChart extends Component
              }
         }
 
+        // Build chartData for Chart.js prototype (labels in ISO, series arrays)
+        $chartData = ['labels' => [], 'series' => [], 'colors' => [], 'visible' => $this->visibleSeries];
+
+        // Initialize series keys
+        $seriesKeys = ['Temperature', 'pH Level', 'Dissolved Oxygen', 'Salinity'];
+        foreach ($seriesKeys as $k) {
+            $chartData['series'][$k] = [];
+        }
+
+        foreach ($water_quality_data as $data) {
+            // Use ISO format for easier parsing in JS
+            $iso = Carbon::parse($data->recorded_at)->toIso8601String();
+            $chartData['labels'][] = $iso;
+            $chartData['series']['Temperature'][] = $data->temperature;
+            $chartData['series']['pH Level'][] = $data->ph_level;
+            $chartData['series']['Dissolved Oxygen'][] = $data->dissolved_oxygen;
+            $chartData['series']['Salinity'][] = $data->salinity;
+        }
+
+        // Colors mapping (keeps same palette used earlier)
+        $chartData['colors'] = [
+            'Temperature' => $temperatureColor,
+            'pH Level' => $phColor,
+            'Dissolved Oxygen' => $doColor,
+            'Salinity' => $salinityColor,
+        ];
+
         return view('livewire.water-quality-chart', [
             'lineChartModel' => $lineChartModel,
-            'legendData' => $this->legendData // Pass updated legend data with visibility info
+            'legendData' => $this->legendData, // Pass updated legend data with visibility info
+            'chartData' => $chartData,
         ]);
     }
 }

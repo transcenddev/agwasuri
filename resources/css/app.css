@@ -79,17 +79,19 @@ body {
   /* gray-800 */
 }
 
-/* Preserve a light 'hero' area in dark mode when the element is marked with .hero-light
-   Use this on the top-page banner or hero card to keep it visually separate from the dark page. */
+/* `.hero-light` is a marker class for hero areas that should preserve their
+   original (often transparent or image-backed) background even when `.dark`
+   is active. Keep it transparent and avoid forcing a white fill. */
 .hero-light {
-  background-color: #ffffff !important;
-  color: #111827 !important;
+  background-color: transparent !important;
+  color: inherit !important;
+  border-color: transparent !important;
 }
 
 .dark .hero-light {
-  background-color: #ffffff !important;
-  color: #111827 !important;
-  border-color: rgba(0,0,0,0.08) !important;
+  background-color: transparent !important;
+  color: inherit !important;
+  border-color: transparent !important;
 }
 
 /* Keep primary brand color intact: do not override cvsu utilities */
