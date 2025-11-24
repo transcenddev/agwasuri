@@ -20,10 +20,35 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button type="button" onclick="window._showAllSeries?.()" class="text-sm px-2 py-1 rounded bg-slate-100">Show all</button>
-                    <button type="button" onclick="window._resetZoom?.()" class="text-sm px-2 py-1 rounded bg-slate-100">Reset zoom</button>
+                    <button
+                        type="button"
+                        id="chart-show-all"
+                        onclick="window._showAllSeries?.()"
+                        title="Show all series"
+                        class="text-sm px-3 py-1.5 rounded-lg inline-flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-cvsu/30 transition bg-cvsu text-white hover:bg-cvsu-700 shadow-sm"
+                    >
+                        Show all
+                    </button>
+
+                    <button
+                        type="button"
+                        id="chart-reset-zoom"
+                        onclick="window._resetZoom?.()"
+                        title="Reset zoom"
+                        class="text-sm px-3 py-1.5 rounded-lg inline-flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-cvsu/20 transition bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    >
+                        Reset zoom
+                    </button>
+
                     {{-- Mini-chart toggle (collapsible) --}}
-                    <button id="waterChart-mini-toggle" type="button" aria-expanded="true" class="text-sm px-2 py-1 rounded bg-slate-50 border border-slate-100 inline-flex items-center gap-2">
+                    <button
+                        id="waterChart-mini-toggle"
+                        type="button"
+                        aria-pressed="false"
+                        data-mini-toggle
+                        title="Toggle timeline overview"
+                        class="text-sm px-3 py-1.5 rounded-lg inline-flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-cvsu/20 transition bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    >
                         <svg id="waterChart-mini-toggle-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 transform transition-transform duration-200">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.1 1.02l-4.25 4.655a.75.75 0 01-1.1 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>

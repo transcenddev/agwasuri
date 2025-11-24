@@ -415,6 +415,8 @@ function setupMiniToggle() {
     // Initialize aria-expanded and chevron rotation
     const expanded = !wrap.classList.contains('hidden');
     btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    // also set aria-pressed and update visual active state
+    try { setTimelineActive(btn, expanded); } catch (e) {}
     const chevron = document.getElementById('waterChart-mini-toggle-chevron');
     if (chevron) {
         if (expanded) chevron.classList.remove('rotate-180'); else chevron.classList.add('rotate-180');
@@ -461,11 +463,31 @@ function _toggleMiniFromButton(btn) {
         try { localStorage.setItem('waterChartMiniCollapsed', '0'); } catch (e) {}
         tryInitWithRetries(6, 150);
         requestAnimationFrame(() => { try { window._waterChartMain?.resize(); } catch (e) {} });
+        // reflect active state on the button
+        try { setTimelineActive(btn, true); } catch (e) {}
     } else {
         wrap.classList.add('hidden');
         btn.setAttribute('aria-expanded', 'false');
         if (chevron) chevron.classList.add('rotate-180');
         try { localStorage.setItem('waterChartMiniCollapsed', '1'); } catch (e) {}
+        try { setTimelineActive(btn, false); } catch (e) {}
+    }
+}
+
+// Update the Timeline toggle's visual/aria active state
+function setTimelineActive(btn, isActive) {
+    if (!btn) return;
+    // update ARIA pressed
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    // active classes (accent)
+    const add = ['bg-cvsu','text-white','shadow-sm'];
+    const remove = ['bg-white/90','text-slate-700','dark:bg-slate-800','dark:text-slate-200','border','border-slate-200','dark:border-slate-700'];
+    if (isActive) {
+        remove.forEach(c => btn.classList.remove(c));
+        add.forEach(c => btn.classList.add(c));
+    } else {
+        add.forEach(c => btn.classList.remove(c));
+        remove.forEach(c => btn.classList.add(c));
     }
 }
 
