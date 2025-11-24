@@ -11,6 +11,8 @@
   --cvsu-700: #103f10;
   --cvsu-800: #0b2b0b;
   --cvsu-900: #061a06;
+  --cvsu-green: #1B651B;
+  --cvsu-green-rgb: 27,101,27;
 
   /* Global nav / header variables so dark mode works consistently across layouts */
   --nav-bg-light: #ffffff;
@@ -26,9 +28,10 @@
   --nav-icon-dark: #1B651B;
   --nav-icon: var(--nav-icon-light);
   /* Chart color variables (used by Chart.js initializers) */
-  --chart-grid: rgba(0,0,0,0.06);
-  --chart-tick: rgba(51,65,85,0.9); /* slate-700 */
-  --chart-border: rgba(0,0,0,0.06);
+  --chart-grid: rgba(0, 0, 0, 0.06);
+  --chart-tick: rgba(51, 65, 85, 0.9);
+  /* slate-700 */
+  --chart-border: rgba(0, 0, 0, 0.06);
 }
 
 /* Minimal app-level color variables for light + minimal black/white dark mode */
@@ -53,9 +56,9 @@
   --muted: #9ca3af;
   /* lighter muted in dark */
   /* Dark-mode overrides: `.dark` or `.site-body.dark` are used in this project */
-  --chart-grid: rgba(255,255,255,0.06);
-  --chart-tick: rgba(255,255,255,0.78);
-  --chart-border: rgba(255,255,255,0.08);
+  --chart-grid: rgba(255, 255, 255, 0.06);
+  --chart-tick: rgba(255, 255, 255, 0.78);
+  --chart-border: rgba(255, 255, 255, 0.08);
 }
 
 /* Apply variables to page + common structural elements */
@@ -183,4 +186,69 @@ html {
 .nav-logo-text {
   line-height: 1;
   display: inline-block;
+}
+
+/* Utility: hide the native select arrow and keep a custom caret
+   - Use vendor fallbacks for broad browser coverage
+   - Hide legacy Edge/IE pseudo-element `::-ms-expand` which still shows the arrow
+   - Use `background-image: none` to clear any CSS-provided caret from global rules
+*/
+.select-no-native {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 2.5rem;
+  /* reserve room for custom caret */
+}
+
+/* Hide the native dropdown arrow in IE / old Edge */
+.select-no-native::-ms-expand {
+  display: none;
+}
+
+/* Ensure the select remains interactive when disabled styles are present */
+.select-no-native:disabled {
+  opacity: 0.85;
+  pointer-events: auto;
+}
+
+/* Brand-aware form tweaks to help browsers that support `accent-color` and
+   provide better focus/selection appearance. Note: some native option popup
+   coloring is controlled by the OS/browser and cannot be fully overridden
+   on all platforms (Chromium on Windows/macOS). For full control, use a
+   custom listbox component rendered in the DOM. */
+
+select.select-no-native {
+  accent-color: var(--cvsu-green);
+  -webkit-tap-highlight-color: rgba(var(--cvsu-green-rgb), 0.12);
+}
+
+select.select-no-native:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--cvsu-green-rgb), 0.18);
+  border-color: var(--cvsu-green);
+}
+
+/* Best-effort option coloring (works in Firefox and some UAs). Chromium-based
+   browsers on some OSes may still show the native selection color in the popup. */
+select.select-no-native option,
+select.select-no-native optgroup {
+  background-color: var(--card-bg);
+  color: var(--text);
+}
+
+select.select-no-native option:hover,
+select.select-no-native option:checked {
+  background-color: var(--cvsu-green);
+  color: #ffffff;
+}
+
+/* Dark-mode adjustments for option list when it can be styled */
+.dark select.select-no-native option,
+.dark select.select-no-native optgroup {
+  background-color: var(--card-bg);
+  color: var(--text);
 }
