@@ -174,15 +174,71 @@ $sendVerification = function () {
                     <x-input-error class="mt-2" :messages="$errors->get('total_fishpond_area')" />
                 </div>
 
-                {{-- Water Type --}}
+                {{-- Water Type (Alpine Listbox bound to Livewire) --}}
                 <div>
                     <x-input-label for="water_type" :value="__('Water Type')" />
-                    <select wire:model="water_type" id="water_type" name="water_type" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                        <option value="">Select Water Type...</option>
-                        <option value="Freshwater">Freshwater</option>
-                        <option value="Brackish">Brackish</option>
-                        <option value="Saltwater">Saltwater</option>
-                    </select>
+                    <div x-data="{
+                            open: false,
+                            options: [
+                                { value: '', label: 'Select Water Type...' },
+                                { value: 'Freshwater', label: 'Freshwater' },
+                                { value: 'Brackish', label: 'Brackish' },
+                                { value: 'Saltwater', label: 'Saltwater' }
+                            ],
+                            selected: @entangle('water_type')
+                        }"
+                        x-init="$watch('selected', value => { /* keep Livewire in sync via entangle */ })"
+                        class="relative">
+
+                        <button
+                            type="button"
+                            x-ref="button"
+                            @click="open = !open"
+                            @keydown.arrow-down.prevent="open = true; $nextTick(() => $refs.list.querySelector('[data-index="0"]').focus())"
+                            @keydown.arrow-up.prevent="open = true; $nextTick(() => $refs.list.querySelector('[data-index="0"]').focus())"
+                            class="mt-1 block w-full text-left rounded-md border border-gray-300 shadow-sm px-3 py-2 pr-10 bg-white dark:bg-slate-800 dark:text-white"
+                            :aria-expanded="open.toString()"
+                            aria-haspopup="listbox"
+                        >
+                            <span x-text="(selected && options.find(o => o.value === selected)?.label) || 'Select Water Type...'" class="block truncate"></span>
+                            <span class="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+                                <svg class="w-4 h-4 text-slate-500 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </span>
+                        </button>
+
+                        <ul
+                            x-show="open"
+                            x-cloak
+                            x-transition.origin.top.left
+                            @click.outside="open = false"
+                            role="listbox"
+                            tabindex="-1"
+                            x-ref="list"
+                            class="absolute z-50 mt-1 w-full bg-white dark:bg-slate-800 border border-gray-300 rounded-md shadow-lg max-h-56 overflow-auto focus:outline-none"
+                        >
+                            <template x-for="(opt, idx) in options" :key="idx">
+                                <li
+                                    :data-index="idx"
+                                    role="option"
+                                    tabindex="0"
+                                    @click="selected = opt.value; open = false"
+                                    @keydown.enter.prevent="selected = opt.value; open = false"
+                                    @keydown.space.prevent="selected = opt.value; open = false"
+                                    :aria-selected="(selected === opt.value)"
+                                    :class="['cursor-pointer px-3 py-2', selected === opt.value ? 'text-white' : 'text-gray-700']"
+                                    :style="selected === opt.value ? 'background-color: var(--cvsu-400);' : ''"
+                                >
+                                    <span x-text="opt.label"></span>
+                                </li>
+                            </template>
+                        </ul>
+
+                        {{-- Hidden input kept for form semantics and Livewire fallback (entangle keeps `selected` in sync) --}}
+                        <input type="hidden" id="water_type" name="water_type" x-model="selected" />
+
+                    </div>
                     <x-input-error class="mt-2" :messages="$errors->get('water_type')" />
                 </div>
             </div>
