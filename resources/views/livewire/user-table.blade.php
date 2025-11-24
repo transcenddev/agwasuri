@@ -151,14 +151,12 @@
                                 <div class="inline-block relative" x-data="{open:false, top:0, left:0, openMenu(e){ const r = e.target.getBoundingClientRect(); this.top = r.bottom + window.scrollY + 6; this.left = r.right + window.scrollX - 140; this.open = true }, closeMenu(){ this.open=false }}" @keydown.escape.window="open=false">
                                     <button @click.prevent="openMenu($event)" class="px-2 py-1 rounded hover:bg-gray-100" aria-haspopup="true" :aria-expanded="open">⋮</button>
 
-                                    <template x-teleport="body">
-                                        <div x-cloak x-show="open" x-transition style="position: absolute;" :style="`top: ${top}px; left: ${left}px;`" @click.away="closeMenu()" class="w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                                            <div class="py-1">
-                                                <a href="#" @click.prevent="closeMenu(); Livewire.emit('menuAction', 'edit', {{ $user->user_id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
-                                                <a href="#" @click.prevent="closeMenu(); Livewire.emit('menuAction', 'delete', {{ $user->user_id }})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
-                                            </div>
+                                    <div x-cloak x-show="open" x-transition style="position: fixed;" :style="`top: ${top}px; left: ${left}px;`" @click.away="closeMenu()" class="w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                                        <div class="py-1">
+                                            <a href="#" @click.prevent="closeMenu(); Livewire.emit('menuAction', 'edit', {{ $user->user_id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
+                                            <a href="#" @click.prevent="closeMenu(); Livewire.emit('menuAction', 'delete', {{ $user->user_id }})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
                                         </div>
-                                    </template>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
