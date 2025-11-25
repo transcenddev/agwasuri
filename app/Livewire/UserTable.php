@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination; // Make sure this is used
 
@@ -185,7 +186,20 @@ class UserTable extends Component
 
         // Require type-to-confirm matching full name
         $expected = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
-        if (trim($this->deleteConfirmName ?? '') !== $expected) {
+        // Normalize whitespace and compare case-insensitively to be more forgiving
+        $normalize = function ($s) {
+            $s = trim((string) $s);
+            // replace consecutive whitespace (including NBSP) with single space
+            $s = preg_replace('/[\s\x{00A0}]+/u', ' ', $s);
+            return mb_strtolower($s);
+        };
+
+        $given = $normalize($this->deleteConfirmName ?? '');
+        $expectNorm = $normalize($expected);
+
+        if ($given !== $expectNorm) {
+            // Log for diagnostics (no sensitive info beyond names)
+            Log::info('Delete confirmation mismatch', ['user_id' => $this->deletingUserId, 'given' => $this->deleteConfirmName, 'expected' => $expected]);
             session()->flash('error', 'Confirmation name does not match. Type the full name to confirm deletion.');
             return;
         }
