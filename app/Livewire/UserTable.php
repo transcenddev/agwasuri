@@ -41,7 +41,9 @@ class UserTable extends Component
         // Livewire Echo listener for admin broadcasts
         'echo-private:admin.users,UserProfileUpdated' => 'handleUserProfileUpdated',
         // events from teleported menus
-        'menuAction' => 'handleMenuAction'
+        'menuAction' => 'handleMenuAction',
+        // allow other code to request a component refresh
+        'refreshUsers' => '$refresh',
     ];
 
     // Reset pagination when any filter is updated
@@ -164,51 +166,93 @@ class UserTable extends Component
 
     public function destroyUser()
     {
-        if (! $this->deletingUserId) {
-            session()->flash('error', 'Could not determine user to delete.');
-            return;
-        }
+        try {
+            // Diagnostic: record the value Livewire sees on entry to this method
+            Log::info('destroyUser entry', ['deleting' => $this->deletingUserId, 'deleteConfirmName' => $this->deleteConfirmName]);
 
-        $user = User::find($this->deletingUserId);
-        if (! $user) {
-            session()->flash('error', 'User not found.');
+            if (! $this->deletingUserId) {
+                session()->flash('error', 'Could not determine user to delete.');
+                return;
+            }
+
+            $user = User::find($this->deletingUserId);
+            if (! $user) {
+                session()->flash('error', 'User not found.');
+                $this->cancelDelete();
+                return;
+            }
+
+            // Disallow deleting currently authenticated admin (safety)
+            $current = Auth::user();
+            if ($current && $current->user_id === $user->user_id) {
+                session()->flash('error', 'You cannot delete the account you are currently signed in with.');
+                $this->cancelDelete();
+                return;
+            }
+
+            // Require type-to-confirm matching full name
+            $expected = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+            // Normalize whitespace and compare case-insensitively to be more forgiving
+            $normalize = function ($s) {
+                $s = trim((string) $s);
+                // replace consecutive whitespace (including NBSP) with single space
+                $s = preg_replace('/[\s\x{00A0}]+/u', ' ', $s);
+                return mb_strtolower($s);
+            };
+
+            $given = $normalize($this->deleteConfirmName ?? '');
+            $expectNorm = $normalize($expected);
+
+            if ($given !== $expectNorm) {
+                // Log for diagnostics (no sensitive info beyond names)
+                Log::info('Delete confirmation mismatch', ['user_id' => $this->deletingUserId, 'given' => $this->deleteConfirmName, 'expected' => $expected]);
+                session()->flash('error', 'Confirmation name does not match. Type the full name to confirm deletion.');
+                return;
+            }
+
+            // All good — delete
+            $user->delete();
+            session()->flash('message', 'User deleted successfully.');
+            $this->resetPage();
             $this->cancelDelete();
-            return;
+            // Ensure the component refreshes immediately for the current client
+            // (use emitSelf to target this Livewire component instance)
+            $this->emitSelf('refreshUsers');
+        } catch (\Throwable $e) {
+            // Log full exception so the 500 from Livewire can be diagnosed
+            Log::error('destroyUser exception', [
+                'deleting' => $this->deletingUserId,
+                'deleteConfirmName' => $this->deleteConfirmName,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            session()->flash('error', 'Server error while deleting user. Check logs for details.');
         }
+    }
 
-        // Disallow deleting currently authenticated admin (safety)
-        $current = Auth::user();
-        if ($current && $current->user_id === $user->user_id) {
-            session()->flash('error', 'You cannot delete the account you are currently signed in with.');
-            $this->cancelDelete();
-            return;
+    /**
+     * Called from client to set typed confirmation and run destroy in one step.
+     * This ensures the client-supplied typed value is present on the server
+     * before the server-side check runs.
+     */
+    public function clientDestroyUser($typed)
+    {
+        // Log the typed value received from client for diagnostics
+        Log::info('clientDestroyUser invoked', ['user_id' => $this->deletingUserId, 'typed_received' => $typed]);
+        $this->deleteConfirmName = $typed;
+        try {
+            $this->destroyUser();
+        } catch (\Throwable $e) {
+            // Defensive logging to capture unexpected exceptions raised during Livewire requests
+            Log::error('clientDestroyUser exception', [
+                'deleting' => $this->deletingUserId,
+                'typed_received' => $typed,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            session()->flash('error', 'Server error while processing deletion request.');
+            // Let Livewire return the response (do not rethrow) so frontend shows a 500 or friendly error
         }
-
-        // Require type-to-confirm matching full name
-        $expected = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
-        // Normalize whitespace and compare case-insensitively to be more forgiving
-        $normalize = function ($s) {
-            $s = trim((string) $s);
-            // replace consecutive whitespace (including NBSP) with single space
-            $s = preg_replace('/[\s\x{00A0}]+/u', ' ', $s);
-            return mb_strtolower($s);
-        };
-
-        $given = $normalize($this->deleteConfirmName ?? '');
-        $expectNorm = $normalize($expected);
-
-        if ($given !== $expectNorm) {
-            // Log for diagnostics (no sensitive info beyond names)
-            Log::info('Delete confirmation mismatch', ['user_id' => $this->deletingUserId, 'given' => $this->deleteConfirmName, 'expected' => $expected]);
-            session()->flash('error', 'Confirmation name does not match. Type the full name to confirm deletion.');
-            return;
-        }
-
-        // All good — delete
-        $user->delete();
-        session()->flash('message', 'User deleted successfully.');
-        $this->resetPage();
-        $this->cancelDelete();
     }
 
     // --- End Delete Logic ---
