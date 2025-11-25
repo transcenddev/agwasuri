@@ -11,10 +11,10 @@
         </x-card-header>
     </x-slot>
 
-    <div class="p-6">
-        {{-- Session Messages (Green for success, Red for errors) --}}
-        @if (session()->has('message'))
-            <div class="mb-4 rounded bg-green-100 p-4 text-sm text-green-700">
+                <div class="py-1">
+                    <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'edit', userId: userId}}))" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
+                    <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'delete', userId: userId}}))" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50" role="menuitem">Delete</a>
+                </div>
                 {{ session('message') }}
             </div>
         @endif
@@ -210,6 +210,34 @@
                         });
                     }
                 }));
+            });
+            // Expose component id so runtime can target the correct Livewire component instance
+            window.__userTableComponentId = '{{ $this->id }}';
+
+            // Route UI menu actions to Livewire with fallbacks
+            window.addEventListener('menuActionFromUI', (e) => {
+                const { action, userId } = e.detail || {};
+                // Preferred API
+                if (window.Livewire && typeof window.Livewire.emit === 'function') {
+                    return window.Livewire.emit('menuAction', action, userId);
+                }
+                // Older alias
+                if (window.livewire && typeof window.livewire.emit === 'function') {
+                    return window.livewire.emit('menuAction', action, userId);
+                }
+                // Try finding the component instance and call directly
+                try {
+                    if (window.Livewire && typeof window.Livewire.find === 'function' && window.__userTableComponentId) {
+                        const comp = window.Livewire.find(window.__userTableComponentId);
+                        if (comp) {
+                            if (typeof comp.emit === 'function') return comp.emit('menuAction', action, userId);
+                            if (typeof comp.call === 'function') return comp.call('handleMenuAction', action, userId);
+                        }
+                    }
+                } catch (err) {
+                    console.warn('menuAction routing failed', err);
+                }
+                console.warn('menuActionFromUI: Livewire client not available to deliver event', action, userId);
             });
         </script>
 
