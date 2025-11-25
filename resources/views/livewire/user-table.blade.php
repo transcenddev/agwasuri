@@ -79,7 +79,7 @@
 
         {{-- Conditionally render the Delete Confirmation Modal --}}
         @if ($showDeleteModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-data @keydown.escape.window="$wire.call('cancelDelete')" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="cancelDelete"></div>
                 <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
@@ -123,7 +123,7 @@
         @endif
 
         <div class="overflow-x-auto relative overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
-            <table class="min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed">
+            <table class="min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
                 <colgroup>
                     <col style="width:6rem"> <!-- ID -->
                     <col> <!-- Full name flexible -->
@@ -156,16 +156,8 @@
                             <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
                                 <button wire:click="showDetails({{ $user->user_id }})" class="text-cvsu-600 hover:text-cvsu-700 mr-2">Details</button>
 
-                                <div class="inline-block relative" x-data="{open:false, top:0, left:0, openMenu(e){ const btn = (e.target.closest && e.target.closest('button')) || e.target; const r = btn.getBoundingClientRect(); let top = r.bottom + window.scrollY + 6; let left = r.right + window.scrollX - 140; const menuWidth = 144; const margin = 8; const maxLeft = window.scrollX + window.innerWidth - menuWidth - margin; left = Math.min(Math.max(left, window.scrollX + margin), maxLeft); const maxTop = window.scrollY + window.innerHeight - 120; top = Math.min(top, maxTop); this.top = Math.round(top); this.left = Math.round(left); this.open = true }, closeMenu(){ this.open=false }}" @keydown.escape.window="open=false">
-                                    <button @click.prevent="openMenu($event)" class="px-2 py-1 rounded hover:bg-gray-100" aria-haspopup="true" :aria-expanded="open">⋮</button>
-
-                                    <div x-cloak x-show="open" x-transition style="position: fixed;" :style="`top: ${top}px; left: ${left}px;`" @click.away="closeMenu()" class="w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50 action-menu" style="max-height: calc(100vh - 48px); overflow:auto;">
-                                        <div class="py-1">
-                                            <a href="#" @click.prevent="closeMenu()" wire:click="editUser({{ $user->user_id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
-                                            <a href="#" @click.prevent="closeMenu()" wire:click="confirmDelete({{ $user->user_id }})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
-                                        </div>
-                                    </div>
-                                </div>
+                                {{-- Global action trigger: dispatch event for the single global menu to open --}}
+                                <button onclick="(function(el){ const r = el.getBoundingClientRect(); const menuWidth = 160; const margin = 8; const desiredLeft = Math.min(Math.max(Math.round(r.right + window.scrollX - 140), window.scrollX + margin), window.scrollX + window.innerWidth - menuWidth - margin); const desiredTop = Math.round(r.bottom + window.scrollY + 6); window.dispatchEvent(new CustomEvent('open-user-action-menu', { detail: { userId: {{ $user->user_id }}, left: desiredLeft, top: desiredTop } })); })(this); event.preventDefault();" class="px-2 py-1 rounded hover:bg-gray-100" aria-haspopup="true">⋮</button>
                             </td>
                         </tr>
                     @empty
@@ -183,11 +175,47 @@
             {{ $users->links() }}
         </div>
 
-    </div>
+        </div>
 
-    {{-- Details Modal --}}
+        {{-- Global action menu (single overlay for all rows) --}}
+        <div x-data="globalUserMenu()" x-cloak @keydown.escape.window="open = false" style="pointer-events: auto;">
+            <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" x-ref="menu" tabindex="-1" :style="`position: fixed; top: ${top}px; left: ${left}px;`" class="global-action-menu z-40" @click.away="open=false" role="menu" aria-orientation="vertical">
+                <div class="py-1">
+                    <a href="#" @click.prevent="open=false; Livewire.emit('menuAction','edit', userId)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
+                    <a href="#" @click.prevent="open=false; Livewire.emit('menuAction','delete', userId)" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50" role="menuitem">Delete</a>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('globalUserMenu', () => ({
+                    open: false,
+                    top: 0,
+                    left: 0,
+                    userId: null,
+                    init() {
+                        window.addEventListener('open-user-action-menu', (e) => {
+                            this.userId = e.detail.userId || null;
+                            this.top = e.detail.top || (e.detail.y || 0);
+                            this.left = e.detail.left || (e.detail.x || 0);
+                            const menuWidth = 160;
+                            const margin = 8;
+                            const maxLeft = window.scrollX + window.innerWidth - menuWidth - margin;
+                            this.left = Math.min(Math.max(this.left, window.scrollX + margin), maxLeft);
+                            this.open = true;
+                            this.$nextTick(() => {
+                                if (this.$refs.menu) this.$refs.menu.focus();
+                            });
+                        });
+                    }
+                }));
+            });
+        </script>
+
+        {{-- Details Modal --}}
     @if($selectedUser)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-data @keydown.escape.window="$wire.call('closeDetails')" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="closeDetails"></div>
                 <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>

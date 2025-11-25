@@ -314,3 +314,55 @@ select.select-no-native option:checked {
 .dark table.responsive tbody tr td::before {
   color: var(--muted);
 }
+
+/* Themed Account Management table (light + dark) preserving brand green */
+.themed-table {
+  --table-bg: var(--card-bg);
+  --table-border: rgba(0, 0, 0, 0.06);
+  --table-header-bg: rgba(var(--cvsu-green-rgb), 0.06);
+  --table-header-text: var(--cvsu-600);
+}
+
+.themed-table thead th {
+  background-color: var(--table-header-bg);
+  color: var(--table-header-text);
+  border-bottom: 1px solid var(--table-border);
+}
+
+.themed-table tbody tr td {
+  border-bottom: 1px solid var(--table-border);
+}
+
+.themed-table .sticky.right-0.bg-white {
+  background-color: transparent;
+  /* avoid stark white in sticky actions column */
+}
+
+.themed-table .text-cvsu-600 {
+  color: var(--cvsu-600) !important;
+}
+
+.themed-table a:hover,
+.themed-table button:hover {
+  text-decoration: underline;
+}
+
+/* Global action menu visual styles (used by the global overlay) */
+.global-action-menu {
+  min-width: 160px;
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: 0.375rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dark .themed-table thead th {
+  background-color: rgba(27, 101, 27, 0.06);
+  color: var(--cvsu-200);
+}
+
+.dark .global-action-menu {
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
