@@ -252,3 +252,6 @@ select.select-no-native option:checked {
   background-color: var(--card-bg);
   color: var(--text);
 }
+
+/* Ensure Alpine's x-cloak hides elements until JS initializes to avoid layout flashes */
+[x-cloak] { display: none !important; }

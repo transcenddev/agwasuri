@@ -151,11 +151,13 @@
                                 <div class="inline-block relative" x-data="{open:false, top:0, left:0, openMenu(e){ const btn = (e.target.closest && e.target.closest('button')) || e.target; const r = btn.getBoundingClientRect(); let top = r.bottom + window.scrollY + 6; let left = r.right + window.scrollX - 140; const menuWidth = 144; const margin = 8; const maxLeft = window.scrollX + window.innerWidth - menuWidth - margin; left = Math.min(Math.max(left, window.scrollX + margin), maxLeft); const maxTop = window.scrollY + window.innerHeight - 120; top = Math.min(top, maxTop); this.top = Math.round(top); this.left = Math.round(left); this.open = true }, closeMenu(){ this.open=false }}" @keydown.escape.window="open=false">
                                     <button @click.prevent="openMenu($event)" class="px-2 py-1 rounded hover:bg-gray-100" aria-haspopup="true" :aria-expanded="open">⋮</button>
 
-                                    <div x-cloak x-show="open" x-transition style="position: fixed;" :style="`top: ${top}px; left: ${left}px;`" @click.away="closeMenu()" class="w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                                        <div class="py-1">
-                                            <a href="#" @click.prevent="closeMenu()" wire:click="editUser({{ $user->user_id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
-                                            <a href="#" @click.prevent="closeMenu()" wire:click="confirmDelete({{ $user->user_id }})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
-                                        </div>
+                                    <div x-teleport="body">
+                                      <div x-cloak x-show="open" x-transition style="position: fixed;" :style="`top: ${top}px; left: ${left}px;`" @click.away="closeMenu()" class="w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+                                          <div class="py-1">
+                                              <a href="#" @click.prevent="closeMenu()" wire:click="editUser({{ $user->user_id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
+                                              <a href="#" @click.prevent="closeMenu()" wire:click="confirmDelete({{ $user->user_id }})" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
+                                          </div>
+                                      </div>
                                     </div>
                                 </div>
                             </td>
