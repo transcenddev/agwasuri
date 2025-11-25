@@ -226,6 +226,17 @@
                 if (window.livewire && typeof window.livewire.emit === 'function') {
                     return window.livewire.emit('menuAction', action, userId);
                 }
+                // Fallback: click hidden per-row Livewire buttons if present
+                try {
+                    const btnId = `user-action-${action}-${userId}`;
+                    const btn = document.getElementById(btnId);
+                    if (btn) {
+                        btn.click();
+                        return;
+                    }
+                } catch (err) {
+                    // ignore
+                }
                 // If neither global API is present, warn and no-op
                 console.warn('menuActionFromUI: Livewire client not available to deliver event', action, userId);
             });
