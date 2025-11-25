@@ -11,14 +11,14 @@
         </x-card-header>
     </x-slot>
 
-                <div class="py-1">
-                    <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'edit', userId: userId}}))" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
-                    <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'delete', userId: userId}}))" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50" role="menuitem">Delete</a>
-                </div>
+    <div class="p-6">
+        {{-- Session Messages (Green for success, Red for errors) --}}
+        @if (session()->has('message'))
+            <div class="mb-4 rounded bg-green-100 p-4 text-sm text-green-700">
                 {{ session('message') }}
             </div>
         @endif
-         @if (session()->has('error'))
+        @if (session()->has('error'))
             <div class="mb-4 rounded bg-red-100 p-4 text-sm text-red-700">
                 {{ session('error') }}
             </div>
@@ -158,6 +158,10 @@
 
                                 {{-- Global action trigger: dispatch event for the single global menu to open --}}
                                 <button onclick="(function(el){ const r = el.getBoundingClientRect(); const menuWidth = 160; const margin = 8; const desiredLeft = Math.min(Math.max(Math.round(r.right + window.scrollX - 140), window.scrollX + margin), window.scrollX + window.innerWidth - menuWidth - margin); const desiredTop = Math.round(r.bottom + window.scrollY + 6); window.dispatchEvent(new CustomEvent('open-user-action-menu', { detail: { userId: {{ $user->user_id }}, left: desiredLeft, top: desiredTop } })); })(this); event.preventDefault();" class="px-2 py-1 rounded hover:bg-gray-100" aria-haspopup="true">⋮</button>
+
+                                {{-- Hidden per-row Livewire action buttons (clicked by global menu) --}}
+                                <button id="user-action-edit-{{ $user->user_id }}" class="hidden" wire:click="editUser({{ $user->user_id }})"></button>
+                                <button id="user-action-delete-{{ $user->user_id }}" class="hidden" wire:click="confirmDelete({{ $user->user_id }})"></button>
                             </td>
                         </tr>
                     @empty
@@ -181,8 +185,8 @@
         <div x-data="globalUserMenu()" x-cloak @keydown.escape.window="open = false" style="pointer-events: auto;">
             <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" x-ref="menu" tabindex="-1" :style="`position: fixed; top: ${top}px; left: ${left}px;`" class="global-action-menu z-40" @click.away="open=false" role="menu" aria-orientation="vertical">
                 <div class="py-1">
-                    <a href="#" @click.prevent="open=false; Livewire.emit('menuAction','edit', userId)" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
-                    <a href="#" @click.prevent="open=false; Livewire.emit('menuAction','delete', userId)" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50" role="menuitem">Delete</a>
+                    <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'edit', userId}}))" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
+                    <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'delete', userId}}))" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50" role="menuitem">Delete</a>
                 </div>
             </div>
         </div>
@@ -211,9 +215,6 @@
                     }
                 }));
             });
-            // Expose component id so runtime can target the correct Livewire component instance
-            window.__userTableComponentId = '{{ $this->id }}';
-
             // Route UI menu actions to Livewire with fallbacks
             window.addEventListener('menuActionFromUI', (e) => {
                 const { action, userId } = e.detail || {};
@@ -225,18 +226,7 @@
                 if (window.livewire && typeof window.livewire.emit === 'function') {
                     return window.livewire.emit('menuAction', action, userId);
                 }
-                // Try finding the component instance and call directly
-                try {
-                    if (window.Livewire && typeof window.Livewire.find === 'function' && window.__userTableComponentId) {
-                        const comp = window.Livewire.find(window.__userTableComponentId);
-                        if (comp) {
-                            if (typeof comp.emit === 'function') return comp.emit('menuAction', action, userId);
-                            if (typeof comp.call === 'function') return comp.call('handleMenuAction', action, userId);
-                        }
-                    }
-                } catch (err) {
-                    console.warn('menuAction routing failed', err);
-                }
+                // If neither global API is present, warn and no-op
                 console.warn('menuActionFromUI: Livewire client not available to deliver event', action, userId);
             });
         </script>
