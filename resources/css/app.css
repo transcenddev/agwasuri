@@ -259,7 +259,7 @@ select.select-no-native option:checked {
 }
 
 /* Responsive stacked table: use data-cell on each td to show header labels on small screens */
-@media (max-width: 875px) {
+@media (max-width: 1000px) {
   table.responsive {
     border: 0;
     width: 100%;
@@ -331,6 +331,23 @@ select.select-no-native option:checked {
 
 .themed-table tbody tr td {
   border-bottom: 1px solid var(--table-border);
+}
+
+/* Zebra striping for improved row readability (subtle, respects light/dark) */
+.themed-table {
+  --table-row-alt: rgba(0, 0, 0, 0.02);
+}
+
+.themed-table tbody tr:nth-child(odd) {
+  background-color: var(--table-row-alt);
+}
+
+.dark .themed-table {
+  --table-row-alt: rgba(255, 255, 255, 0.02);
+}
+
+.dark .themed-table tbody tr:nth-child(odd) {
+  background-color: var(--table-row-alt);
 }
 
 .themed-table .sticky.right-0.bg-white {
