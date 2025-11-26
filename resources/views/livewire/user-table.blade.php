@@ -79,7 +79,7 @@
 
         {{-- Conditionally render the Delete Confirmation Modal --}}
         @if ($showDeleteModal)
-        <div x-data @keydown.escape.window="$wire.call('cancelDelete')" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-data="deleteModal()" @keydown.escape.window="$wire.call('cancelDelete')" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="cancelDelete"></div>
                 <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
@@ -102,15 +102,34 @@
                             </div>
                         </div>
                         <div class="mt-4">
-                            <input wire:model.defer="deleteConfirmName" type="text" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Type full name to confirm">
+                            <input x-model="typed" x-ref="confirmInput" type="text" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Type full name to confirm">
+                        </div>
+                        <div class="mt-2 space-y-2 text-xs text-gray-600">
+                            <div class="flx items-center space-x-2">
+                                <div class="font-medium">Debug:</div>
+                                <div>typed (Alpine): <strong x-text="typed"></strong></div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div>server `deleteConfirmName`:</div>
+                                <div class="font-mono text-sm text-gray-800" x-text="$wire.get('deleteConfirmName')"></div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div>deletingNameRaw:</div>
+                                <div class="font-medium" x-text="deletingNameRaw"></div>
+                            </div>
+                            <div>canDelete: <strong x-text="canDelete ? 'true' : 'false'"></strong></div>
+
+                            <div class="pt-2 flex space-x-2">
+                                <button type="button" @click.prevent="(function(){ const v = (this.$refs && this.$refs.confirmInput) ? this.$refs.confirmInput.value : typed; console.debug('DBG: calling clientDestroyUser with', v); try { $wire.call('clientDestroyUser', String(v)); } catch(e){ console.error('DBG clientDestroyUser failed', e);} })()" class="rounded bg-yellow-100 px-2 py-1 text-xs">DBG: clientDestroyUser(v)</button>
+
+                                <button type="button" @click.prevent="(function(){ const v = (this.$refs && this.$refs.confirmInput) ? this.$refs.confirmInput.value : typed; console.debug('DBG: doing $wire.set then $wire.call destroyUser', v); try { $wire.set('deleteConfirmName', v); $wire.call('destroyUser'); } catch(e){ console.error('DBG set/call failed', e);} })()" class="rounded bg-yellow-100 px-2 py-1 text-xs">DBG: $wire.set + destroyUser()</button>
+
+                                <button type="button" @click.prevent="(function(){ const v = (this.$refs && this.$refs.confirmInput) ? this.$refs.confirmInput.value : typed; console.debug('DBG: Livewire.find flow', v); try { const root = (this.$el && this.$el.closest) ? this.$el.closest('[wire\\:id]') : document.querySelector('[wire\\:id]'); if (window.Livewire && root) { const id = root.getAttribute('wire:id'); console.debug('DBG: Livewire id', id); const comp = Livewire.find(id); if (comp) { comp.set('deleteConfirmName', v); comp.call('destroyUser'); return; } } } catch(e){ console.error('DBG Livewire.find failed', e);} })()" class="rounded bg-yellow-100 px-2 py-1 text-xs">DBG: Livewire.find set+call</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        @php
-                            $canDelete = trim($deleteConfirmName ?? '') === trim($deletingUserName ?? '');
-                            $isSelf = auth()->check() && optional(auth()->user())->user_id === $deletingUserId;
-                        @endphp
-                        <button type="button" wire:click="destroyUser" @if(! $canDelete || $isSelf) disabled @endif class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
+                        <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                        <button type="button" :disabled="!canDelete || isSelf || deleting" @click.prevent="confirmAndDelete()" onclick="console.debug('native-delete-click', this.disabled)" :class="{ 'opacity-50 cursor-not-allowed': !canDelete || isSelf || deleting }" class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm" data-debug-delete>
                             Delete
                         </button>
                         <button type="button" wire:click="cancelDelete" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm">
@@ -121,7 +140,6 @@
             </div>
         </div>
         @endif
-
         <div class="overflow-x-auto relative overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
             <table class="min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
                 <colgroup>
@@ -154,10 +172,17 @@
                                 <div class="text-xs text-gray-500">{{ $user->municipality }}{{ $user->municipality && $user->province ? ', ' : '' }}{{ $user->province }}</div>
                             </td>
                             <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
-                                <button wire:click="showDetails({{ $user->user_id }})" class="text-cvsu-600 hover:text-cvsu-700 mr-2">Details</button>
+                                {{-- Primary inline actions (improve UX by placing actions next to row data) --}}
+                                <div class="hidden md:flex items-center space-x-2">
+                                    <button wire:click="showDetails({{ $user->user_id }})" class="text-cvsu-600 hover:text-cvsu-700 text-sm">Details</button>
 
-                                {{-- Global action trigger: dispatch event for the single global menu to open --}}
-                                <button onclick="(function(el){ const r = el.getBoundingClientRect(); const menuWidth = 160; const margin = 8; const desiredLeft = Math.min(Math.max(Math.round(r.right + window.scrollX - 140), window.scrollX + margin), window.scrollX + window.innerWidth - menuWidth - margin); const desiredTop = Math.round(r.bottom + window.scrollY + 6); window.dispatchEvent(new CustomEvent('open-user-action-menu', { detail: { userId: {{ $user->user_id }}, left: desiredLeft, top: desiredTop } })); })(this); event.preventDefault();" class="px-2 py-1 rounded hover:bg-gray-100" aria-haspopup="true">⋮</button>
+                                    <button wire:click="editUser({{ $user->user_id }})" class="text-gray-600 hover:text-gray-800 text-sm">Edit</button>
+
+                                    <button wire:click="confirmDelete({{ $user->user_id }})" class="text-red-600 hover:text-red-700 text-sm">Delete</button>
+                                </div>
+
+                                {{-- Keep the global menu trigger as a compact fallback for power users/overflow --}}
+                                <button title="More" onclick="(function(el){ const r = el.getBoundingClientRect(); const menuWidth = 160; const margin = 8; const desiredLeft = Math.min(Math.max(Math.round(r.right + window.scrollX - 140), window.scrollX + margin), window.scrollX + window.innerWidth - menuWidth - margin); const desiredTop = Math.round(r.bottom + window.scrollY + 6); window.dispatchEvent(new CustomEvent('open-user-action-menu', { detail: { userId: {{ $user->user_id }}, left: desiredLeft, top: desiredTop } })); })(this); event.preventDefault();" class="ml-2 px-2 py-1 rounded hover:bg-gray-100 md:hidden" aria-haspopup="true">⋮</button>
 
                                 {{-- Hidden per-row Livewire action buttons (clicked by global menu) --}}
                                 <button id="user-action-edit-{{ $user->user_id }}" class="hidden" wire:click="editUser({{ $user->user_id }})"></button>
@@ -239,6 +264,85 @@
                 }
                 // If neither global API is present, warn and no-op
                 console.warn('menuActionFromUI: Livewire client not available to deliver event', action, userId);
+            });
+        </script>
+
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.data('deleteModal', () => ({
+                    // local typed value; we'll send it to Livewire via $wire.call before destroy
+                    typed: @json($deleteConfirmName ?? ''),
+                    deletingNameRaw: @json($deletingUserName ?? ''),
+                    isSelf: @json(auth()->check() && optional(auth()->user())->user_id === $deletingUserId),
+                    deleting: false,
+                    normalize(s) {
+                        if (!s) return '';
+                        return String(s).trim().replace(/[\s\u00A0]+/g, ' ').toLowerCase();
+                    },
+                    get canDelete() {
+                        const val = (this.$refs && this.$refs.confirmInput) ? this.$refs.confirmInput.value : this.typed;
+                        return this.normalize(val) === this.normalize(this.deletingNameRaw);
+                    },
+                    init() {
+                        this.$nextTick(() => {
+                            if (this.$refs.confirmInput) {
+                                try { this.$refs.confirmInput.focus(); } catch (e) {}
+                            }
+                        });
+                    },
+                    // Centralized method called by the Delete button. Reads the typed value,
+                    // sends it to Livewire explicitly via `clientDestroyUser`, and handles
+                    // a small local loading state to avoid duplicate clicks.
+                    async confirmAndDelete() {
+                        if (this.deleting) return;
+                        if (!this.canDelete) return;
+                        if (this.isSelf) return;
+                        const v = (this.$refs && this.$refs.confirmInput) ? this.$refs.confirmInput.value : this.typed;
+                        this.deleting = true;
+                        console.debug('confirmAndDelete: begin; typed=', v);
+                        try {
+                            // First, set the server-side property to be extra-safe
+                            try {
+                                $wire.set('deleteConfirmName', String(v));
+                                console.debug('confirmAndDelete: $wire.set(deleteConfirmName) succeeded');
+                            } catch (setErr) {
+                                console.warn('confirmAndDelete: $wire.set failed, will continue to call method', setErr);
+                            }
+
+                            // Preferred explicit method call that passes the typed value as an argument
+                            try {
+                                await $wire.call('clientDestroyUser', String(v));
+                                console.debug('confirmAndDelete: $wire.call(clientDestroyUser) completed');
+                                return;
+                            } catch (callErr) {
+                                console.warn('confirmAndDelete: $wire.call failed, attempting Livewire.find fallback', callErr);
+                            }
+
+                            // Fallback: locate nearest Livewire component instance and call directly
+                            try {
+                                const root = (this.$el && this.$el.closest) ? this.$el.closest('[wire\:id]') : document.querySelector('[wire\:id]');
+                                if (window.Livewire && root) {
+                                    const id = root.getAttribute('wire:id');
+                                    console.debug('confirmAndDelete: Livewire.find id=', id);
+                                    const comp = Livewire.find(id);
+                                    if (comp) {
+                                        comp.set('deleteConfirmName', String(v));
+                                        comp.call('clientDestroyUser', String(v));
+                                        console.debug('confirmAndDelete: Livewire.find fallback invoked');
+                                    } else {
+                                        console.error('confirmAndDelete: Livewire.find returned no component for id', id);
+                                    }
+                                } else {
+                                    console.error('confirmAndDelete: Livewire global or root element not found');
+                                }
+                            } catch (fbErr) {
+                                console.error('confirmAndDelete: Livewire.find fallback failed', fbErr);
+                            }
+                        } finally {
+                            this.deleting = false;
+                        }
+                    }
+                }));
             });
         </script>
 
