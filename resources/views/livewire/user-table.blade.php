@@ -154,19 +154,19 @@
                             <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
                                 {{-- Primary inline actions (desktop) --}}
                                 <div class="hidden md:flex items-center space-x-2">
-                                    <button wire:click="showDetails({{ $user->user_id }})" aria-label="View details" class="inline-flex items-center space-x-2 text-sm text-cvsu-600 hover:text-cvsu-700 focus:outline-none focus:ring-2 focus:ring-cvsu-500 px-2 py-1 rounded">
+                                    <button wire:click="showDetails({{ $user->user_id }})" title="View details" aria-label="View details" class="inline-flex items-center justify-center text-cvsu-600 hover:text-cvsu-700 focus:outline-none focus:ring-2 focus:ring-cvsu-500 p-2 rounded">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        <span>Details</span>
+                                        <span class="sr-only">Details</span>
                                     </button>
 
-                                    <button wire:click="editUser({{ $user->user_id }})" aria-label="Edit user" class="inline-flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-cvsu-500 px-2 py-1 rounded">
+                                    <button wire:click="editUser({{ $user->user_id }})" title="Edit user" aria-label="Edit user" class="inline-flex items-center justify-center text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-cvsu-500 p-2 rounded">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/></svg>
-                                        <span>Edit</span>
+                                        <span class="sr-only">Edit</span>
                                     </button>
 
-                                    <button wire:click="confirmDelete({{ $user->user_id }})" aria-label="Delete user" class="inline-flex items-center space-x-2 text-sm text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 px-2 py-1 rounded">
+                                    <button wire:click="confirmDelete({{ $user->user_id }})" title="Delete user" aria-label="Delete user" class="inline-flex items-center justify-center text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 p-2 rounded">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                        <span>Delete</span>
+                                        <span class="sr-only">Delete</span>
                                     </button>
                                 </div>
 
