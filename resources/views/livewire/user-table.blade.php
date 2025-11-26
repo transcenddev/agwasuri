@@ -104,32 +104,12 @@
                         <div class="mt-4">
                             <input x-model="typed" x-ref="confirmInput" type="text" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Type full name to confirm">
                         </div>
-                        <div class="mt-2 space-y-2 text-xs text-gray-600">
-                            <div class="flx items-center space-x-2">
-                                <div class="font-medium">Debug:</div>
-                                <div>typed (Alpine): <strong x-text="typed"></strong></div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <div>server `deleteConfirmName`:</div>
-                                <div class="font-mono text-sm text-gray-800" x-text="$wire.get('deleteConfirmName')"></div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <div>deletingNameRaw:</div>
-                                <div class="font-medium" x-text="deletingNameRaw"></div>
-                            </div>
-                            <div>canDelete: <strong x-text="canDelete ? 'true' : 'false'"></strong></div>
-
-                            <div class="pt-2 flex space-x-2">
-                                <button type="button" @click.prevent="(function(){ const v = (this.$refs && this.$refs.confirmInput) ? this.$refs.confirmInput.value : typed; console.debug('DBG: calling clientDestroyUser with', v); try { $wire.call('clientDestroyUser', String(v)); } catch(e){ console.error('DBG clientDestroyUser failed', e);} })()" class="rounded bg-yellow-100 px-2 py-1 text-xs">DBG: clientDestroyUser(v)</button>
-
-                                <button type="button" @click.prevent="(function(){ const v = (this.$refs && this.$refs.confirmInput) ? this.$refs.confirmInput.value : typed; console.debug('DBG: doing $wire.set then $wire.call destroyUser', v); try { $wire.set('deleteConfirmName', v); $wire.call('destroyUser'); } catch(e){ console.error('DBG set/call failed', e);} })()" class="rounded bg-yellow-100 px-2 py-1 text-xs">DBG: $wire.set + destroyUser()</button>
-
-                                <button type="button" @click.prevent="(function(){ const v = (this.$refs && this.$refs.confirmInput) ? this.$refs.confirmInput.value : typed; console.debug('DBG: Livewire.find flow', v); try { const root = (this.$el && this.$el.closest) ? this.$el.closest('[wire\\:id]') : document.querySelector('[wire\\:id]'); if (window.Livewire && root) { const id = root.getAttribute('wire:id'); console.debug('DBG: Livewire id', id); const comp = Livewire.find(id); if (comp) { comp.set('deleteConfirmName', v); comp.call('destroyUser'); return; } } } catch(e){ console.error('DBG Livewire.find failed', e);} })()" class="rounded bg-yellow-100 px-2 py-1 text-xs">DBG: Livewire.find set+call</button>
-                            </div>
+                        <div class="mt-2 text-sm text-gray-600">
+                            <p>Please type the full name shown above to confirm deletion. This action cannot be undone.</p>
                         </div>
                     </div>
                         <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <button type="button" :disabled="!canDelete || isSelf || deleting" @click.prevent="confirmAndDelete()" onclick="console.debug('native-delete-click', this.disabled)" :class="{ 'opacity-50 cursor-not-allowed': !canDelete || isSelf || deleting }" class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm" data-debug-delete>
+                        <button type="button" :disabled="!canDelete || isSelf || deleting" @click.prevent="confirmAndDelete()" :class="{ 'opacity-50 cursor-not-allowed': !canDelete || isSelf || deleting }" class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm" aria-label="Confirm delete">
                             Delete
                         </button>
                         <button type="button" wire:click="cancelDelete" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm">
@@ -172,21 +152,26 @@
                                 <div class="text-xs text-gray-500">{{ $user->municipality }}{{ $user->municipality && $user->province ? ', ' : '' }}{{ $user->province }}</div>
                             </td>
                             <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
-                                {{-- Primary inline actions (improve UX by placing actions next to row data) --}}
+                                {{-- Primary inline actions (desktop) --}}
                                 <div class="hidden md:flex items-center space-x-2">
-                                    <button wire:click="showDetails({{ $user->user_id }})" class="text-cvsu-600 hover:text-cvsu-700 text-sm">Details</button>
+                                    <button wire:click="showDetails({{ $user->user_id }})" aria-label="View details" class="inline-flex items-center space-x-2 text-sm text-cvsu-600 hover:text-cvsu-700 focus:outline-none focus:ring-2 focus:ring-cvsu-500 px-2 py-1 rounded">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        <span>Details</span>
+                                    </button>
 
-                                    <button wire:click="editUser({{ $user->user_id }})" class="text-gray-600 hover:text-gray-800 text-sm">Edit</button>
+                                    <button wire:click="editUser({{ $user->user_id }})" aria-label="Edit user" class="inline-flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-cvsu-500 px-2 py-1 rounded">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/></svg>
+                                        <span>Edit</span>
+                                    </button>
 
-                                    <button wire:click="confirmDelete({{ $user->user_id }})" class="text-red-600 hover:text-red-700 text-sm">Delete</button>
+                                    <button wire:click="confirmDelete({{ $user->user_id }})" aria-label="Delete user" class="inline-flex items-center space-x-2 text-sm text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 px-2 py-1 rounded">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        <span>Delete</span>
+                                    </button>
                                 </div>
 
-                                {{-- Keep the global menu trigger as a compact fallback for power users/overflow --}}
-                                <button title="More" onclick="(function(el){ const r = el.getBoundingClientRect(); const menuWidth = 160; const margin = 8; const desiredLeft = Math.min(Math.max(Math.round(r.right + window.scrollX - 140), window.scrollX + margin), window.scrollX + window.innerWidth - menuWidth - margin); const desiredTop = Math.round(r.bottom + window.scrollY + 6); window.dispatchEvent(new CustomEvent('open-user-action-menu', { detail: { userId: {{ $user->user_id }}, left: desiredLeft, top: desiredTop } })); })(this); event.preventDefault();" class="ml-2 px-2 py-1 rounded hover:bg-gray-100 md:hidden" aria-haspopup="true">⋮</button>
-
-                                {{-- Hidden per-row Livewire action buttons (clicked by global menu) --}}
-                                <button id="user-action-edit-{{ $user->user_id }}" class="hidden" wire:click="editUser({{ $user->user_id }})"></button>
-                                <button id="user-action-delete-{{ $user->user_id }}" class="hidden" wire:click="confirmDelete({{ $user->user_id }})"></button>
+                                {{-- Kebab menu (mobile) --}}
+                                <button title="Open actions" aria-label="Open actions" onclick="(function(el){ const r = el.getBoundingClientRect(); const menuWidth = 160; const margin = 8; const desiredLeft = Math.min(Math.max(Math.round(r.right + window.scrollX - 140), window.scrollX + margin), window.scrollX + window.innerWidth - menuWidth - margin); const desiredTop = Math.round(r.bottom + window.scrollY + 6); window.dispatchEvent(new CustomEvent('open-user-action-menu', { detail: { userId: {{ $user->user_id }}, left: desiredLeft, top: desiredTop } })); })(this); event.preventDefault();" class="ml-2 px-3 py-2 rounded hover:bg-gray-100 md:hidden focus:outline-none focus:ring-2 focus:ring-cvsu-500" aria-haspopup="true">⋮</button>
                             </td>
                         </tr>
                     @empty
