@@ -5,8 +5,11 @@ namespace App\Livewire;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 use Livewire\Component;
 use Livewire\WithPagination; // Make sure this is used
+use PDOException;
 
 class UserTable extends Component
 {
@@ -211,13 +214,27 @@ class UserTable extends Component
             }
 
             // All good — delete
-            $user->delete();
+            try {
+                $user->delete();
+            } catch (QueryException $qe) {
+                // Likely a foreign-key constraint or related-data issue. Log and show friendly message.
+                Log::warning('user delete failed - query exception', ['user_id' => $this->deletingUserId, 'error' => $qe->getMessage()]);
+                session()->flash('error', 'Cannot delete user: related records exist. Remove or reassign related data first.');
+                return;
+            } catch (PDOException $pe) {
+                // Database-level connection issues (lost connection, refused, etc.)
+                Log::warning('user delete failed - PDO exception', ['user_id' => $this->deletingUserId, 'error' => $pe->getMessage()]);
+                session()->flash('error', 'Database unavailable — please try again later.');
+                return;
+            }
             session()->flash('message', 'User deleted successfully.');
+            // Clear any prior error flash so only the success message is shown
+            session()->forget('error');
             $this->resetPage();
             $this->cancelDelete();
             // Ensure the component refreshes immediately for the current client
-            // (use emitSelf to target this Livewire component instance)
-            $this->emitSelf('refreshUsers');
+            // Emit a refresh event to listeners (emitSelf not available here)
+            $this->emit('refreshUsers');
         } catch (\Throwable $e) {
             // Log full exception so the 500 from Livewire can be diagnosed
             Log::error('destroyUser exception', [
@@ -235,23 +252,117 @@ class UserTable extends Component
      * This ensures the client-supplied typed value is present on the server
      * before the server-side check runs.
      */
-    public function clientDestroyUser($typed)
+    public function clientDestroyUser($userId, $typed)
     {
+        // Quick DB connectivity check so we can surface a friendly message instead
+        // of letting Livewire bubble a hard 500 when the DB isn't reachable.
+        try {
+            DB::connection()->getPdo();
+        } catch (\Exception $e) {
+            Log::warning('clientDestroyUser - DB connection check failed', [
+                'user_id_arg' => $userId,
+                'typed_received' => $typed,
+                'deletingUserId' => $this->deletingUserId,
+                'error' => $e->getMessage(),
+            ]);
+            session()->flash('error', 'Database unavailable — please try again later.');
+            return;
+        }
+
         // Log the typed value received from client for diagnostics
-        Log::info('clientDestroyUser invoked', ['user_id' => $this->deletingUserId, 'typed_received' => $typed]);
+        Log::info('clientDestroyUser invoked', ['user_id_arg' => $userId, 'typed_received' => $typed, 'deletingUserId' => $this->deletingUserId]);
+
+        // Ensure server-side state matches the explicit client request to avoid race conditions
+        $this->deletingUserId = $userId;
         $this->deleteConfirmName = $typed;
+
         try {
             $this->destroyUser();
         } catch (\Throwable $e) {
-            // Defensive logging to capture unexpected exceptions raised during Livewire requests
-            Log::error('clientDestroyUser exception', [
-                'deleting' => $this->deletingUserId,
-                'typed_received' => $typed,
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+            // Already logged inside destroyUser; surface a friendly message to the UI
+            Log::error('clientDestroyUser exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            session()->flash('error', 'Server error while attempting deletion. Check logs for details.');
+            return;
+        }
+    }
+
+    /**
+     * Simpler client flow for the modal that binds the typed input with wire:model.defer.
+     * Called from Blade: wire:click="clientDestroyUserFromUI({{ $deletingUserId }})"
+     */
+    public function clientDestroyUserFromUI($userId)
+    {
+        // Quick DB connectivity check so we can surface a friendly message instead
+        // of letting Livewire bubble a hard 500 when the DB isn't reachable.
+        try {
+            DB::connection()->getPdo();
+        } catch (\Exception $e) {
+            Log::warning('clientDestroyUserFromUI - DB connection check failed', [
+                'user_id_arg' => $userId,
+                'deleteConfirmName' => $this->deleteConfirmName,
+                'error' => $e->getMessage(),
             ]);
-            session()->flash('error', 'Server error while processing deletion request.');
-            // Let Livewire return the response (do not rethrow) so frontend shows a 500 or friendly error
+            session()->flash('error', 'Database unavailable — please try again later.');
+            return;
+        }
+
+        // Ensure server-side state matches the explicit client request to avoid race conditions
+        $this->deletingUserId = $userId;
+        // $this->deleteConfirmName is already populated by wire:model.defer from the Blade input
+
+        try {
+            $this->destroyUser();
+        } catch (\Throwable $e) {
+            Log::error('clientDestroyUserFromUI exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            session()->flash('error', 'Server error while attempting deletion. Check logs for details.');
+            return;
+        }
+    }
+
+    /**
+     * Simple confirm-based delete invoked directly from Blade buttons.
+     * This method performs a direct delete (no typed-name confirmation)
+     * and dispatches a `user-deleted` event for front-end listeners.
+     */
+    public function deleteUser($userId)
+    {
+        try {
+            $user = User::find($userId);
+            if (! $user) {
+                session()->flash('error', 'User not found.');
+                return;
+            }
+
+            // Prevent deleting the currently authenticated admin
+            $current = Auth::user();
+            if ($current && $current->user_id === $user->user_id) {
+                session()->flash('error', 'You cannot delete the account you are currently signed in with.');
+                return;
+            }
+
+            try {
+                $user->delete();
+            } catch (QueryException $qe) {
+                Log::warning('deleteUser - query exception', ['user_id' => $userId, 'error' => $qe->getMessage()]);
+                session()->flash('error', 'Cannot delete user: related records exist.');
+                return;
+            } catch (PDOException $pe) {
+                Log::warning('deleteUser - PDO exception', ['user_id' => $userId, 'error' => $pe->getMessage()]);
+                session()->flash('error', 'Database unavailable — please try again later.');
+                return;
+            }
+
+            session()->flash('message', 'User deleted successfully.');
+            // Clear any prior error flash so only the success message is shown
+            session()->forget('error');
+            $this->resetPage();
+
+            // Notify JS listeners and other Livewire components
+            $this->emit('user-deleted', $userId);
+            $this->dispatchBrowserEvent('user-deleted', ['user_id' => $userId]);
+        } catch (\Throwable $e) {
+            Log::error('deleteUser exception', ['user_id' => $userId, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            session()->flash('error', 'Server error while deleting user. Check logs for details.');
         }
     }
 

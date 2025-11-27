@@ -17,8 +17,7 @@
             <div class="mb-4 rounded bg-green-100 p-4 text-sm text-green-700">
                 {{ session('message') }}
             </div>
-        @endif
-        @if (session()->has('error'))
+        @elseif (session()->has('error'))
             <div class="mb-4 rounded bg-red-100 p-4 text-sm text-red-700">
                 {{ session('error') }}
             </div>
@@ -102,14 +101,27 @@
                             </div>
                         </div>
                         <div class="mt-4">
-                            <input x-model="typed" x-ref="confirmInput" type="text" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Type full name to confirm">
+                            <!-- Bind the typed confirmation directly to Livewire to avoid Alpine state-sync bugs -->
+                            <input wire:model.defer="deleteConfirmName"
+                                   id="delete-confirm-input"
+                                   type="text"
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                   placeholder="Type full name to confirm" />
                         </div>
+
                         <div class="mt-2 text-sm text-gray-600">
                             <p>Please type the full name shown above to confirm deletion. This action cannot be undone.</p>
                         </div>
+
+                        <!-- Debug text removed: confirmation input is sufficient -->
                     </div>
                         <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <button type="button" :disabled="!canDelete || isSelf || deleting" @click.prevent="confirmAndDelete()" :class="{ 'opacity-50 cursor-not-allowed': !canDelete || isSelf || deleting }" class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm" aria-label="Confirm delete">
+                        <button type="button"
+                                wire:click="clientDestroyUserFromUI({{ $deletingUserId }})"
+                                wire:loading.attr="disabled"
+                                wire:target="clientDestroyUserFromUI"
+                                class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                                aria-label="Confirm delete">
                             Delete
                         </button>
                         <button type="button" wire:click="cancelDelete" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm">
@@ -121,7 +133,7 @@
         </div>
         @endif
         <div class="overflow-x-auto relative overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
-            <table class="min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
+            <table class="hidden sm:table min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
                 <colgroup>
                     <col style="width:6rem"> <!-- ID -->
                     <col> <!-- Full name flexible -->
@@ -154,24 +166,24 @@
                             <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
                                 {{-- Primary inline actions (desktop) --}}
                                 <div class="hidden md:flex items-center space-x-2">
-                                    <button wire:click="showDetails({{ $user->user_id }})" title="View details" aria-label="View details" class="inline-flex items-center justify-center text-cvsu-600 hover:text-cvsu-700 focus:outline-none focus:ring-2 focus:ring-cvsu-500 p-2 rounded">
+                                    <button wire:click="showDetails({{ $user->user_id }})" title="View details" aria-label="View details" class="action-icon text-cvsu-600 hover:text-cvsu-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         <span class="sr-only">Details</span>
                                     </button>
 
-                                    <button wire:click="editUser({{ $user->user_id }})" title="Edit user" aria-label="Edit user" class="inline-flex items-center justify-center text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-cvsu-500 p-2 rounded">
+                                    <button wire:click="editUser({{ $user->user_id }})" title="Edit user" aria-label="Edit user" class="action-icon text-gray-600 hover:text-gray-800">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/></svg>
                                         <span class="sr-only">Edit</span>
                                     </button>
 
-                                    <button wire:click="confirmDelete({{ $user->user_id }})" title="Delete user" aria-label="Delete user" class="inline-flex items-center justify-center text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 p-2 rounded">
+                                    <button wire:click="confirmDelete({{ $user->user_id }})" title="Delete user" aria-label="Delete user" class="action-icon text-red-600 hover:text-red-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                         <span class="sr-only">Delete</span>
                                     </button>
                                 </div>
 
-                                {{-- Kebab menu (mobile) --}}
-                                <button title="Open actions" aria-label="Open actions" onclick="(function(el){ const r = el.getBoundingClientRect(); const menuWidth = 160; const margin = 8; const desiredLeft = Math.min(Math.max(Math.round(r.right + window.scrollX - 140), window.scrollX + margin), window.scrollX + window.innerWidth - menuWidth - margin); const desiredTop = Math.round(r.bottom + window.scrollY + 6); window.dispatchEvent(new CustomEvent('open-user-action-menu', { detail: { userId: {{ $user->user_id }}, left: desiredLeft, top: desiredTop } })); })(this); event.preventDefault();" class="ml-2 px-3 py-2 rounded hover:bg-gray-100 md:hidden focus:outline-none focus:ring-2 focus:ring-cvsu-500" aria-haspopup="true">⋮</button>
+                                {{-- Kebab menu removed for mobile — use inline icons instead --}}
+                                {{-- Previously used on small screens as a fallback; hidden to prefer explicit actions on mobile cards --}}
                             </td>
                         </tr>
                     @empty
@@ -181,6 +193,41 @@
                     @endforelse
                 </tbody>
             </table>
+            {{-- Mobile: Card-list view for small screens --}}
+            <div class="sm:hidden mt-2"> 
+                <div class="space-y-3"> 
+                    @forelse ($users as $user)
+                        <div class="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-lg p-4 shadow-sm flex items-start justify-between">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center font-semibold">{{ strtoupper(substr($user->first_name ?? '', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? '', 0, 1)) }}</div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <div class="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{{ $user->first_name }} {{ $user->last_name }}</div>
+                                        <div class="text-xs text-gray-500 truncate">{{ $user->account_type }}</div>
+                                    </div>
+                                    <div class="text-xs text-gray-500 truncate mt-1">{{ $user->email }}</div>
+                                    <div class="text-xs text-gray-400 mt-1">ID: {{ $user->user_id }}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 ml-2">
+                                <button wire:click="showDetails({{ $user->user_id }})" aria-label="View details" title="View details" class="action-icon text-cvsu-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                </button>
+
+                                <button wire:click="editUser({{ $user->user_id }})" aria-label="Edit user" title="Edit user" class="action-icon text-gray-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/></svg>
+                                </button>
+
+                                <button wire:click="confirmDelete({{ $user->user_id }})" aria-label="Delete user" title="Delete user" class="action-icon text-red-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center text-sm text-gray-500">No users found.</div>
+                    @endforelse
+                </div>
+            </div>
             {{-- Pagination links are moved OUTSIDE this div --}}
         </div> {{-- End of overflow-x-auto div --}}
 
@@ -256,17 +303,30 @@
             document.addEventListener('alpine:init', () => {
                 Alpine.data('deleteModal', () => ({
                     // local typed value; we'll send it to Livewire via $wire.call before destroy
-                    typed: @json($deleteConfirmName ?? ''),
-                    deletingNameRaw: @json($deletingUserName ?? ''),
-                    isSelf: @json(auth()->check() && optional(auth()->user())->user_id === $deletingUserId),
+                    typed: {!! json_encode($deleteConfirmName ?? '') !!},
+                    deletingNameRaw: {!! json_encode($deletingUserName ?? '') !!},
+                    deletingUserId: {!! json_encode($deletingUserId ?? null) !!},
+                    isSelf: {!! json_encode(auth()->check() && optional(auth()->user())->user_id === $deletingUserId) !!},
                     deleting: false,
                     normalize(s) {
                         if (!s) return '';
                         return String(s).trim().replace(/[\s\u00A0]+/g, ' ').toLowerCase();
                     },
                     get canDelete() {
+                        // Read the typed value from the input (prefer live ref) and the expected
+                        // name from the DOM so we don't rely on Alpine's initial snapshot
                         const val = (this.$refs && this.$refs.confirmInput) ? this.$refs.confirmInput.value : this.typed;
-                        return this.normalize(val) === this.normalize(this.deletingNameRaw);
+                        // Prefer the server-rendered <strong> element content if present
+                        let expected = this.deletingNameRaw || '';
+                        try {
+                            const strong = this.$el ? this.$el.querySelector('p strong') : null;
+                            if (strong && strong.textContent) {
+                                expected = String(strong.textContent).trim();
+                            }
+                        } catch (e) {
+                            // ignore DOM errors and fall back to Alpine state
+                        }
+                        return this.normalize(val) === this.normalize(expected);
                     },
                     init() {
                         this.$nextTick(() => {
@@ -294,9 +354,10 @@
                                 console.warn('confirmAndDelete: $wire.set failed, will continue to call method', setErr);
                             }
 
-                            // Preferred explicit method call that passes the typed value as an argument
+                            // Preferred explicit method call that passes the userId and typed value as arguments
                             try {
-                                await $wire.call('clientDestroyUser', String(v));
+                                const idToDelete = this.deletingUserId;
+                                await $wire.call('clientDestroyUser', idToDelete, String(v));
                                 console.debug('confirmAndDelete: $wire.call(clientDestroyUser) completed');
                                 return;
                             } catch (callErr) {
