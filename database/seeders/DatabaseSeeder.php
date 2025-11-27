@@ -66,8 +66,7 @@ class DatabaseSeeder extends Seeder
             'api_key' => Str::random(32),
         ]);
 
+        $this->call(\Database\Seeders\BulkUserSeeder::class);
         $this->call(WaterQualityDataSeeder::class);
-        // Add predictable bulk/sample users for UI testing (pagination, tables)
-        $this->call(BulkUserSeeder::class);
     }
 }
