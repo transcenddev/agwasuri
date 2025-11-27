@@ -30,15 +30,26 @@ class LoginForm extends Form
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
-            RateLimiter::hit($this->throttleKey());
+        try {
+            if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
+                RateLimiter::hit($this->throttleKey());
 
+                throw ValidationException::withMessages([
+                    'form.email' => trans('auth.failed'),
+                ]);
+            }
+
+            RateLimiter::clear($this->throttleKey());
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Surface a friendly validation error when DB cannot be reached
             throw ValidationException::withMessages([
-                'form.email' => trans('auth.failed'),
+                'form.email' => 'Unable to connect to the database. Please try again later.',
+            ]);
+        } catch (\PDOException $e) {
+            throw ValidationException::withMessages([
+                'form.email' => 'Unable to connect to the database. Please try again later.',
             ]);
         }
-
-        RateLimiter::clear($this->throttleKey());
     }
 
     /**
