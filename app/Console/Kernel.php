@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \App\Console\Commands\SampleWaterQuality::class,
+        \App\Console\Commands\DeleteSampleUsers::class,
+        \App\Console\Commands\DeleteBulkUsers::class,
     ];
 
     /**
