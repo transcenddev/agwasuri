@@ -67,5 +67,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(WaterQualityDataSeeder::class);
+        // Add predictable bulk/sample users for UI testing (pagination, tables)
+        $this->call(BulkUserSeeder::class);
     }
 }
