@@ -1,11 +1,42 @@
 <x-card>
     <x-slot name="header">
         <x-card-header>
-            <x-slot name="title">Account Management</x-slot>
+            <x-slot name="title">
+                <div>
+                    <h1 class="text-lg font-semibold text-gray-900">Account Management</h1>
+                    <p class="text-sm text-gray-500 mt-1">Manage accounts, roles, and API keys</p>
+                </div>
+            </x-slot>
+
             <x-slot name="actions">
                 <div class="flex items-center space-x-2">
-                    <button wire:click="toggleFilters" class="rounded bg-cvsu-600 px-3 py-2 text-sm font-medium text-white hover:bg-cvsu-700">Filters {{ $showFilters ? '▲' : '▼' }}</button>
-                    <button wire:click="createUser" class="rounded bg-cvsu-600 px-3 py-2 text-sm font-medium text-white hover:bg-cvsu-700">Create User</button>
+                    <div class="hidden sm:block">
+                        <input
+                            type="search"
+                            wire:model.debounce.300ms="filterName"
+                            placeholder="Search name, email or pond"
+                            class="w-64 rounded-md border border-cvsu-200 px-3 py-2 text-sm focus:border-cvsu-600 focus:ring-cvsu-300"
+                        />
+                    </div>
+
+                    <button
+                        wire:click="toggleFilters"
+                        aria-expanded="{{ $showFilters ? 'true' : 'false' }}"
+                        class="rounded bg-white border border-cvsu-200 px-3 py-2 text-sm text-cvsu-600 hover:bg-cvsu-50 flex items-center"
+                    >
+                        <svg class="h-4 w-4 mr-2 text-cvsu-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01.29.71l-6 6V20l-4-2v-7.29L3.29 6.71A1 1 0 013 6V4z" />
+                        </svg>
+                        <span>Filters</span>
+                        <span class="ml-2 text-xs text-gray-500">{{ $showFilters ? '▲' : '▼' }}</span>
+                    </button>
+
+                    <button wire:click="createUser" class="rounded bg-cvsu-600 px-3 py-2 text-sm font-medium text-white hover:bg-cvsu-700 flex items-center">
+                        <svg class="h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Create User
+                    </button>
                 </div>
             </x-slot>
         </x-card-header>
