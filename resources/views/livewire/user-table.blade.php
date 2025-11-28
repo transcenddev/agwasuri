@@ -270,7 +270,7 @@
         </div>
 
         {{-- Global action menu (single overlay for all rows) --}}
-        <div x-data="globalUserMenu()" x-cloak @keydown.escape.window="open = false" style="pointer-events: auto;">
+        <div x-data="globalUserMenu()" x-cloak class="hidden" @keydown.escape.window="open = false" style="pointer-events: auto;">
             <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" x-ref="menu" tabindex="-1" :style="`position: fixed; top: ${top}px; left: ${left}px;`" class="global-action-menu z-40" @click.away="open=false" role="menu" aria-orientation="vertical">
                 <div class="py-1">
                     <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'edit', userId}}))" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
