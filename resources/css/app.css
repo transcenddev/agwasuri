@@ -383,3 +383,19 @@ select.select-no-native option:checked {
   border-color: rgba(255, 255, 255, 0.06);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
 }
+
+/* Brand focus styles: make focused controls use the cvsu green brand color
+   This ensures inputs, buttons and links show a green focus ring and border
+   across the dashboard and app layout without changing existing Tailwind classes. */
+.site-body :is(input:focus, textarea:focus, select:focus, button:focus, a:focus, .form-input:focus) {
+  outline: none;
+  border-color: var(--cvsu-500);
+  /* soft green ring */
+  box-shadow: 0 0 0 3px rgba(var(--cvsu-green-rgb), 0.12);
+  /* ensure Tailwind ring utilities that depend on --tw-ring-color inherit brand color */
+  --tw-ring-color: rgba(var(--cvsu-green-rgb), 0.45);
+}
+
+.site-body :is(input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, .form-input:focus-visible) {
+  box-shadow: 0 0 0 4px rgba(var(--cvsu-green-rgb), 0.14);
+}
