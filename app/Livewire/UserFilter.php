@@ -74,20 +74,10 @@ class UserFilter extends Component
         $userModel = new User();
         $primaryKeyName = $userModel->getKeyName();
         $query = User::query()->select($primaryKeyName, 'first_name', 'last_name', 'fishpond_name');
-        // Build a cross-DB concat expression (SQLite uses ||, MySQL uses CONCAT)
-        $driver = null;
-        try {
-            $driver = DB::getPdo() ? DB::getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME) : null;
-        } catch (\Throwable $e) {
-            $driver = null;
-        }
-
-        $concatExpr = ($driver === 'sqlite') ? "first_name || ' ' || last_name" : "CONCAT(first_name, ' ', last_name)";
-
-        $query->where(function ($q) use ($concatExpr) {
+        $query->where(function ($q) {
             $q->where('first_name', 'like', '%' . $this->fullName . '%')
               ->orWhere('last_name', 'like', '%' . $this->fullName . '%')
-              ->orWhereRaw("{$concatExpr} LIKE ?", ['%' . $this->fullName . '%']);
+              ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $this->fullName . '%']);
         });
         if (!empty($this->fishpondName)) {
              $query->where('fishpond_name', 'like', '%' . $this->fishpondName . '%');
@@ -105,29 +95,23 @@ class UserFilter extends Component
         }
         $userModel = new User();
         $primaryKeyName = $userModel->getKeyName();
-        // When searching fishpond names we want distinct pond names (grouped)
-        // so the dropdown presents each matching pond once.
-        $query = User::query()
-            ->selectRaw("MIN({$primaryKeyName}) as {$primaryKeyName}, MIN(first_name) as first_name, MIN(last_name) as last_name, fishpond_name")
-            ->where('fishpond_name', 'like', '%' . $this->fishpondName . '%')
-            ->groupBy('fishpond_name');
+        $query = User::query()->select($primaryKeyName, 'first_name', 'last_name', 'fishpond_name');
+        $query->where('fishpond_name', 'like', '%' . $this->fishpondName . '%');
         if (!empty($this->fullName)) {
-            // Respect the same DB-driver aware concat expression used above
-            $driver = null;
-            try {
-                $driver = DB::getPdo() ? DB::getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME) : null;
-            } catch (\Throwable $e) {
-                $driver = null;
-            }
-            $concatExpr = ($driver === 'sqlite') ? "first_name || ' ' || last_name" : "CONCAT(first_name, ' ', last_name)";
-
-            $query->where(function ($q) use ($concatExpr) {
+            $query->where(function ($q) {
                 $q->where('first_name', 'like', '%' . $this->fullName . '%')
                   ->orWhere('last_name', 'like', '%' . $this->fullName . '%')
-                  ->orWhereRaw("{$concatExpr} LIKE ?", ['%' . $this->fullName . '%']);
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $this->fullName . '%']);
             });
         }
-        $this->fishpondNameResults = $query->limit(10)->get();
+        // Get all matching rows, then collapse to unique fishpond names so the
+        // dropdown shows each pond once (avoid multiple users with the same pond)
+        $results = $query->get();
+        $this->fishpondNameResults = $results
+            ->filter(fn($u) => !empty($u->fishpond_name))
+            ->unique(fn($u) => mb_strtolower(trim($u->fishpond_name)))
+            ->values();
+
         $this->showFishpondNameResults = $this->fishpondNameResults->isNotEmpty();
     }
 
