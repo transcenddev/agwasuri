@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Livewire\Component;
+use Illuminate\Support\Collection as SupportCollection;
 use Livewire\WithPagination; // Make sure this is used
 use PDOException;
 
@@ -60,12 +61,77 @@ class UserTable extends Component
             $this->resetPage();
         }
     }
+    public SupportCollection $suggestions;
+    public bool $showSuggestions = false;
 
     public function mount()
     {
         // Optional: Initialize filters from query string if needed
+        $this->suggestions = collect();
     }
 
+    // Livewire hook when the header search input changes
+    public function updatedFilterName(string $value)
+    {
+        $value = trim($value);
+        $this->showSuggestions = false;
+        $this->suggestions = collect();
+
+        if ($value === '') {
+            return;
+        }
+
+        $limit = 6;
+
+        // Prefer starts-with matches for names and ponds
+        $users = User::query()
+            ->select('user_id', 'first_name', 'last_name', 'email', 'fishpond_name')
+            ->where(function ($q) use ($value) {
+                $q->where('first_name', 'like', $value . '%')
+                  ->orWhere('last_name', 'like', $value . '%')
+                  ->orWhere('email', 'like', $value . '%')
+                  ->orWhere('fishpond_name', 'like', $value . '%');
+            })
+            ->limit($limit)
+            ->get();
+
+        if ($users->count() < $limit) {
+            $needed = $limit - $users->count();
+            $more = User::query()
+                ->select('user_id', 'first_name', 'last_name', 'email', 'fishpond_name')
+                ->where(function ($q) use ($value) {
+                    $q->where('first_name', 'like', '%' . $value . '%')
+                      ->orWhere('last_name', 'like', '%' . $value . '%')
+                      ->orWhere('email', 'like', '%' . $value . '%')
+                      ->orWhere('fishpond_name', 'like', '%' . $value . '%');
+                })
+                ->whereNotIn('user_id', $users->pluck('user_id'))
+                ->limit($needed)
+                ->get();
+            $users = $users->concat($more);
+        }
+
+        $mapped = $users->map(function ($u) {
+            return [
+                'id' => $u->user_id,
+                'label' => trim($u->first_name . ' ' . $u->last_name),
+                'meta' => $u->fishpond_name,
+                'email' => $u->email,
+            ];
+        });
+
+        $this->suggestions = collect($mapped)->take($limit);
+        $this->showSuggestions = $this->suggestions->isNotEmpty();
+    }
+
+    // When selecting a suggestion from the dropdown
+    public function selectSuggestion($userId, $label)
+    {
+        $this->filterName = $label;
+        $this->suggestions = collect();
+        $this->showSuggestions = false;
+        $this->resetPage();
+    }
     public function handleUserSaved()
     {
         $this->closeForm();
