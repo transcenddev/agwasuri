@@ -42,7 +42,7 @@
         </x-card-header>
     </x-slot>
 
-    <div class="p-6">
+    <div class="p-6 relative">
         {{-- Session Messages (Green for success, Red for errors) --}}
         @if (session()->has('message'))
             <div class="mb-4 rounded bg-green-100 p-4 text-sm text-green-700">
@@ -54,9 +54,9 @@
             </div>
         @endif
 
-        {{-- Conditionally render the Filter Section --}}
+        {{-- Conditionally render the Filter Section as an overlay (doesn't shift content) --}}
         @if ($showFilters)
-            <div class="mb-4 rounded border border-cvsu-200 bg-cvsu-50 px-4 py-3 shadow-inner">
+            <div class="absolute left-0 right-0 top-0 z-30 rounded border border-cvsu-200 bg-cvsu-50 px-4 py-3 shadow-inner">
                 <div class="grid grid-cols-1 gap-x-4 gap-y-2 md:grid-cols-2 lg:grid-cols-3">
                     <div>
                         <input wire:model.live.debounce.300ms="filterName" type="text" id="filterName" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Filter by name...">
