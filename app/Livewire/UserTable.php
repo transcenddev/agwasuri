@@ -375,9 +375,13 @@ class UserTable extends Component
 
         // Apply filters
         if (!empty($this->filterName)) {
-            $query->where(function($q) {
-                $q->where('first_name', 'like', '%'.$this->filterName.'%')
-                  ->orWhere('last_name', 'like', '%'.$this->filterName.'%');
+            $value = $this->filterName;
+            $query->where(function($q) use ($value) {
+                $q->where('first_name', 'like', '%'.$value.'%')
+                  ->orWhere('last_name', 'like', '%'.$value.'%')
+                  ->orWhere('email', 'like', '%'.$value.'%')
+                  ->orWhere('fishpond_name', 'like', '%'.$value.'%')
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%'.$value.'%']);
             });
         }
         if (!empty($this->filterEmail)) {
