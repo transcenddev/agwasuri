@@ -2,14 +2,14 @@
     <x-slot name="header">
         <x-card-header>
             <x-slot name="title">
-                <div>
+                <div class="flex-1">
                     <h1 class="text-lg font-semibold text-gray-900">Account Management</h1>
                     <p class="text-sm text-gray-500 mt-1">Manage accounts, roles, and API keys</p>
                 </div>
             </x-slot>
 
             <x-slot name="actions">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 justify-end">
                     <div class="hidden sm:block">
                         <input
                             type="search"
