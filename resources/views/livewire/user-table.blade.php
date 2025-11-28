@@ -13,8 +13,8 @@
                     <div class="hidden sm:block">
                         <input
                             type="search"
-                            wire:model.debounce.300ms="filterName"
-                            placeholder="Search name, email or pond"
+                            wire:model.live="filterName"
+                            placeholder="Search name, email, pond, location or species"
                             class="w-64 rounded-md border border-cvsu-200 px-3 py-2 text-sm focus:border-cvsu-600 focus:ring-cvsu-300"
                         />
                     </div>
