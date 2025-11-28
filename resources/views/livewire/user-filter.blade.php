@@ -4,8 +4,38 @@
     <div class="md:w-1/2">
         <div class="grid grid-cols-1 gap-x-4 gap-y-2 mb-1 md:grid-cols-2">
 
-            {{-- Full Name Input and Dropdown Container --}}
-            <div class="relative" x-data @click.outside="$wire.showFullNameResults = false">
+            {{-- Omnisearch (user or pond) --}}
+            <div class="relative col-span-2" x-data @click.outside="$wire.showOmniResults = false">
+                <input type="text" id="omniSearch"
+                       wire:model.live.debounce.300ms="omni"
+                       class="block w-full h-12 px-4 mt-1 text-left text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm placeholder:text-gray-400"
+                       placeholder="Search user or fishpond name..."
+                       autocomplete="off">
+
+                <div x-show="$wire.showOmniResults" x-transition style="display: none;">
+                    @if($omniResults->isNotEmpty())
+                        <ul class="absolute z-50 w-full mt-1 overflow-auto bg-white rounded-md shadow-lg max-h-60">
+                            @foreach($omniResults as $r)
+                                <li class="px-4 py-2 cursor-pointer hover:bg-indigo-100 flex items-center justify-between"
+                                    wire:click="selectUser({{ $r['id'] }}, '{{ addslashes($r['type'] === 'user' ? $r['label'] : $r['meta']) }}', '{{ addslashes($r['type'] === 'pond' ? $r['label'] : $r['meta']) }}')">
+                                    <div>
+                                        <span class="font-medium">{{ $r['label'] }}</span>
+                                        <span class="ml-2 text-xs text-gray-500">{{ ucfirst($r['type']) }}{{ $r['meta'] ? ' · ' . $r['meta'] : '' }}</span>
+                                    </div>
+                                    <div class="text-xs text-gray-400">{{ $r['type'] === 'user' ? 'User' : 'Pond' }}</div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @elseif(!empty($omni))
+                        <div class="absolute z-50 w-full p-3 mt-1 text-sm text-center text-gray-500 bg-white rounded-md shadow-lg">
+                            No results found.
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Full Name Input and Dropdown Container (hidden while omnisearch is tested) --}}
+            <div class="relative hidden" x-data @click.outside="$wire.showFullNameResults = false">
                 {{-- Remove the label --}}
                 {{-- <label for="fullName" class="block text-sm font-medium text-gray-700">Search by Full Name</label> --}}
                 <input type="text" id="fullName"
@@ -42,8 +72,8 @@
                 </div>
             </div>
 
-            {{-- Fishpond Name Input and Dropdown Container --}}
-            <div class="relative" x-data @click.outside="$wire.showFishpondNameResults = false">
+            {{-- Fishpond Name Input and Dropdown Container (hidden while omnisearch is tested) --}}
+            <div class="relative hidden" x-data @click.outside="$wire.showFishpondNameResults = false">
                 {{-- Removed the icon wrapper div --}}
                 <input type="text" id="fishpondName"
                        wire:model.live.debounce.300ms="fishpondName"
