@@ -6,12 +6,15 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class UserFilter extends Component
 {
     // Properties bound to the input fields for searching
     public string $fullName = '';
     public string $fishpondName = '';
+    // Omni search input
+    public string $omni = '';
 
     // Properties to hold the names of the *currently selected* user for the placeholder
     public ?string $selectedUserNameForPlaceholder = null;
@@ -23,11 +26,15 @@ class UserFilter extends Component
     public bool $showFullNameResults = false;
     public Collection $fishpondNameResults;
     public bool $showFishpondNameResults = false;
+    // Merged omnisearch results (use Support collection for mixed array shape)
+    public SupportCollection $omniResults;
+    public bool $showOmniResults = false;
 
     public function mount()
     {
         $this->fullNameResults = new Collection();
         $this->fishpondNameResults = new Collection();
+        $this->omniResults = new SupportCollection();
         // Optionally, load the initial user's name/pond into placeholder on mount if needed
         // $initialUser = User::find(Auth::id());
         // if ($initialUser) {
@@ -41,6 +48,10 @@ class UserFilter extends Component
     {
         $this->selectedUserNameForPlaceholder = null; // Clear placeholder
         $this->selectedPondNameForPlaceholder = null; // Clear placeholder
+        // clear omnisearch when typing into field
+        $this->omni = '';
+        $this->omniResults = new Collection();
+        $this->showOmniResults = false;
         if (empty($value)) {
             $this->resetFullNameSearch();
              // If clearing input should reset view to logged-in user
@@ -55,6 +66,10 @@ class UserFilter extends Component
     {
         $this->selectedUserNameForPlaceholder = null; // Clear placeholder
         $this->selectedPondNameForPlaceholder = null; // Clear placeholder
+        // clear omnisearch when typing into field
+        $this->omni = '';
+        $this->omniResults = new Collection();
+        $this->showOmniResults = false;
         if (empty($value)) {
             $this->resetFishpondNameSearch();
              // If clearing input should reset view to logged-in user
@@ -113,6 +128,93 @@ class UserFilter extends Component
             ->values();
 
         $this->showFishpondNameResults = $this->fishpondNameResults->isNotEmpty();
+    }
+
+    /**
+     * Updated omni search value handler. Performs two targeted queries (users and ponds),
+     * merges results with type markers and exposes them to the view.
+     */
+    public function updatedOmni(string $value): void
+    {
+        $value = trim($value);
+        // Clear other inputs when using omni to avoid conflicting dropdowns
+        if (!empty($value)) {
+            $this->fullName = '';
+            $this->fishpondName = '';
+        } else {
+            $this->omniResults = new Collection();
+            $this->showOmniResults = false;
+            return;
+        }
+
+        $limitPerType = 6;
+
+        // Users: prefer starts-with matches first
+        $users = User::query()
+            ->select('user_id', 'first_name', 'last_name', 'fishpond_name')
+            ->where(function ($q) use ($value) {
+                $q->where('first_name', 'like', $value . '%')
+                  ->orWhere('last_name', 'like', $value . '%');
+            })
+            ->limit($limitPerType)
+            ->get();
+
+        // If not enough starts-with matches, add contains matches
+        if ($users->count() < $limitPerType) {
+            $needed = $limitPerType - $users->count();
+            $more = User::query()
+                ->select('user_id', 'first_name', 'last_name', 'fishpond_name')
+                ->where(function ($q) use ($value) {
+                    $q->where('first_name', 'like', '%' . $value . '%')
+                      ->orWhere('last_name', 'like', '%' . $value . '%');
+                })
+                ->whereNotIn('user_id', $users->pluck('user_id'))
+                ->limit($needed)
+                ->get();
+            $users = $users->concat($more);
+        }
+
+        // Ponds: search fishpond_name starts-with then contains
+        $ponds = User::query()
+            ->select('user_id', 'first_name', 'last_name', 'fishpond_name')
+            ->where('fishpond_name', 'like', $value . '%')
+            ->whereNotNull('fishpond_name')
+            ->limit($limitPerType)
+            ->get();
+
+        if ($ponds->count() < $limitPerType) {
+            $needed = $limitPerType - $ponds->count();
+            $moreP = User::query()
+                ->select('user_id', 'first_name', 'last_name', 'fishpond_name')
+                ->where('fishpond_name', 'like', '%' . $value . '%')
+                ->whereNotNull('fishpond_name')
+                ->whereNotIn('user_id', $ponds->pluck('user_id'))
+                ->limit($needed)
+                ->get();
+            $ponds = $ponds->concat($moreP);
+        }
+
+        // Map to unified shape
+        $mappedUsers = $users->map(fn($u) => [
+            'type' => 'user',
+            'id' => $u->user_id,
+            'label' => trim($u->first_name . ' ' . $u->last_name),
+            'meta' => $u->fishpond_name,
+        ]);
+
+        $mappedPonds = $ponds->filter(fn($u) => !empty($u->fishpond_name))
+            ->unique(fn($u) => mb_strtolower(trim($u->fishpond_name)))
+            ->map(fn($u) => [
+                'type' => 'pond',
+                'id' => $u->user_id,
+                'label' => $u->fishpond_name,
+                'meta' => trim($u->first_name . ' ' . $u->last_name),
+            ]);
+
+        $merged = $mappedUsers->concat($mappedPonds)->take(10);
+
+        $this->omniResults = collect($merged);
+        $this->showOmniResults = $this->omniResults->isNotEmpty();
     }
 
 
