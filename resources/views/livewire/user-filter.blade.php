@@ -17,7 +17,7 @@
                         <ul class="absolute z-50 w-full mt-1 overflow-auto bg-white rounded-md shadow-lg max-h-60">
                             @foreach($omniResults as $r)
                                 <li class="px-4 py-2 cursor-pointer hover:bg-indigo-100 flex items-center justify-between"
-                                    wire:click="selectUser({{ $r['id'] }}, '{{ addslashes($r['type'] === 'user' ? $r['label'] : $r['meta']) }}', '{{ addslashes($r['type'] === 'pond' ? $r['label'] : $r['meta']) }}')">
+                                    onclick="(function(){ try{ Livewire.emit('user-selected', {{ $r['id'] }}); var lab='{{ addslashes($r['type'] === 'user' ? $r['label'] : $r['meta']) }}'; var meta='{{ addslashes($r['type'] === 'pond' ? $r['label'] : $r['meta']) }}'; var inp=document.getElementById('omniSearch'); if(inp){ inp.placeholder = lab || 'Search user or fishpond name...'; inp.value=''; } }catch(e){} })()">
                                     <div>
                                         <span class="font-medium">{{ $r['label'] }}</span>
                                         <span class="ml-2 text-xs text-gray-500">{{ ucfirst($r['type']) }}{{ $r['meta'] ? ' · ' . $r['meta'] : '' }}</span>
@@ -56,7 +56,7 @@
                         <ul class="absolute z-50 w-full mt-1 overflow-auto bg-white rounded-md shadow-lg max-h-60" >
                             @foreach($fullNameResults as $user)
                                 <li class="px-4 py-2 cursor-pointer hover:bg-indigo-100"
-                                    wire:click="selectUser({{ $user->getKey() }}, '{{ addslashes($user->first_name) }} {{ addslashes($user->last_name) }}', '{{ addslashes($user->fishpond_name) }}')">
+                                    onclick="(function(){ try{ Livewire.emit('user-selected', {{ $user->getKey() }}); var lab='{{ addslashes($user->first_name) }} {{ addslashes($user->last_name) }}'; var inp=document.getElementById('fullName'); if(inp){ inp.placeholder = lab || 'Name'; inp.value=''; } }catch(e){} })()">
                                     <span class="font-medium">{{ $user->first_name }} {{ $user->last_name }}</span>
                                     @if($user->fishpond_name)
                                         <span class="ml-2 text-sm text-gray-500">({{ $user->fishpond_name }})</span>
@@ -93,7 +93,7 @@
                         <ul class="absolute z-50 w-full mt-1 overflow-auto bg-white rounded-md shadow-lg max-h-60">
                             @foreach($fishpondNameResults as $user)
                                  <li class="px-4 py-2 cursor-pointer hover:bg-indigo-100"
-                                     wire:click="selectUser({{ $user->getKey() }}, '{{ addslashes($user->first_name) }} {{ addslashes($user->last_name) }}', '{{ addslashes($user->fishpond_name) }}')">
+                                     onclick="(function(){ try{ Livewire.emit('user-selected', {{ $user->getKey() }}); var lab='{{ addslashes($user->fishpond_name) }}'; var inp=document.getElementById('fishpondName'); if(inp){ inp.placeholder = lab || 'Pond Name'; inp.value=''; } }catch(e){} })()">
                                     <span class="font-medium">{{ $user->fishpond_name }}</span>
                                     <span class="ml-2 text-sm text-gray-500">({{ $user->first_name }} {{ $user->last_name }})</span>
                                  </li>
