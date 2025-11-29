@@ -55,6 +55,38 @@
 
         document.addEventListener('livewire:navigated', function(){ try { reapplyThemeFromStorageOrCookie(); } catch(e){} });
         document.addEventListener('alpine:navigated', function(){ try { reapplyThemeFromStorageOrCookie(); } catch(e){} });
+
+        // Some libraries (e.g. nprogress) overwrite `document.documentElement.className`
+        // which can accidentally remove our `dark` class. Observe class changes
+        // and re-apply the `dark` class when the user preference is dark.
+        try {
+            if (!window._agwasuriThemeClassObserver) {
+                window._agwasuriThemeClassObserver = new MutationObserver(function(mutations){
+                    try {
+                        mutations.forEach(function(m){
+                            if (m.type === 'attributes' && m.attributeName === 'class') {
+                                // determine preference
+                                var pref = null;
+                                try { pref = localStorage.getItem('agwasuri_theme') || localStorage.getItem('theme'); } catch(e) { pref = null; }
+                                if (!pref) {
+                                    var mm = document.cookie.match('(?:^|; )agwasuri_theme=([^;]+)') || document.cookie.match('(?:^|; )theme=([^;]+)');
+                                    if (mm && mm[1]) pref = mm[1];
+                                }
+
+                                if (pref === 'dark' && !document.documentElement.classList.contains('dark')) {
+                                    // temporarily disconnect to avoid recursion
+                                    try { window._agwasuriThemeClassObserver.disconnect(); } catch(e){}
+                                    try { document.documentElement.classList.add('dark'); } catch(e){}
+                                    try { window._agwasuriThemeClassObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] }); } catch(e){}
+                                    window.dispatchEvent(new CustomEvent('agwasuri:theme-changed', { detail: 'dark' }));
+                                }
+                            }
+                        });
+                    } catch(e){}
+                });
+                try { window._agwasuriThemeClassObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] }); } catch(e){}
+            }
+        } catch(e){}
     } catch(e){}
 })();
 </script>
