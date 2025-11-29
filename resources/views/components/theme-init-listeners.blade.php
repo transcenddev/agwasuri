@@ -132,36 +132,28 @@ window.addEventListener('user-selected', function(e){
 });
 
 // Delegated click handler: forward clicks on elements with `data-livewire-user-id`
+console.log('[livewire-delegate] handler attached');
 document.addEventListener('click', function(e){
     try {
         var el = e.target.closest && e.target.closest('[data-livewire-user-id]');
         if (!el) return;
         var id = el.getAttribute('data-livewire-user-id');
         if (!id) return;
-        if (window.Livewire) {
+        if (window.Livewire && typeof Livewire.emit === 'function') {
+            Livewire.emit('user-selected', id);
+            // Update placeholders if provided via data attributes
             try {
-                // Prefer targetted emitTo to ensure the WaterQualityDataTable receives the event
-                if (typeof Livewire.emitTo === 'function') {
-                    Livewire.emitTo('water-quality-data-table', 'user-selected', id);
-                    console.log('[livewire-delegate] emitTo water-quality-data-table ->', id);
-                } else if (typeof Livewire.emit === 'function') {
-                    Livewire.emit('user-selected', id);
-                    console.log('[livewire-delegate] emit ->', id);
-                }
-
-                // Update placeholders if provided via data attributes
-                try {
-                    var placeholderTarget = el.getAttribute('data-placeholder-target');
-                    var placeholderValue = el.getAttribute('data-placeholder-value');
-                    if (placeholderTarget && placeholderValue) {
-                        var input = document.getElementById(placeholderTarget);
-                        if (input) {
-                            input.placeholder = placeholderValue;
-                            input.value = '';
-                        }
+                var placeholderTarget = el.getAttribute('data-placeholder-target');
+                var placeholderValue = el.getAttribute('data-placeholder-value');
+                if (placeholderTarget && placeholderValue) {
+                    var input = document.getElementById(placeholderTarget);
+                    if (input) {
+                        input.placeholder = placeholderValue;
+                        input.value = '';
                     }
-                } catch(e){}
-            } catch(e) { console.warn('livewire emit failed', e); }
+                }
+            } catch(e){}
+            console.log('[livewire-delegate] emitted user-selected ->', id);
         }
     } catch(e) {}
 }, { capture: false });

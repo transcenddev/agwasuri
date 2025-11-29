@@ -82,6 +82,11 @@ class WaterQualityDataTable extends Component
     {
         $query = WaterQualityData::where('user_id', $this->userId);
 
+        // Debug: log how many rows the query would return for the current userId
+        try {
+            \Log::info('WaterQualityDataTable:render - query count', ['userId' => $this->userId, 'count' => $query->count()]);
+        } catch (\Throwable $e) {}
+
         if ($this->startDate && $this->endDate) {
             $query->whereBetween('recorded_at', [
                 Carbon::parse($this->startDate)->startOfDay(),
