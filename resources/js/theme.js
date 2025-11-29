@@ -86,13 +86,52 @@ function applyTheme(theme) {
 // Initialize on module import: apply persisted theme if present
 export function initTheme() {
     try {
-        const saved = (function () {
+        // Read persisted theme. Handle malformed/hidden-key variants in localStorage
+        let saved = null;
+        try {
+            saved = localStorage.getItem("agwasuri_theme");
+        } catch (e) {
+            saved = null;
+        }
+
+        // If the normal key is missing but a visually-similar key exists
+        // (e.g. zero-width characters), try to detect and normalize it.
+        if (!saved) {
             try {
-                return localStorage.getItem("agwasuri_theme");
-            } catch (e) {
-                return null;
-            }
-        })();
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (!k) continue;
+                    // normalize key by removing common invisible characters and trimming
+                    const normalized = k.replace(/\u200B|\uFEFF|\u200E|\u200F/g, "").trim();
+                    if (normalized === "agwasuri_theme") {
+                        try {
+                            const v = localStorage.getItem(k);
+                            if (v) {
+                                // promote to canonical key
+                                localStorage.setItem("agwasuri_theme", v);
+                                // optionally remove the weird key to avoid confusion
+                                try { localStorage.removeItem(k); } catch (e) {}
+                                saved = v;
+                                break;
+                            }
+                        } catch (e) {}
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // If still not found, fall back to cookie values (server might have set them)
+        if (!saved) {
+            try {
+                const cookies = Object.fromEntries(document.cookie.split(/;\s*/).map(c => {
+                    const idx = c.indexOf('=');
+                    return [c.slice(0, idx), decodeURIComponent(c.slice(idx + 1))];
+                }));
+                if (cookies['agwasuri_theme']) saved = cookies['agwasuri_theme'];
+                else if (cookies['theme']) saved = cookies['theme'];
+            } catch (e) {}
+        }
+
         applyTheme(saved);
         // Notify listeners about the current theme on init
         try {
