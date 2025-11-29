@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @if(request()->cookie('agwasuri_theme') === 'dark' || request()->cookie('theme') === 'dark') class="dark" @endif>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,20 +7,9 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
         <!-- Prevent flash of wrong theme -->
-        <script>
-        (function() {
-            try {
-                var theme = (function() {
-                    var m = document.cookie.match('(^|;)\\s*agwasuri_theme\\s*=\\s*([^;]+)');
-                    if (m) return m.pop();
-                    return null;
-                })();
-                if (theme === 'dark' || (!theme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    document.documentElement.classList.add('dark');
-                }
-            } catch(e) {}
-        })();
-        </script>
+            @if (view()->exists('components.theme-init-head'))
+                @include('components.theme-init-head')
+            @endif
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
@@ -42,9 +31,12 @@
         {{ $slot }}
 
         @livewireScripts
-        <script type="module">
-        // Expose toggleTheme globally for the button as a fallback if app bundle hasn't run yet
-        import('./../../js/theme.js').then(m => { window.toggleTheme = m.toggleTheme; }).catch(()=>{});
-        </script>
+            @if (view()->exists('components.theme-init-listeners'))
+                @include('components.theme-init-listeners')
+            @endif
+            <script type="module">
+            // Expose toggleTheme globally for the button as a fallback if app bundle hasn't run yet
+            import('./../../js/theme.js').then(m => { window.toggleTheme = m.toggleTheme; }).catch(()=>{});
+            </script>
     </body>
 </html>

@@ -10,9 +10,30 @@ export function toggleTheme() {
     } catch (e) {}
     applyTheme(next);
     try {
-        document.cookie = `agwasuri_theme=${next}; path=/; max-age=${
-            60 * 60 * 24 * 365
-        }`;
+        // Set both cookie names to be robust across different client code
+        // Use a long expiry and SameSite=Lax so the cookie is sent on navigation
+        const expires = new Date();
+        expires.setFullYear(expires.getFullYear() + 10);
+        const expiresStr = expires.toUTCString();
+        try { document.cookie = `agwasuri_theme=${next}; expires=${expiresStr}; path=/; SameSite=Lax`; } catch(e){}
+        try { document.cookie = `theme=${next}; expires=${expiresStr}; path=/; SameSite=Lax`; } catch(e){}
+    } catch (e) {}
+    // Inform the server so it can set secure server-side cookies immediately
+    try {
+        fetch('/set-theme', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ theme: next })
+        }).then(function(response){
+            // We no longer force a full reload here. The app now re-applies the
+            // theme on client-side navigations (Livewire/Alpine) and the server
+            // will also set cookies in the response. This keeps UX smooth.
+        }).catch(function(){});
     } catch (e) {}
     try {
         window.dispatchEvent(
@@ -34,9 +55,11 @@ function applyTheme(theme) {
             localStorage.setItem("agwasuri_theme", theme);
         } catch (e) {}
         try {
-            document.cookie = `agwasuri_theme=${theme}; path=/; max-age=${
-                60 * 60 * 24 * 365
-            }`;
+            const expires = new Date();
+            expires.setFullYear(expires.getFullYear() + 10);
+            const expiresStr = expires.toUTCString();
+            try { document.cookie = `agwasuri_theme=${theme}; expires=${expiresStr}; path=/; SameSite=Lax`; } catch(e){}
+            try { document.cookie = `theme=${theme}; expires=${expiresStr}; path=/; SameSite=Lax`; } catch(e){}
         } catch (e) {}
 
         // Broadcast a DOM event for non-Livewire consumers

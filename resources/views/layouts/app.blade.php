@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" @if(request()->cookie('agwasuri_theme') === 'dark' || request()->cookie('theme') === 'dark') class="dark" @endif>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,35 +12,9 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-        <!-- Inline theme init: read saved preference (localStorage 'agwasuri_theme') or system preference
-             Run before CSS loads to avoid flash-of-incorrect-theme -->
-        <script>
-            (function(){
-                try {
-                    var saved = null;
-                    try { saved = localStorage.getItem('agwasuri_theme'); } catch(e) { saved = null; }
-                    if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                        document.documentElement.classList.add('dark');
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                    }
-                    // helper to toggle theme from other scripts/components
-                    window.agwasuriSetDark = function(on) {
-                        try {
-                            if (on) {
-                                document.documentElement.classList.add('dark');
-                                localStorage.setItem('agwasuri_theme','dark');
-                            } else {
-                                document.documentElement.classList.remove('dark');
-                                localStorage.setItem('agwasuri_theme','light');
-                            }
-                            // also dispatch a DOM event so other scripts can react
-                            try { window.dispatchEvent(new CustomEvent('agwasuri:theme-changed',{detail: on ? 'dark' : 'light'})); } catch(e){}
-                        } catch(e){}
-                    };
-                } catch(e){}
-            })();
-        </script>
+        @if (view()->exists('components.theme-init-head'))
+            @include('components.theme-init-head')
+        @endif
 
         @livewireStyles
         @vite(['resources/css/app.css', 'resources/js/app.js'])

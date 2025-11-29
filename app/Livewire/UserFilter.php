@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\DB;
 
 class UserFilter extends Component
 {
@@ -89,10 +90,18 @@ class UserFilter extends Component
         $userModel = new User();
         $primaryKeyName = $userModel->getKeyName();
         $query = User::query()->select($primaryKeyName, 'first_name', 'last_name', 'fishpond_name');
-        $query->where(function ($q) {
+        // DB-agnostic full-name concat
+        try {
+            $driver = DB::getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        } catch (\Throwable $e) {
+            $driver = null;
+        }
+        $fullNameExpr = $driver === 'sqlite' ? "first_name || ' ' || last_name" : "CONCAT(first_name, ' ', last_name)";
+
+        $query->where(function ($q) use ($fullNameExpr) {
             $q->where('first_name', 'like', '%' . $this->fullName . '%')
               ->orWhere('last_name', 'like', '%' . $this->fullName . '%')
-              ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ['%' . $this->fullName . '%']);
+              ->orWhereRaw("{$fullNameExpr} LIKE ?", ['%' . $this->fullName . '%']);
         });
         if (!empty($this->fishpondName)) {
              $query->where('fishpond_name', 'like', '%' . $this->fishpondName . '%');

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\NormalizeThemeCookie;
 use GuzzleHttp\Promise\Is;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,8 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'isAdmin' => IsAdmin::class
+            'isAdmin' => IsAdmin::class,
+            'normalizeTheme' => NormalizeThemeCookie::class,
         ]);
+        // Ensure NormalizeThemeCookie runs for web group so server-side cookie is normalized
+        $middleware->web(append: [NormalizeThemeCookie::class]);
         $middleware->validateCsrfTokens(
             except: ['store-water-quality-data']
         );
