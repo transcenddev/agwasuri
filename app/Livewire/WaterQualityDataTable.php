@@ -25,6 +25,11 @@ class WaterQualityDataTable extends Component
     #[On('user-selected')]
     public function updateUser($userId)
     {
+        // Debug: log when an updateUser event is received and the incoming value
+        try {
+            \Log::info('WaterQualityDataTable:updateUser called', ['userId' => $userId, 'type' => gettype($userId)]);
+        } catch (\Throwable $e) {}
+
         $this->userId = $userId;
         $this->resetPage();
     }
@@ -68,6 +73,9 @@ class WaterQualityDataTable extends Component
     {
         $this->paginate_num = Route::currentRouteName() === 'historical-data' ? 50 : 10;
         $this->userId = Auth::id();
+        try {
+            \Log::info('WaterQualityDataTable:mount', ['initialUserId' => $this->userId]);
+        } catch (\Throwable $e) {}
     }
 
     public function render()
