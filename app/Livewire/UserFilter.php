@@ -230,8 +230,9 @@ class UserFilter extends Component
     // User selection updates placeholders and clears input values
     public function selectUser($userId, $selectedFullName, $selectedFishpondName): void
     {
-        // Emit a Livewire event so other Livewire components can listen server-side
-        $this->emit('user-selected', $userId);
+        // Dispatch a browser event; a small client-side forwarder will emit
+        // this to Livewire so server-side listeners (#[On('user-selected')]) run.
+        $this->dispatchBrowserEvent('user-selected', ['userId' => $userId]);
 
         // Update the placeholder properties
         $this->selectedUserNameForPlaceholder = $selectedFullName;

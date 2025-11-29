@@ -119,4 +119,15 @@ document.addEventListener('livewire:navigated', (event) => {
 window.addEventListener('agwasuri:theme-changed', (e) => {
     console.log('🎨 Theme changed to:', e.detail);
 });
+
+// Forward `user-selected` browser events to Livewire (so server-side #[On] handlers run)
+window.addEventListener('user-selected', function(e){
+    try {
+        if (window.Livewire && typeof Livewire.emit === 'function') {
+            var userId = e?.detail?.userId ?? e?.detail?.userId ?? null;
+            Livewire.emit('user-selected', userId);
+            console.log('[livewire-forward] user-selected ->', userId);
+        }
+    } catch(err) { console.warn('forward user-selected failed', err); }
+});
 </script>
