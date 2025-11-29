@@ -18,7 +18,11 @@ class WaterQualityDataTable extends Component
 
     public $paginate_num;
     public $userId;
-
+    
+    protected $queryString = [
+        // persist the selected user in the URL so filters carry between pages
+        'userId' => ['except' => null],
+    ];
     public ?string $startDate = null;
     public ?string $endDate = null;
 
@@ -72,7 +76,11 @@ class WaterQualityDataTable extends Component
     public function mount()
     {
         $this->paginate_num = Route::currentRouteName() === 'historical-data' ? 50 : 10;
-        $this->userId = Auth::id();
+        // If userId was provided via query string or component param, keep it.
+        // Otherwise default to the authenticated user.
+        if (empty($this->userId)) {
+            $this->userId = Auth::id();
+        }
         try {
             \Log::info('WaterQualityDataTable:mount', ['initialUserId' => $this->userId]);
         } catch (\Throwable $e) {}
