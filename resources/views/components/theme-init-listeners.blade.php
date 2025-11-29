@@ -130,4 +130,30 @@ window.addEventListener('user-selected', function(e){
         }
     } catch(err) { console.warn('forward user-selected failed', err); }
 });
+
+// Delegated click handler: forward clicks on elements with `data-livewire-user-id`
+document.addEventListener('click', function(e){
+    try {
+        var el = e.target.closest && e.target.closest('[data-livewire-user-id]');
+        if (!el) return;
+        var id = el.getAttribute('data-livewire-user-id');
+        if (!id) return;
+        if (window.Livewire && typeof Livewire.emit === 'function') {
+            Livewire.emit('user-selected', id);
+            // Update placeholders if provided via data attributes
+            try {
+                var placeholderTarget = el.getAttribute('data-placeholder-target');
+                var placeholderValue = el.getAttribute('data-placeholder-value');
+                if (placeholderTarget && placeholderValue) {
+                    var input = document.getElementById(placeholderTarget);
+                    if (input) {
+                        input.placeholder = placeholderValue;
+                        input.value = '';
+                    }
+                }
+            } catch(e){}
+            console.log('[livewire-delegate] emitted user-selected ->', id);
+        }
+    } catch(e) {}
+}, { capture: false });
 </script>
