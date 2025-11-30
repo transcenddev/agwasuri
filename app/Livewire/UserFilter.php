@@ -31,11 +31,26 @@ class UserFilter extends Component
     public SupportCollection $omniResults;
     public bool $showOmniResults = false;
 
+    // Selected user id exposed via query string for bookmarkable URLs
+    public ?int $selectedUserId = null;
+
+    protected $queryString = [
+        // use `user` as the query param name for readability
+        'selectedUserId' => ['as' => 'user'],
+    ];
+
     public function mount()
     {
         $this->fullNameResults = new Collection();
         $this->fishpondNameResults = new Collection();
         $this->omniResults = new SupportCollection();
+        // Initialize selectedUserId from query string or session so the
+        // component reflects bookmarked/previous selections
+        try {
+            $this->selectedUserId = request('user') ?? session('selected_user', null);
+        } catch (\Throwable $e) {
+            $this->selectedUserId = session('selected_user', null);
+        }
         // Optionally, load the initial user's name/pond into placeholder on mount if needed
         // $initialUser = User::find(Auth::id());
         // if ($initialUser) {
@@ -230,9 +245,14 @@ class UserFilter extends Component
     // User selection updates placeholders and clears input values
     public function selectUser($userId, $selectedFullName, $selectedFishpondName): void
     {
-        // Dispatch a browser event; a small client-side forwarder will emit
-        // this to Livewire so server-side listeners (#[On('user-selected')]) run.
-        $this->dispatchBrowserEvent('user-selected', ['userId' => $userId]);
+        // Persist selection so other pages/components can read it
+        try { session(['selected_user' => $userId]); } catch (\Throwable $e) {}
+
+        // Update query-string bound property so URL is bookmarkable
+        $this->selectedUserId = (int) $userId;
+
+        // Dispatch event for same-page Livewire consumers
+        $this->dispatch('user-selected', userId: $userId);
 
         // Update the placeholder properties
         $this->selectedUserNameForPlaceholder = $selectedFullName;

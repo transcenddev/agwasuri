@@ -18,11 +18,7 @@ class WaterQualityDataTable extends Component
 
     public $paginate_num;
     public $userId;
-    
-    protected $queryString = [
-        // persist the selected user in the URL so filters carry between pages
-        'userId' => ['except' => null],
-    ];
+
     public ?string $startDate = null;
     public ?string $endDate = null;
 
@@ -76,10 +72,11 @@ class WaterQualityDataTable extends Component
     public function mount()
     {
         $this->paginate_num = Route::currentRouteName() === 'historical-data' ? 50 : 10;
-        // If userId was provided via query string or component param, keep it.
-        // Otherwise default to the authenticated user.
-        if (empty($this->userId)) {
-            $this->userId = Auth::id();
+        // Hybrid: prefer explicit `user` query param, then session fallback, then Auth id
+        try {
+            $this->userId = request('user') ?? session('selected_user', Auth::id());
+        } catch (\Throwable $e) {
+            $this->userId = session('selected_user', Auth::id());
         }
         try {
             \Log::info('WaterQualityDataTable:mount', ['initialUserId' => $this->userId]);
