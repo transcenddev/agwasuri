@@ -18,6 +18,10 @@ class UserTable extends Component
     public $showForm = false;
     public $editingUserId = null;
 
+    // Bulk selection
+    public $selected = [];
+    public $selectAll = false;
+
     public $showDeleteModal = false;
     public $deletingUserId = null;
     public $deletingUserName = null; // full name for confirmation UI
@@ -59,6 +63,75 @@ class UserTable extends Component
         ])) {
             $this->resetPage();
         }
+    }
+
+    public function updatedSelectAll($value)
+    {
+        if ($value) {
+            // Select all user IDs on the current page
+            $query = $this->buildUserQuery();
+            $ids = $query->paginate(10)->pluck('user_id')->toArray();
+            $this->selected = $ids;
+        } else {
+            $this->selected = [];
+        }
+    }
+
+    protected function buildUserQuery()
+    {
+        $query = User::query();
+
+        if (!empty($this->filterName)) {
+            $value = $this->filterName;
+            try {
+                $driver = DB::getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            } catch (\Throwable $e) {
+                $driver = null;
+            }
+
+            $fullNameExpr = $driver === 'sqlite'
+                ? "first_name || ' ' || last_name"
+                : "CONCAT(first_name, ' ', last_name)";
+
+            $query->where(function($q) use ($value, $fullNameExpr) {
+                $q->where('first_name', 'like', '%'.$value.'%')
+                  ->orWhere('last_name', 'like', '%'.$value.'%')
+                  ->orWhere('email', 'like', '%'.$value.'%')
+                  ->orWhere('fishpond_name', 'like', '%'.$value.'%')
+                  ->orWhere('barangay', 'like', '%'.$value.'%')
+                  ->orWhere('municipality', 'like', '%'.$value.'%')
+                  ->orWhere('province', 'like', '%'.$value.'%')
+                  ->orWhere('species_cultured', 'like', '%'.$value.'%')
+                  ->orWhereRaw("{$fullNameExpr} LIKE ?", ['%'.$value.'%']);
+            });
+        }
+        if (!empty($this->filterEmail)) {
+            $query->where('email', 'like', '%' . $this->filterEmail . '%');
+        }
+        if (!empty($this->filterAccountType)) {
+            $query->where('account_type', $this->filterAccountType);
+        }
+         if (!empty($this->filterBarangay)) {
+            $query->where('barangay', 'like', '%' . $this->filterBarangay . '%');
+        }
+        if (!empty($this->filterMunicipality)) {
+            $query->where('municipality', 'like', '%' . $this->filterMunicipality . '%');
+        }
+        if (!empty($this->filterProvince)) {
+            $query->where('province', 'like', '%' . $this->filterProvince . '%');
+        }
+         if (!empty($this->filterWaterType)) {
+            $query->where('water_type', $this->filterWaterType);
+        }
+        if (!empty($this->filterSpecies)) {
+            $query->where('species_cultured', 'like', '%' . $this->filterSpecies . '%');
+        }
+        // Added: Filter for Fishpond Name
+        if (!empty($this->filterFishpondName)) {
+            $query->where('fishpond_name', 'like', '%' . $this->filterFishpondName . '%');
+        }
+
+        return $query;
     }
     public function mount()
     {
@@ -361,6 +434,42 @@ class UserTable extends Component
         } catch (\Throwable $e) {
             Log::error('deleteUser exception', ['user_id' => $userId, 'error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             session()->flash('error', 'Server error while deleting user. Check logs for details.');
+        }
+    }
+
+    /**
+     * Bulk delete selected users (no typed confirmation).
+     */
+    public function bulkDeleteSelected()
+    {
+        if (empty($this->selected)) {
+            session()->flash('error', 'No users selected.');
+            return;
+        }
+
+        $currentId = optional(Auth::user())->user_id;
+        $toDelete = array_filter($this->selected, function ($id) use ($currentId) {
+            return $id !== $currentId;
+        });
+
+        if (empty($toDelete)) {
+            session()->flash('error', 'Cannot delete the currently authenticated user.');
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+            User::whereIn('user_id', $toDelete)->delete();
+            DB::commit();
+            session()->flash('message', 'Selected users deleted successfully.');
+            $this->selected = [];
+            $this->selectAll = false;
+            $this->resetPage();
+            $this->emit('refreshUsers');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('bulkDeleteSelected failed', ['error' => $e->getMessage(), 'selected' => $this->selected]);
+            session()->flash('error', 'Failed to delete selected users. Check logs.');
         }
     }
 

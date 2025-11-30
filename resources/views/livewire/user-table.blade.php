@@ -50,7 +50,17 @@
         </x-card-header>
     </x-slot>
 
-    <div class="p-6 relative">
+            <div class="p-6 relative">
+                {{-- Bulk actions bar --}}
+                @if(!empty($selected))
+                    <div class="mb-4 p-3 rounded bg-gray-50 border border-gray-200 flex items-center justify-between">
+                        <div class="text-sm text-gray-700">{{ count($selected) }} selected</div>
+                        <div class="flex items-center space-x-2">
+                            <button wire:click="bulkDeleteSelected" class="inline-flex items-center px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700">Delete Selected</button>
+                            <button wire:click="$set('selected', [])" class="inline-flex items-center px-3 py-2 bg-white border border-gray-200 rounded text-sm">Clear</button>
+                        </div>
+                    </div>
+                @endif
         {{-- Session Messages (Green for success, Red for errors) --}}
         @if (session()->has('message'))
             <div class="mb-4 rounded bg-green-100 p-4 text-sm text-green-700">
@@ -172,8 +182,9 @@
         </div>
         @endif
         <div class="overflow-x-auto relative overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
-            <table class="hidden table-desktop min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
+            <table class="hidden md:table min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
                 <colgroup>
+                    <col style="width:3.5rem"> <!-- select -->
                     <col style="width:6rem"> <!-- ID -->
                     <col> <!-- Full name flexible -->
                     <col style="width:20rem"> <!-- Email -->
@@ -183,6 +194,9 @@
                 </colgroup>
                 <thead class="bg-white">
                     <tr>
+                        <th scope="col" class="sticky top-0 z-10 bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                            <input type="checkbox" wire:model="selectAll" aria-label="Select all" class="h-4 w-4 rounded border-gray-300">
+                        </th>
                         <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">ID</th>
                         <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Full Name</th>
                         <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
@@ -194,10 +208,19 @@
                 <tbody class="divide-y divide-gray-200 bg-white">
                     @forelse ($users as $user)
                         <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-50">
+                            <td class="whitespace-nowrap px-4 py-2 text-sm text-gray-900 text-left">
+                                <input type="checkbox" wire:model="selected" value="{{ $user->user_id }}" class="h-4 w-4 rounded border-gray-300">
+                            </td>
                             <td data-cell="ID" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-right">{{ $user->user_id }}</td>
                             <td data-cell="Full Name" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-left">{{ $user->first_name }} {{ $user->last_name }}</td>
                             <td data-cell="Email" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 truncate max-w-[18rem] text-left" title="{{ $user->email }}">{{ $user->email }}</td>
-                            <td data-cell="Type" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-center">{{ $user->account_type }}</td>
+                            <td data-cell="Type" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-center">
+                                @if(strtolower($user->account_type) === 'admin')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cvsu-600 text-white">Admin</span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">User</span>
+                                @endif
+                            </td>
                             <td data-cell="Location" class="px-6 py-2 text-sm text-gray-700 text-center">
                                 <div class="font-medium">{{ $user->fishpond_name ?: ($user->barangay ? $user->barangay : '—') }}</div>
                                 <div class="text-xs text-gray-500">{{ $user->municipality }}{{ $user->municipality && $user->province ? ', ' : '' }}{{ $user->province }}</div>
@@ -238,7 +261,7 @@
                 </tbody>
             </table>
             {{-- Mobile: Card-list view for small screens (visible until md breakpoint) --}}
-            <div class="table-mobile mt-2">
+            <div class="table-mobile mt-2 md:hidden">
                 <div class="space-y-3">
                     @forelse ($users as $user)
                         <div class="bg-white border border-gray-100 rounded-lg p-4 shadow-sm">
@@ -246,7 +269,11 @@
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2">
                                         <div class="font-medium text-sm text-gray-900 truncate">{{ $user->first_name }} {{ $user->last_name }}</div>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">{{ ucfirst($user->account_type) }}</span>
+                                        @if(strtolower($user->account_type) === 'admin')
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cvsu-600 text-white">Admin</span>
+                                        @else
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">User</span>
+                                        @endif
                                     </div>
                                     <div class="text-xs text-gray-500 mt-1 truncate">{{ $user->email }}</div>
                                     <div class="text-xs text-gray-500 mt-1">{{ $user->fishpond_name ?: ($user->barangay ? $user->barangay : '—') }}@if($user->municipality), {{ $user->municipality }}@endif@if($user->province), {{ $user->province }}@endif</div>
