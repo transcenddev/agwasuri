@@ -14,34 +14,37 @@
             </x-slot>
 
             <x-slot name="actions">
-                <div class="flex items-center space-x-2 justify-end">
-                    <div class="hidden sm:block">
+                <div class="w-full flex flex-col md:flex-row md:items-center md:justify-end md:space-x-4 gap-3">
+                    {{-- Search + actions wrapper: on mobile stack vertically, on tablet wrap, on desktop align horizontally --}}
+                    <div class="w-full md:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-2 gap-2 md:gap-0">
                         <input
                             type="search"
                             wire:model.live="filterName"
                             placeholder="Search name, email, pond, location or species"
-                            class="w-64 rounded-md border border-cvsu-200 px-3 py-2 text-sm focus:border-cvsu-600 focus:ring-cvsu-300"
+                            class="w-full md:w-64 rounded-md border border-cvsu-200 px-3 py-2 text-sm focus:border-cvsu-600 focus:ring-cvsu-300"
                         />
                     </div>
 
-                    <button
-                        wire:click="toggleFilters"
-                        aria-expanded="{{ $showFilters ? 'true' : 'false' }}"
-                        class="rounded bg-white border border-cvsu-200 px-3 py-2 text-sm text-cvsu-600 hover:bg-cvsu-50 flex items-center"
-                    >
-                        <svg class="h-4 w-4 mr-2 text-cvsu-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01.29.71l-6 6V20l-4-2v-7.29L3.29 6.71A1 1 0 013 6V4z" />
-                        </svg>
-                        <span>Filters</span>
-                        <span class="ml-2 text-xs text-gray-500">{{ $showFilters ? '▲' : '▼' }}</span>
-                    </button>
+                    <div class="w-full md:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-2 gap-2 md:gap-0 md:justify-end">
+                        <button
+                            wire:click="toggleFilters"
+                            aria-expanded="{{ $showFilters ? 'true' : 'false' }}"
+                            class="w-full sm:w-auto rounded bg-white border border-cvsu-200 px-3 py-2 text-sm text-cvsu-600 hover:bg-cvsu-50 flex items-center justify-center"
+                        >
+                            <svg class="h-4 w-4 mr-2 text-cvsu-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01.29.71l-6 6V20l-4-2v-7.29L3.29 6.71A1 1 0 013 6V4z" />
+                            </svg>
+                            <span>Filters</span>
+                            <span class="ml-2 text-xs text-gray-500">{{ $showFilters ? '▲' : '▼' }}</span>
+                        </button>
 
-                    <button wire:click="createUser" class="rounded bg-cvsu-600 px-3 py-2 text-sm font-medium text-white hover:bg-cvsu-700 flex items-center">
-                        <svg class="h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Create User
-                    </button>
+                        <button wire:click="createUser" class="w-full sm:w-auto rounded bg-cvsu-600 px-3 py-2 text-sm font-medium text-white hover:bg-cvsu-700 flex items-center justify-center">
+                            <svg class="h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Create User
+                        </button>
+                    </div>
                 </div>
             </x-slot>
         </x-card-header>
@@ -169,7 +172,7 @@
         </div>
         @endif
         <div class="overflow-x-auto relative overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
-            <table class="hidden md:table min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
+            <table class="hidden table-desktop min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
                 <colgroup>
                     <col style="width:6rem"> <!-- ID -->
                     <col> <!-- Full name flexible -->
@@ -201,7 +204,7 @@
                             </td>
                             <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-2 text-sm font-medium text-center">
                                 {{-- Primary inline actions (desktop) --}}
-                                <div class="hidden md:flex items-center space-x-2">
+                                <div class="hidden desktop-actions items-center space-x-2">
                                     <button wire:click="showDetails({{ $user->user_id }})" title="View details" aria-label="View details" class="action-icon text-cvsu-600 hover:text-cvsu-700">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         <span class="sr-only">Details</span>
@@ -235,7 +238,7 @@
                 </tbody>
             </table>
             {{-- Mobile: Card-list view for small screens (visible until md breakpoint) --}}
-            <div class="md:hidden mt-2">
+            <div class="table-mobile mt-2">
                 <div class="space-y-3">
                     @forelse ($users as $user)
                         <div class="bg-white border border-gray-100 rounded-lg p-4 shadow-sm">
