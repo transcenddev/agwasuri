@@ -49,7 +49,10 @@ $login = function () {
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" name="remember">
+                <input wire:model="form.remember" id="remember" type="checkbox"
+                    class="text-cvsu-500 border-cvsu-500 rounded shadow-sm focus:ring-cvsu-500 focus:border-cvsu-500"
+                    style="accent-color: var(--cvsu-500); -webkit-accent-color: var(--cvsu-500);"
+                    name="remember">
                 <span class="text-sm text-gray-600 ms-2">{{ __('Remember me') }}</span>
             </label>
         </div>
