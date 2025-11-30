@@ -164,7 +164,7 @@
         </div>
         @endif
         <div class="overflow-x-auto relative overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
-            <table class="hidden sm:table min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
+            <table class="hidden md:table min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
                 <colgroup>
                     <col style="width:6rem"> <!-- ID -->
                     <col> <!-- Full name flexible -->
@@ -173,14 +173,14 @@
                     <col style="width:18rem"> <!-- Location -->
                     <col style="width:6.5rem"> <!-- Actions -->
                 </colgroup>
-                <thead class="bg-gray-50">
+                <thead class="bg-white">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">ID</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Full Name</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
-                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Location</th>
-                        <th scope="col" class="sticky right-0 z-10 bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">ID</th>
+                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Full Name</th>
+                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
+                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
+                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Location</th>
+                        <th scope="col" class="sticky top-0 right-0 z-10 bg-white px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
@@ -224,34 +224,34 @@
                     @endforelse
                 </tbody>
             </table>
-            {{-- Mobile: Card-list view for small screens --}}
-            <div class="sm:hidden mt-2"> 
-                <div class="space-y-3"> 
+            {{-- Mobile: Card-list view for small screens (visible until md breakpoint) --}}
+            <div class="md:hidden mt-2">
+                <div class="space-y-3">
                     @forelse ($users as $user)
-                        <div class="bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-lg p-4 shadow-sm flex items-start justify-between">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center font-semibold">{{ strtoupper(substr($user->first_name ?? '', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? '', 0, 1)) }}</div>
+                        <div class="bg-white border border-gray-100 rounded-lg p-4 shadow-sm">
+                            <div class="flex items-start justify-between">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2">
-                                        <div class="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">{{ $user->first_name }} {{ $user->last_name }}</div>
-                                        <div class="text-xs text-gray-500 truncate">{{ $user->account_type }}</div>
+                                        <div class="font-medium text-sm text-gray-900 truncate">{{ $user->first_name }} {{ $user->last_name }}</div>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">{{ ucfirst($user->account_type) }}</span>
                                     </div>
-                                    <div class="text-xs text-gray-500 truncate mt-1">{{ $user->email }}</div>
-                                    <div class="text-xs text-gray-400 mt-1">ID: {{ $user->user_id }}</div>
+                                    <div class="text-xs text-gray-500 mt-1 truncate">{{ $user->email }}</div>
+                                    <div class="text-xs text-gray-500 mt-1">{{ $user->fishpond_name ?: ($user->barangay ? $user->barangay : '—') }}@if($user->municipality), {{ $user->municipality }}@endif@if($user->province), {{ $user->province }}@endif</div>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-2 ml-2">
-                                <button wire:click="showDetails({{ $user->user_id }})" aria-label="View details" title="View details" class="action-icon text-cvsu-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                </button>
 
-                                <button wire:click="editUser({{ $user->user_id }})" aria-label="Edit user" title="Edit user" class="action-icon text-gray-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/></svg>
-                                </button>
+                                <div class="flex items-center gap-2 ml-4">
+                                    <button wire:click="showDetails({{ $user->user_id }})" aria-label="View details" title="View details" class="action-icon text-cvsu-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
 
-                                <button wire:click="confirmDelete({{ $user->user_id }})" aria-label="Delete user" title="Delete user" class="action-icon text-red-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
+                                    <button wire:click="editUser({{ $user->user_id }})" aria-label="Edit user" title="Edit user" class="action-icon text-gray-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/></svg>
+                                    </button>
+
+                                    <button wire:click="confirmDelete({{ $user->user_id }})" aria-label="Delete user" title="Delete user" class="action-icon text-red-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     @empty
