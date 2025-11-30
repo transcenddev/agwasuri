@@ -36,10 +36,10 @@ class UserFilter extends Component
 
     protected $queryString = [
         // use `user` as the query param name for readability
-        'selectedUserId' => ['as' => 'user'],
+        'selectedUserId' => ['as' => 'user', 'except' => ''],
     ];
 
-    public function mount()
+    public function mount(): void
     {
         $this->fullNameResults = new Collection();
         $this->fishpondNameResults = new Collection();
@@ -47,9 +47,9 @@ class UserFilter extends Component
         // Initialize selectedUserId from query string or session so the
         // component reflects bookmarked/previous selections
         try {
-            $this->selectedUserId = request('user') ?? session('selected_user', null);
+            $this->selectedUserId = request('user') ?? session('selected_user');
         } catch (\Throwable $e) {
-            $this->selectedUserId = session('selected_user', null);
+            $this->selectedUserId = session('selected_user');
         }
         // Optionally, load the initial user's name/pond into placeholder on mount if needed
         // $initialUser = User::find(Auth::id());
@@ -243,7 +243,7 @@ class UserFilter extends Component
 
 
     // User selection updates placeholders and clears input values
-    public function selectUser($userId, $selectedFullName, $selectedFishpondName): void
+    public function selectUser($userId): void
     {
         // Persist selection so other pages/components can read it
         try { session(['selected_user' => $userId]); } catch (\Throwable $e) {}
@@ -254,9 +254,14 @@ class UserFilter extends Component
         // Dispatch event for same-page Livewire consumers
         $this->dispatch('user-selected', userId: $userId);
 
-        // Update the placeholder properties
-        $this->selectedUserNameForPlaceholder = $selectedFullName;
-        $this->selectedPondNameForPlaceholder = $selectedFishpondName;
+        // Update the placeholder properties if we can resolve the user
+        try {
+            $u = User::find($userId);
+            if ($u) {
+                $this->selectedUserNameForPlaceholder = trim($u->first_name . ' ' . $u->last_name);
+                $this->selectedPondNameForPlaceholder = $u->fishpond_name;
+            }
+        } catch (\Throwable $e) {}
 
         // Clear the actual input values
         $this->fullName = '';
