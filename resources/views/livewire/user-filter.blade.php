@@ -1,25 +1,23 @@
 {{-- Main container --}}
 <div>
-    {{-- Wrapper to constrain the width of the grid below to 50% on medium screens and up --}}
-    <div class="md:w-1/2">
+    {{-- Wrapper to constrain the width of the grid below to 50% on large screens and up --}}
+    <div class="lg:w-1/2">
         <div class="grid grid-cols-1 gap-x-4 gap-y-2 mb-1 md:grid-cols-2">
 
             {{-- Omnisearch (user or pond) --}}
             <div class="relative col-span-2" x-data @click.outside="$wire.showOmniResults = false">
-                <input type="text" id="omniSearch"
-                       wire:model.live.debounce.300ms="omni"
-                       class="block w-full h-12 px-4 mt-1 text-left text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm placeholder:text-gray-400"
-                       placeholder="Search user or fishpond name..."
-                       autocomplete="off">
+                  <input type="text" id="omniSearch"
+                      wire:model.live.debounce.300ms="omni"
+                      class="block w-full h-12 px-4 mt-1 text-left text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      placeholder="Search user or fishpond name..."
+                      autocomplete="off">
 
                 <div x-show="$wire.showOmniResults" x-transition style="display: none;">
                     @if($omniResults->isNotEmpty())
                         <ul class="absolute z-50 w-full mt-1 overflow-auto bg-white rounded-md shadow-lg max-h-60">
                             @foreach($omniResults as $r)
                                 <li class="px-4 py-2 cursor-pointer hover:bg-indigo-100 flex items-center justify-between"
-                                    data-livewire-user-id="{{ $r['id'] }}"
-                                    data-placeholder-target="omniSearch"
-                                    data-placeholder-value="{{ addslashes($r['type'] === 'user' ? $r['label'] : $r['meta']) }}">
+                                    wire:click="selectUser({{ $r['id'] }})">
                                     <div>
                                         <span class="font-medium">{{ $r['label'] }}</span>
                                         <span class="ml-2 text-xs text-gray-500">{{ ucfirst($r['type']) }}{{ $r['meta'] ? ' · ' . $r['meta'] : '' }}</span>
@@ -58,9 +56,7 @@
                         <ul class="absolute z-50 w-full mt-1 overflow-auto bg-white rounded-md shadow-lg max-h-60" >
                             @foreach($fullNameResults as $user)
                                 <li class="px-4 py-2 cursor-pointer hover:bg-indigo-100"
-                                    data-livewire-user-id="{{ $user->getKey() }}"
-                                    data-placeholder-target="fullName"
-                                    data-placeholder-value="{{ addslashes($user->first_name) }} {{ addslashes($user->last_name) }}">
+                                    wire:click="selectUser({{ $user->getKey() }})">
                                     <span class="font-medium">{{ $user->first_name }} {{ $user->last_name }}</span>
                                     @if($user->fishpond_name)
                                         <span class="ml-2 text-sm text-gray-500">({{ $user->fishpond_name }})</span>
@@ -97,9 +93,7 @@
                         <ul class="absolute z-50 w-full mt-1 overflow-auto bg-white rounded-md shadow-lg max-h-60">
                             @foreach($fishpondNameResults as $user)
                                  <li class="px-4 py-2 cursor-pointer hover:bg-indigo-100"
-                                     data-livewire-user-id="{{ $user->getKey() }}"
-                                     data-placeholder-target="fishpondName"
-                                     data-placeholder-value="{{ addslashes($user->fishpond_name) }}">
+                                     wire:click="selectUser({{ $user->getKey() }})">
                                     <span class="font-medium">{{ $user->fishpond_name }}</span>
                                     <span class="ml-2 text-sm text-gray-500">({{ $user->first_name }} {{ $user->last_name }})</span>
                                  </li>
@@ -115,3 +109,21 @@
         </div>
     </div> {{-- End of md:w-1/2 wrapper --}}
 </div>
+
+{{-- Script: listen for URL update events and update query param without navigation --}}
+<script>
+    window.addEventListener('agwa:update-user-query', function (ev) {
+        try {
+            const user = ev.detail?.user;
+            const url = new URL(window.location.href);
+            if (user) {
+                url.searchParams.set('user', user);
+            } else {
+                url.searchParams.delete('user');
+            }
+            history.replaceState({}, '', url.toString());
+        } catch (e) {
+            console.warn('Failed to update user query param', e);
+        }
+    });
+</script>
