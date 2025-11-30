@@ -31,12 +31,12 @@ $logout = function (Logout $logout) {
                     </x-nav-link>
 
                     <x-nav-link :href="route('historical-data', ['user' => request('user')])" :active="request()->routeIs('historical-data')" wire:navigate>
-                        Historical Data
+                        History
                     </x-nav-link>
 
                     @if (auth()->user()->isAdmin())
                         <x-nav-link :href="route('account_management')" :active="request()->routeIs('account_management')" wire:navigate>
-                            Account Management
+                            Accounts
                         </x-nav-link>
                     @endif
                 </div>
@@ -55,8 +55,8 @@ $logout = function (Logout $logout) {
                             <div x-data='@json(["name" => (auth()->user()?->name ?? "User")])' x-text="name"
                                 x-on:profile-updated.window="name = $event.detail.name" aria-live="polite">User</div>
 
-                            <!-- <div x-data="{{ json_encode(['name' => trim((auth()->user()->first_name ?? '') . ' ' . (auth()->user()->last_name ?? '')) ?: 'User']) }}" x-text="name"
-                                x-on:profile-updated.window="name = $event.detail.name"></div> -->
+                            {{-- <div x-data="{{ json_encode(['name' => trim((auth()->user()->first_name ?? '') . ' ' . (auth()->user()->last_name ?? '')) ?: 'User']) }}" x-text="name"
+                                x-on:profile-updated.window="name = $event.detail.name"></div> --}}
 
 
                             <div class="ms-1">
