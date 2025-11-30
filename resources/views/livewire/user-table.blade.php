@@ -5,6 +5,11 @@
                 <div class="flex-1">
                     <h1 class="text-lg font-semibold text-gray-900">Account Management</h1>
                     <p class="text-sm text-gray-500 mt-1">Manage accounts, roles, and API keys</p>
+                    @isset($totalUsers)
+                        <div class="text-xs text-gray-500 mt-2">
+                            {{ $totalUsers }} users · {{ $adminCount }} {{ $adminCount == 1 ? 'admin' : 'admins' }} · {{ $regularCount }} {{ $regularCount == 1 ? 'farmer' : 'farmers' }}
+                        </div>
+                    @endisset
                 </div>
             </x-slot>
 
@@ -213,6 +218,11 @@
                                     </button>
                                 </div>
 
+                                {{-- Hidden per-row Livewire hooks used as a robust fallback when global Livewire.emit is not available --}}
+                                <button id="user-action-edit-{{ $user->user_id }}" wire:click="showDetails({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
+                                <button id="user-action-edit-user-{{ $user->user_id }}" wire:click="editUser({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
+                                <button id="user-action-delete-{{ $user->user_id }}" wire:click="confirmDelete({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
+
                                 {{-- Kebab menu removed for mobile — use inline icons instead --}}
                                 {{-- Previously used on small screens as a fallback; hidden to prefer explicit actions on mobile cards --}}
                             </td>
@@ -239,19 +249,26 @@
                                     <div class="text-xs text-gray-500 mt-1">{{ $user->fishpond_name ?: ($user->barangay ? $user->barangay : '—') }}@if($user->municipality), {{ $user->municipality }}@endif@if($user->province), {{ $user->province }}@endif</div>
                                 </div>
 
-                                <div class="flex items-center gap-2 ml-4">
-                                    <button wire:click="showDetails({{ $user->user_id }})" aria-label="View details" title="View details" class="action-icon text-cvsu-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                    </button>
-
-                                    <button wire:click="editUser({{ $user->user_id }})" aria-label="Edit user" title="Edit user" class="action-icon text-gray-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/></svg>
-                                    </button>
-
-                                    <button wire:click="confirmDelete({{ $user->user_id }})" aria-label="Delete user" title="Delete user" class="action-icon text-red-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                <div class="ml-4">
+                                    <!-- Mobile: single kebab menu that opens the shared global action menu -->
+                                    <button
+                                        type="button"
+                                        class="inline-flex items-center justify-center rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                        title="More actions"
+                                        onclick="window.dispatchEvent(new CustomEvent('open-user-action-menu',{detail:{userId: {{ $user->user_id }}, x: (event.clientX || 0), y: (event.clientY || 0)}}))"
+                                    >
+                                        <span class="sr-only">Open actions</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM18 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
                                     </button>
                                 </div>
+                                {{-- Hidden hooks for mobile actions fallback (same ids as desktop fallback) --}}
+                                <button id="user-action-edit-{{ $user->user_id }}" wire:click="showDetails({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
+                                <button id="user-action-edit-user-{{ $user->user_id }}" wire:click="editUser({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
+                                <button id="user-action-delete-{{ $user->user_id }}" wire:click="confirmDelete({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
                             </div>
                         </div>
                     @empty
@@ -270,7 +287,7 @@
         </div>
 
         {{-- Global action menu (single overlay for all rows) --}}
-        <div x-data="globalUserMenu()" x-cloak class="hidden" @keydown.escape.window="open = false" style="pointer-events: auto;">
+        <div x-data="globalUserMenu()" x-cloak x-show="open" @keydown.escape.window="open = false" class="fixed inset-0 z-40" style="pointer-events: auto;">
             <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" x-ref="menu" tabindex="-1" :style="`position: fixed; top: ${top}px; left: ${left}px;`" class="global-action-menu z-40" @click.away="open=false" role="menu" aria-orientation="vertical">
                 <div class="py-1">
                     <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'edit', userId}}))" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
@@ -306,24 +323,30 @@
             // Route UI menu actions to Livewire with fallbacks
             window.addEventListener('menuActionFromUI', (e) => {
                 const { action, userId } = e.detail || {};
+                console.debug('menuActionFromUI fired', { action, userId, Livewire: !!window.Livewire, livewire: !!window.livewire });
                 // Preferred API
                 if (window.Livewire && typeof window.Livewire.emit === 'function') {
-                    return window.Livewire.emit('menuAction', action, userId);
+                    console.debug('Using window.Livewire.emit to send menuAction');
+                    try { window.Livewire.emit('menuAction', action, userId); } catch (err) { console.error('Livewire.emit error', err); }
+                    return;
                 }
                 // Older alias
                 if (window.livewire && typeof window.livewire.emit === 'function') {
-                    return window.livewire.emit('menuAction', action, userId);
+                    console.debug('Using window.livewire.emit to send menuAction');
+                    try { window.livewire.emit('menuAction', action, userId); } catch (err) { console.error('livewire.emit error', err); }
+                    return;
                 }
                 // Fallback: click hidden per-row Livewire buttons if present
                 try {
                     const btnId = `user-action-${action}-${userId}`;
                     const btn = document.getElementById(btnId);
                     if (btn) {
+                        console.debug('Falling back to clicking hidden button', btnId);
                         btn.click();
                         return;
                     }
                 } catch (err) {
-                    // ignore
+                    console.error('menuActionFromUI fallback click error', err);
                 }
                 // If neither global API is present, warn and no-op
                 console.warn('menuActionFromUI: Livewire client not available to deliver event', action, userId);

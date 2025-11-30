@@ -424,8 +424,25 @@ class UserTable extends Component
         }
 
 
+        // Compute counts based on the same filtered query so the stats reflect current filters
+        try {
+            $totalUsers = (clone $query)->count();
+            $adminCount = (clone $query)->where('account_type', 'admin')->count();
+            $regularCount = $totalUsers - $adminCount;
+        } catch (\Throwable $e) {
+            // Fallback: if counting fails (rare), default to paginated count
+            Log::warning('UserTable counts failed', ['error' => $e->getMessage()]);
+            $usersForCount = $query->limit(1000)->get();
+            $totalUsers = $usersForCount->count();
+            $adminCount = $usersForCount->where('account_type', 'admin')->count();
+            $regularCount = $totalUsers - $adminCount;
+        }
+
         return view('livewire.user-table', [
-            'users' => $query->paginate(10) // Fetch paginated and filtered users
+            'users' => $query->paginate(10), // Fetch paginated and filtered users
+            'totalUsers' => $totalUsers,
+            'adminCount' => $adminCount,
+            'regularCount' => $regularCount,
         ]);
     }
 }
