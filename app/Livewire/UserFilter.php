@@ -44,19 +44,20 @@ class UserFilter extends Component
         $this->fullNameResults = new Collection();
         $this->fishpondNameResults = new Collection();
         $this->omniResults = new SupportCollection();
-        // Initialize selectedUserId from query string or session so the
-        // component reflects bookmarked/previous selections
+
         try {
             $this->selectedUserId = request('user') ?? session('selected_user');
         } catch (\Throwable $e) {
             $this->selectedUserId = session('selected_user');
         }
-        // Optionally, load the initial user's name/pond into placeholder on mount if needed
-        // $initialUser = User::find(Auth::id());
-        // if ($initialUser) {
-        //     $this->selectedUserNameForPlaceholder = $initialUser->first_name . ' ' . $initialUser->last_name;
-        //     $this->selectedPondNameForPlaceholder = $initialUser->fishpond_name;
-        // }
+
+        // NEW: hydrate placeholders from selected user
+        if ($this->selectedUserId) {
+            if ($u = User::find($this->selectedUserId)) {
+                $this->selectedUserNameForPlaceholder = trim($u->first_name . ' ' . $u->last_name);
+                $this->selectedPondNameForPlaceholder = $u->fishpond_name;
+            }
+        }
     }
 
     // When user starts typing again, clear the selection placeholders
