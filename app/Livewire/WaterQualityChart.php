@@ -13,7 +13,7 @@ use Livewire\Component;
 class WaterQualityChart extends Component
 {
     public $water_quality_data;
-    public $userId;
+    public ?int $userId = null;
     public array $legendData = [];
 
     // Add properties to store date range
@@ -72,9 +72,16 @@ class WaterQualityChart extends Component
         }
     }
 
-    public function mount()
+    public function mount(?int $userId = null): void
     {
-        $this->userId = Auth::id();
+        if ($userId !== null) {
+            $this->userId = (int) $userId;
+        } elseif (request()->has('user') && request('user')) {
+            $this->userId = (int) request('user');
+        } else {
+            $this->userId = (int) session('selected_user', Auth::id());
+        }
+
         $this->loadData();
     }
 

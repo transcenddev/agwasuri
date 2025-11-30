@@ -15,7 +15,7 @@ class WaterQualityCard extends Component
     public $salinity;
     public $ph_level;
 
-    public $userId;
+    public ?int $userId = null;
 
     public ?string $startDate = null;
     public ?string $endDate = null;
@@ -61,9 +61,16 @@ class WaterQualityCard extends Component
         }
     }
 
-    public function mount()
+    public function mount(?int $userId = null): void
     {
-        $this->userId = Auth::id();
+        if ($userId !== null) {
+            $this->userId = (int) $userId;
+        } elseif (request()->has('user') && request('user')) {
+            $this->userId = (int) request('user');
+        } else {
+            $this->userId = (int) session('selected_user', Auth::id());
+        }
+
         $this->loadData();
     }
 

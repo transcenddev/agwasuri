@@ -17,7 +17,7 @@ class WaterQualityDataTable extends Component
     use WithPagination, WithoutUrlPagination;
 
     public $paginate_num;
-    public $userId;
+    public ?int $userId = null;
 
     public ?string $startDate = null;
     public ?string $endDate = null;
@@ -69,15 +69,23 @@ class WaterQualityDataTable extends Component
         }
     }
 
-    public function mount()
+    public function mount(?int $userId = null): void
     {
         $this->paginate_num = Route::currentRouteName() === 'historical-data' ? 50 : 10;
-        // Hybrid: prefer explicit `user` query param, then session fallback, then Auth id
+
+        // Prefer explicit parameter passed from Blade, then request, then session, then auth
         try {
-            $this->userId = request('user') ?? session('selected_user', Auth::id());
+            if ($userId !== null) {
+                $this->userId = (int) $userId;
+            } elseif (request()->has('user') && request('user')) {
+                $this->userId = (int) request('user');
+            } else {
+                $this->userId = (int) session('selected_user', Auth::id());
+            }
         } catch (\Throwable $e) {
             $this->userId = session('selected_user', Auth::id());
         }
+
         try {
             \Log::info('WaterQualityDataTable:mount', ['initialUserId' => $this->userId]);
         } catch (\Throwable $e) {}
