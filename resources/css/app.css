@@ -13,6 +13,8 @@
   --cvsu-900: #061a06;
   --cvsu-green: #1B651B;
   --cvsu-green-rgb: 27, 101, 27;
+  /* Livewire/NProgress top loading bar color: use brand green */
+  --livewire-progress-bar-color: var(--cvsu-600);
 
   /* Global nav / header variables so dark mode works consistently across layouts */
   --nav-bg-light: #ffffff;
@@ -349,4 +351,22 @@ select.select-no-native option:checked {
 
 .site-body :is(input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible, .form-input:focus-visible) {
   box-shadow: 0 0 0 4px rgba(var(--cvsu-green-rgb), 0.14);
+}
+
+/* Custom breakpoint: switch Account Management layout at 1075px
+   - At widths >= 1076px show the desktop table (`table-desktop`) and desktop action icons (`desktop-actions`)
+   - At widths <= 1075px show the mobile stacked cards (`table-mobile`) and hide desktop-only elements
+*/
+@media (min-width: 1076px) {
+  .table-desktop { display: table !important; }
+  .table-desktop thead { display: table-header-group !important; }
+  .table-desktop tbody { display: table-row-group !important; }
+  .table-mobile { display: none !important; }
+  .desktop-actions { display: flex !important; }
+}
+
+@media (max-width: 1075px) {
+  .table-desktop { display: none !important; }
+  .table-mobile { display: block !important; }
+  .desktop-actions { display: none !important; }
 }
