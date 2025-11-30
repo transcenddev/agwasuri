@@ -175,26 +175,26 @@
                 </colgroup>
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">ID</th>
+                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">ID</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Full Name</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Location</th>
-                        <th scope="col" class="sticky right-0 z-10 bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
+                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Location</th>
+                        <th scope="col" class="sticky right-0 z-10 bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
                     @forelse ($users as $user)
-                        <tr>
-                            <td data-cell="ID" class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->user_id }}</td>
-                            <td data-cell="Full Name" class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->first_name }} {{ $user->last_name }}</td>
-                            <td data-cell="Email" class="whitespace-nowrap px-6 py-4 text-sm text-gray-900 truncate max-w-[18rem]" title="{{ $user->email }}">{{ $user->email }}</td>
-                            <td data-cell="Type" class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{{ $user->account_type }}</td>
-                            <td data-cell="Location" class="px-6 py-4 text-sm text-gray-700">
+                        <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-50">
+                            <td data-cell="ID" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-right">{{ $user->user_id }}</td>
+                            <td data-cell="Full Name" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-left">{{ $user->first_name }} {{ $user->last_name }}</td>
+                            <td data-cell="Email" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 truncate max-w-[18rem] text-left" title="{{ $user->email }}">{{ $user->email }}</td>
+                            <td data-cell="Type" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-center">{{ $user->account_type }}</td>
+                            <td data-cell="Location" class="px-6 py-2 text-sm text-gray-700 text-center">
                                 <div class="font-medium">{{ $user->fishpond_name ?: ($user->barangay ? $user->barangay : '—') }}</div>
                                 <div class="text-xs text-gray-500">{{ $user->municipality }}{{ $user->municipality && $user->province ? ', ' : '' }}{{ $user->province }}</div>
                             </td>
-                            <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-4 text-sm font-medium">
+                            <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-2 text-sm font-medium text-center">
                                 {{-- Primary inline actions (desktop) --}}
                                 <div class="hidden md:flex items-center space-x-2">
                                     <button wire:click="showDetails({{ $user->user_id }})" title="View details" aria-label="View details" class="action-icon text-cvsu-600 hover:text-cvsu-700">
@@ -219,7 +219,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="whitespace-nowrap px-6 py-4 text-center text-sm text-gray-500">No users found.</td>
+                            <td colspan="6" class="whitespace-nowrap px-6 py-2 text-center text-sm text-gray-500">No users found.</td>
                         </tr>
                     @endforelse
                 </tbody>
