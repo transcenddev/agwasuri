@@ -16,13 +16,13 @@ $logout = function (Logout $logout) {
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center space-x-8 h-full">
                 <!-- Logo -->
-                <a href="{{ route('dashboard') }}" wire:navigate class="text-2xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-opacity">
+                <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-2xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-opacity">
                     <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span>
                 </a>
 
                 <!-- Navigation Links -->
                 <div class="hidden md:flex md:items-center md:space-x-2 h-full">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                    <x-nav-link :href="route('dashboard', ['user' => request('user')])" :active="request()->routeIs('dashboard')" wire:navigate>
                         Dashboard
                     </x-nav-link>
 
@@ -30,7 +30,7 @@ $logout = function (Logout $logout) {
                         Optimal Fish
                     </x-nav-link>
 
-                    <x-nav-link :href="route('historical-data')" :active="request()->routeIs('historical-data')" wire:navigate>
+                    <x-nav-link :href="route('historical-data', ['user' => request('user')])" :active="request()->routeIs('historical-data')" wire:navigate>
                         Historical Data
                     </x-nav-link>
 
@@ -102,9 +102,9 @@ $logout = function (Logout $logout) {
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
+            <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+            <x-responsive-nav-link :href="route('dashboard', ['user' => request('user')])" :active="request()->routeIs('dashboard')" wire:navigate>
                 Dashboard
             </x-responsive-nav-link>
         </div>
