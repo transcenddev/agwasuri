@@ -17,12 +17,37 @@
                 <div class="w-full flex flex-col md:flex-row md:items-center md:justify-end md:space-x-4 gap-3">
                     {{-- Search + actions wrapper: on mobile stack vertically, on tablet wrap, on desktop align horizontally --}}
                     <div class="w-full md:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-2 gap-2 md:gap-0">
-                        <input
-                            type="search"
-                            wire:model.live="filterName"
-                            placeholder="Search name, email, pond, location or species"
-                            class="w-full md:w-64 rounded-md border border-cvsu-200 px-3 py-2 text-sm focus:border-cvsu-600 focus:ring-cvsu-300"
-                        />
+                        <div x-data="{ q: @entangle('filterName') }">
+                            <div class="relative inline-flex items-center">
+                                <input
+                                    x-ref="search"
+                                    x-model="q"
+                                    @keydown.escape="q = ''; $nextTick(() => $refs.search.focus())"
+                                    type="search"
+                                    wire:model.live="filterName"
+                                    placeholder="Search name, email, pond, location"
+                                    class="w-full md:w-64 rounded-md border border-cvsu-200 px-3 py-2 pr-10 text-sm focus:border-cvsu-600 focus:ring-cvsu-300 focus:outline-none"
+                                    aria-label="Search users"
+                                />
+
+                                <!-- Clear button: appears only when there is text -->
+                                <button
+                                    x-show="q && q.length > 0"
+                                    x-transition.opacity.duration.200
+                                    type="button"
+                                    @click.prevent="q = ''; $nextTick(() => $refs.search.focus())"
+                                    class="absolute right-0 mr-1 inline-flex h-11 w-11 items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-cvsu-300 focus:ring-offset-1 transform transition transform-gpu"
+                                    aria-label="Clear search"
+                                    title="Clear search"
+                                    tabindex="0"
+                                >
+                                    <span class="sr-only">Clear search</span>
+                                    <svg class="h-5 w-5 text-gray-500 transition-colors duration-150 transform-gpu hover:scale-110 group-focus:text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="w-full md:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-2 gap-2 md:gap-0 md:justify-end">
@@ -51,16 +76,17 @@
     </x-slot>
 
             <div class="p-6 relative">
-                {{-- Bulk actions bar --}}
-                @if(!empty($selected))
-                    <div class="mb-4 p-3 rounded bg-gray-50 border border-gray-200 flex items-center justify-between">
-                        <div class="text-sm text-gray-700">{{ count($selected) }} selected</div>
+                {{-- Bulk actions bar: render client-side and bind to Livewire `selected` so
+                     it appears immediately when checkboxes change (no extra click needed) --}}
+                <div x-data="{ selected: @entangle('selected') }" x-cloak x-show="Array.isArray(selected) ? selected.length > 0 : false" x-transition class="mb-4">
+                    <div class="p-3 rounded bg-gray-50 border border-gray-200 flex items-center justify-between">
+                        <div class="text-sm text-gray-700" x-text="Array.isArray(selected) ? selected.length + ' selected' : '0 selected'"></div>
                         <div class="flex items-center space-x-2">
                             <button wire:click="bulkDeleteSelected" class="inline-flex items-center px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700">Delete Selected</button>
-                            <button wire:click="$set('selected', [])" class="inline-flex items-center px-3 py-2 bg-white border border-gray-200 rounded text-sm">Clear</button>
+                            <button type="button" @click="selected = []" class="inline-flex items-center px-3 py-2 bg-white border border-gray-200 rounded text-sm">Clear</button>
                         </div>
                     </div>
-                @endif
+                </div>
         {{-- Session Messages (Green for success, Red for errors) --}}
         @if (session()->has('message'))
             <div class="mb-4 rounded bg-green-100 p-4 text-sm text-green-700">
@@ -182,7 +208,7 @@
         </div>
         @endif
         <div class="overflow-x-auto relative overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
-            <table class="hidden md:table min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table">
+            <table class="hidden md:table min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table accounts--table-desktop">
                 <colgroup>
                     <col style="width:3.5rem"> <!-- select -->
                     <col style="width:6rem"> <!-- ID -->
@@ -261,7 +287,7 @@
                 </tbody>
             </table>
             {{-- Mobile: Card-list view for small screens (visible until md breakpoint) --}}
-            <div class="table-mobile mt-2 md:hidden">
+            <div class="table-mobile mt-2 md:hidden accounts--cards-desktop">
                 <div class="space-y-3">
                     @forelse ($users as $user)
                         <div class="bg-white border border-gray-100 rounded-lg p-4 shadow-sm">
@@ -287,7 +313,18 @@
                                         aria-haspopup="true"
                                         aria-expanded="false"
                                         title="More actions"
-                                        onclick="window.dispatchEvent(new CustomEvent('open-user-action-menu',{detail:{userId: {{ $user->user_id }}, x: (event.clientX || 0), y: (event.clientY || 0)}}))"
+                                        onclick="(function(e){
+                                            try {
+                                                const btn = (e.currentTarget || e.target);
+                                                const rect = btn.getBoundingClientRect();
+                                                const left = rect.left + (window.scrollX || 0);
+                                                const top = rect.bottom + (window.scrollY || 0);
+                                                window.dispatchEvent(new CustomEvent('open-user-action-menu',{detail:{userId: {{ $user->user_id }}, left: left, top: top, coordsArePage: true}}));
+                                            } catch(err) {
+                                                // fallback to page/client coords
+                                                window.dispatchEvent(new CustomEvent('open-user-action-menu',{detail:{userId: {{ $user->user_id }}, x: (e.pageX || e.clientX || 0), y: (e.pageY || e.clientY || 0)}}));
+                                            }
+                                        })(event)"
                                     >
                                         <span class="sr-only">Open actions</span>
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -316,71 +353,82 @@
 
         </div>
 
-        {{-- Global action menu (single overlay for all rows) --}}
-        <div x-data="globalUserMenu()" x-cloak x-show="open" @keydown.escape.window="open = false" class="fixed inset-0 z-40" style="pointer-events: auto;">
-            <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" x-ref="menu" tabindex="-1" :style="`position: fixed; top: ${top}px; left: ${left}px;`" class="global-action-menu z-40" @click.away="open=false" role="menu" aria-orientation="vertical">
-                <div class="py-1">
-                    <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'edit', userId}}))" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Edit</a>
-                    <a href="#" @click.prevent="open=false; window.dispatchEvent(new CustomEvent('menuActionFromUI',{detail:{action:'delete', userId}}))" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50" role="menuitem">Delete</a>
-                </div>
-            </div>
-        </div>
+        {{-- Global action menu: rendered as a portal appended to `document.body` to avoid
+             containment/transform issues and ensure fixed positioning. The portal is
+             created on-demand when a row kebab is clicked and removed on click-away. --}}
 
         <script>
-            document.addEventListener('alpine:init', () => {
-                Alpine.data('globalUserMenu', () => ({
-                    open: false,
-                    top: 0,
-                    left: 0,
-                    userId: null,
-                    init() {
-                        window.addEventListener('open-user-action-menu', (e) => {
-                            this.userId = e.detail.userId || null;
-                            this.top = e.detail.top || (e.detail.y || 0);
-                            this.left = e.detail.left || (e.detail.x || 0);
-                            const menuWidth = 160;
-                            const margin = 8;
-                            const maxLeft = window.scrollX + window.innerWidth - menuWidth - margin;
-                            this.left = Math.min(Math.max(this.left, window.scrollX + margin), maxLeft);
-                            this.open = true;
-                            this.$nextTick(() => {
-                                if (this.$refs.menu) this.$refs.menu.focus();
-                            });
+            (function(){
+                let portalEl = null;
+                let escHandler = null;
+                let clickAwayHandler = null;
+
+                function removePortal() {
+                    if (!portalEl) return;
+                    if (clickAwayHandler) document.removeEventListener('click', clickAwayHandler, true);
+                    if (escHandler) document.removeEventListener('keydown', escHandler, true);
+                    portalEl.remove();
+                    portalEl = null;
+                    clickAwayHandler = null;
+                    escHandler = null;
+                }
+
+                function createPortalMenu({ left = 0, top = 0, userId = null }) {
+                    removePortal();
+                    portalEl = document.createElement('div');
+                    portalEl.className = 'global-action-menu';
+                    portalEl.setAttribute('role', 'menu');
+                    portalEl.style.position = 'fixed';
+                    portalEl.style.left = (left) + 'px';
+                    portalEl.style.top = (top) + 'px';
+                    portalEl.style.zIndex = 9999;
+                    portalEl.innerHTML = `
+                        <div class="py-1">
+                            <a href="#" data-action="edit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
+                            <a href="#" data-action="delete" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Delete</a>
+                        </div>
+                    `;
+
+                    // Wire up actions
+                    portalEl.querySelectorAll('[data-action]').forEach(el => {
+                        el.addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            const action = el.getAttribute('data-action');
+                            window.dispatchEvent(new CustomEvent('menuActionFromUI', { detail: { action: action, userId: userId } }));
+                            removePortal();
                         });
-                    }
-                }));
-            });
-            // Route UI menu actions to Livewire with fallbacks
-            window.addEventListener('menuActionFromUI', (e) => {
-                const { action, userId } = e.detail || {};
-                console.debug('menuActionFromUI fired', { action, userId, Livewire: !!window.Livewire, livewire: !!window.livewire });
-                // Preferred API
-                if (window.Livewire && typeof window.Livewire.emit === 'function') {
-                    console.debug('Using window.Livewire.emit to send menuAction');
-                    try { window.Livewire.emit('menuAction', action, userId); } catch (err) { console.error('Livewire.emit error', err); }
-                    return;
+                    });
+
+                    document.body.appendChild(portalEl);
+
+                    // Close on click-away
+                    clickAwayHandler = function(e) {
+                        if (!portalEl) return;
+                        if (!portalEl.contains(e.target)) removePortal();
+                    };
+                    document.addEventListener('click', clickAwayHandler, true);
+
+                    // Close on Escape
+                    escHandler = function(e) {
+                        if (e.key === 'Escape' || e.key === 'Esc') removePortal();
+                    };
+                    document.addEventListener('keydown', escHandler, true);
                 }
-                // Older alias
-                if (window.livewire && typeof window.livewire.emit === 'function') {
-                    console.debug('Using window.livewire.emit to send menuAction');
-                    try { window.livewire.emit('menuAction', action, userId); } catch (err) { console.error('livewire.emit error', err); }
-                    return;
-                }
-                // Fallback: click hidden per-row Livewire buttons if present
-                try {
-                    const btnId = `user-action-${action}-${userId}`;
-                    const btn = document.getElementById(btnId);
-                    if (btn) {
-                        console.debug('Falling back to clicking hidden button', btnId);
-                        btn.click();
-                        return;
-                    }
-                } catch (err) {
-                    console.error('menuActionFromUI fallback click error', err);
-                }
-                // If neither global API is present, warn and no-op
-                console.warn('menuActionFromUI: Livewire client not available to deliver event', action, userId);
-            });
+
+                // Listen for open requests (dispatched by kebab buttons)
+                window.addEventListener('open-user-action-menu', function(e){
+                    const detail = e.detail || {};
+                    const rawLeft = (detail.left !== undefined) ? detail.left : (detail.x !== undefined ? detail.x + (window.scrollX || 0) : 0);
+                    const rawTop = (detail.top !== undefined) ? detail.top : (detail.y !== undefined ? detail.y + (window.scrollY || 0) : 0);
+                    // Clamp left so menu doesn't overflow viewport
+                    const menuWidth = 160;
+                    const margin = 8;
+                    const maxLeft = window.scrollX + window.innerWidth - menuWidth - margin;
+                    const left = Math.min(Math.max(rawLeft, window.scrollX + margin), maxLeft);
+                    const top = rawTop;
+                    createPortalMenu({ left: left, top: top, userId: detail.userId || null });
+                });
+            })();
         </script>
 
         <script>
