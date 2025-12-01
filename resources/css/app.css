@@ -142,6 +142,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   min-height: 100vh;
 }
 
+/* Ensure content is pushed below the fixed header/nav. The nav sets
+   `--header-height` (in navigation markup and via JS). This keeps the
+   visual header and first page card from overlapping. */
+.site-body {
+  padding-top: var(--header-height, 64px);
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -337,6 +344,42 @@ select.select-no-native option:checked {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
 }
 
+/* Fix for overlay / z-index issues:
+   - Ensure the global action/menu layer is positioned and sits above nav when visible.
+   - When hidden (or x-cloak/hidden classes used) it must not capture pointer events.
+   - Ensure table action buttons sit above overlays so clicks reach them reliably. */
+.global-action-menu {
+  position: absolute;
+  z-index: 70;
+}
+
+/* When overlays are hidden via attributes/classes, prevent them from blocking pointer events */
+.global-action-menu[hidden],
+.global-action-menu.hidden,
+.global-action-menu.x-cloak {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* Make sure interactive action icons/buttons in tables are above floating overlays */
+.themed-table .action-cell,
+.themed-table .action-button,
+.table-action,
+.action-icon {
+  position: relative;
+  z-index: 80;
+}
+
+/* Safety: if a full-width invisible overlay exists, prefer pointer-events:none by default
+   and enable pointer-events only when purposely shown via a `.overlay-active` helper. */
+.site-overlay {
+  pointer-events: none;
+}
+.site-overlay.overlay-active {
+  pointer-events: auto;
+}
+
 /* Brand focus styles: make focused controls use the cvsu green brand color
    This ensures inputs, buttons and links show a green focus ring and border
    across the dashboard and app layout without changing existing Tailwind classes. */
@@ -358,15 +401,54 @@ select.select-no-native option:checked {
    - At widths <= 1075px show the mobile stacked cards (`table-mobile`) and hide desktop-only elements
 */
 @media (min-width: 1076px) {
-  .table-desktop { display: table !important; }
-  .table-desktop thead { display: table-header-group !important; }
-  .table-desktop tbody { display: table-row-group !important; }
-  .table-mobile { display: none !important; }
-  .desktop-actions { display: flex !important; }
+  .table-desktop {
+    display: table !important;
+  }
+
+  .table-desktop thead {
+    display: table-header-group !important;
+  }
+
+  .table-desktop tbody {
+    display: table-row-group !important;
+  }
+
+  .table-mobile {
+    display: none !important;
+  }
+
+  .desktop-actions {
+    display: flex !important;
+  }
 }
 
 @media (max-width: 1075px) {
-  .table-desktop { display: none !important; }
-  .table-mobile { display: block !important; }
-  .desktop-actions { display: none !important; }
+  .table-desktop {
+    display: none !important;
+  }
+
+  .table-mobile {
+    display: block !important;
+  }
+
+  .desktop-actions {
+    display: none !important;
+  }
+}
+
+/* Local override for Accounts component: switch table/cards at 1130px
+   - Targets only elements with the accounts--* classes so it won't affect
+     other components that may rely on the existing 1076px breakpoint. */
+@media (min-width: 1130px) {
+  .accounts--table-desktop { display: table !important; }
+  .accounts--table-desktop thead { display: table-header-group !important; }
+  .accounts--table-desktop tbody { display: table-row-group !important; }
+  .accounts--cards-desktop { display: none !important; }
+  .accounts--table-desktop .desktop-actions { display: flex !important; }
+}
+
+@media (max-width: 1129.98px) {
+  .accounts--table-desktop { display: none !important; }
+  .accounts--cards-desktop { display: block !important; }
+  .accounts--table-desktop .desktop-actions { display: none !important; }
 }
