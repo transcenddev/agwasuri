@@ -16,6 +16,7 @@ class WaterQualityCard extends Component
     public $ph_level;
     public $lastUpdated;
     public $connectionStatus = 'disconnected';
+    public $overallStatus = 'Disconnected';
 
     public ?int $userId = null;
 
@@ -99,6 +100,8 @@ class WaterQualityCard extends Component
             $this->lastUpdated = Carbon::parse($waterQualityData->recorded_at)->toDateTimeString();
             // connection status can be extended later; for now mark connected when we have a row
             $this->connectionStatus = 'connected';
+            // compute overall status after loading latest metrics
+            $this->computeOverallStatus();
         } else {
             $this->temperature = null;
             $this->salinity = null;
@@ -106,7 +109,50 @@ class WaterQualityCard extends Component
             $this->dissolved_oxygen = null;
             $this->lastUpdated = null;
             $this->connectionStatus = 'disconnected';
+            $this->overallStatus = 'Disconnected';
         }
+    }
+
+    /**
+     * Compute an aggregated overall status from individual metric statuses.
+     * Priority: danger -> warning -> good
+     */
+    protected function computeOverallStatus(): void
+    {
+        $statuses = [];
+
+        $statuses[] = $this->statusFor('temperature', $this->temperature);
+        $statuses[] = $this->statusFor('salinity', $this->salinity);
+        $statuses[] = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
+        $statuses[] = $this->statusFor('ph_level', $this->ph_level);
+
+        if (in_array('danger', $statuses, true)) {
+            $this->overallStatus = 'Critical';
+            return;
+        }
+
+        if (in_array('warning', $statuses, true)) {
+            $this->overallStatus = 'Warning';
+            return;
+        }
+
+        // if all unknown or null, mark disconnected; otherwise healthy
+        if (collect($statuses)->every(fn($s) => $s === 'unknown')) {
+            $this->overallStatus = 'Disconnected';
+            return;
+        }
+
+        $this->overallStatus = 'Healthy';
+    }
+
+    public function overallClassesForStatus(string $status): string
+    {
+        return match(strtolower($status)) {
+            'healthy' => 'bg-green-50 text-green-800',
+            'warning' => 'bg-yellow-50 text-yellow-800',
+            'critical' => 'bg-rose-50 text-rose-700',
+            default => 'bg-gray-50 text-gray-700',
+        };
     }
 
     /**

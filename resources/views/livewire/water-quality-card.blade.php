@@ -1,4 +1,13 @@
 <div>
+    {{-- Overall status pill (aggregated) --}}
+    <div class="mb-3 flex items-center justify-between">
+        <div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold {{ $this->overallClassesForStatus($overallStatus ?? $this->overallStatus) }}">
+                {{ $overallStatus ?? $this->overallStatus }}
+            </span>
+        </div>
+        <div class="text-xs text-gray-500">Based on current metrics</div>
+    </div>
     {{-- Mobile-first: 2 columns (2x2 grid) by default, expand to 4 columns on larger screens --}}
     <dl class="grid grid-cols-2 gap-4 md:grid-cols-4">
         @php
@@ -8,7 +17,7 @@
             $phStatus = $this->statusFor('ph_level', $this->ph_level);
         @endphp
 
-        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-8 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($tempStatus) }}">
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($tempStatus) }}">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature</dt>
 
             <dd class="flex items-baseline gap-2">
@@ -22,7 +31,7 @@
             </div>
         </div>
 
-        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-8 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($salStatus) }}">
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($salStatus) }}">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity</dt>
 
             <dd class="flex items-baseline gap-2">
@@ -36,7 +45,7 @@
             </div>
         </div>
 
-        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-8 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($doStatus) }}">
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($doStatus) }}">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen</dt>
 
             <dd class="flex items-baseline gap-2">
@@ -50,7 +59,7 @@
             </div>
         </div>
 
-        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-8 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($phStatus) }}">
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($phStatus) }}">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH</dt>
 
             <dd class="flex items-baseline gap-2">
