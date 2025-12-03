@@ -21,7 +21,7 @@
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen</dt>
 
             <dd class="flex items-baseline gap-2">
-                <span class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cvsu-600">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
+                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold text-cvsu-600">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
                 <span class="text-sm text-gray-600">{{ $this->unitFor('dissolved_oxygen') }}</span>
             </dd>
 
@@ -35,7 +35,7 @@
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature</dt>
 
             <dd class="flex items-baseline gap-2">
-                <span class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cvsu-600">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
+                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold text-cvsu-600">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
                 <span class="text-sm text-gray-600">{{ $this->unitFor('temperature') }}</span>
             </dd>
 
@@ -49,7 +49,7 @@
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH</dt>
 
             <dd class="flex items-baseline gap-2">
-                <span class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cvsu-600">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
+                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold text-cvsu-600">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
                 <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
             </dd>
 
@@ -63,7 +63,7 @@
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity</dt>
 
             <dd class="flex items-baseline gap-2">
-                <span class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cvsu-600">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
+                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold text-cvsu-600">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
                 <span class="text-sm text-gray-600">{{ $this->unitFor('salinity') }}</span>
             </dd>
 
