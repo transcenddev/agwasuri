@@ -14,6 +14,8 @@ class WaterQualityCard extends Component
     public $dissolved_oxygen;
     public $salinity;
     public $ph_level;
+    public $lastUpdated;
+    public $connectionStatus = 'disconnected';
 
     public ?int $userId = null;
 
@@ -94,12 +96,77 @@ class WaterQualityCard extends Component
             $this->salinity = $waterQualityData->salinity;
             $this->ph_level = $waterQualityData->ph_level;
             $this->dissolved_oxygen = $waterQualityData->dissolved_oxygen;
+            $this->lastUpdated = Carbon::parse($waterQualityData->recorded_at)->toDateTimeString();
+            // connection status can be extended later; for now mark connected when we have a row
+            $this->connectionStatus = 'connected';
         } else {
             $this->temperature = null;
             $this->salinity = null;
             $this->ph_level = null;
             $this->dissolved_oxygen = null;
+            $this->lastUpdated = null;
+            $this->connectionStatus = 'disconnected';
         }
+    }
+
+    /**
+     * Return a status string for a given metric value: good|warning|danger
+     */
+    public function statusFor(string $metric, $value): string
+    {
+        if ($value === null) {
+            return 'unknown';
+        }
+
+        switch ($metric) {
+            case 'temperature':
+                // good: 24-30, warning: 20-24 or 30-34, danger: otherwise
+                if ($value >= 24 && $value <= 30) return 'good';
+                if (($value >= 20 && $value < 24) || ($value > 30 && $value <= 34)) return 'warning';
+                return 'danger';
+
+            case 'salinity':
+                // salinity in ppt: good <=35, warning 35-50, danger >50
+                if ($value <= 35) return 'good';
+                if ($value > 35 && $value <= 50) return 'warning';
+                return 'danger';
+
+            case 'dissolved_oxygen':
+                // mg/L: good >=5, warning 3-5, danger <3
+                if ($value >= 5) return 'good';
+                if ($value >= 3 && $value < 5) return 'warning';
+                return 'danger';
+
+            case 'ph_level':
+                // pH: good 6.5-8.5, warning 6.0-6.5 or 8.5-9.0, danger otherwise
+                if ($value >= 6.5 && $value <= 8.5) return 'good';
+                if (($value >= 6.0 && $value < 6.5) || ($value > 8.5 && $value <= 9.0)) return 'warning';
+                return 'danger';
+
+            default:
+                return 'unknown';
+        }
+    }
+
+    public function classesForStatus(string $status): string
+    {
+        return match($status) {
+            'good' => 'bg-cvsu-50 border-cvsu-200 text-cvsu-700',
+            'warning' => 'bg-yellow-50 border-yellow-200 text-yellow-700',
+            'danger' => 'bg-rose-50 border-rose-200 text-rose-700',
+            default => 'bg-gray-50 border-gray-200 text-gray-700',
+        };
+    }
+
+    public function unitFor(string $metric): string
+    {
+        return match($metric) {
+            'temperature' => '°C',
+            'salinity' => 'ppt',
+            'dissolved_oxygen' => 'mg/L',
+            'ph_level' => 'pH',
+            default => ''
+        };
     }
 
     public function render()

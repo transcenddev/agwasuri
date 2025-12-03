@@ -1,6 +1,6 @@
 <div>
-    {{-- If there's no effective userId (admin hasn't selected one), show hint --}}
-    @if(! $userId)
+    {{-- If there's no effective user selected (admin hasn't selected one), show hint --}}
+    @if(! $currentUserId)
          <div class="flex items-center justify-center w-full h-12"> {{-- Match height of potential inputs --}}
             <p class="text-sm italic text-center text-gray-500">
                 Please select a user above to enable date filtering.
@@ -21,7 +21,7 @@
                            class="block w-full h-12 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                            min="{{ $minAllowedDate }}"
                            max="{{ $endDate ?? $maxAllowedDate }}"
-                           @if($userId === null) disabled @endif
+                           @if($currentUserId === null) disabled @endif
                            >
                 </div>
 
@@ -33,7 +33,7 @@
                            class="block w-full h-12 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                            min="{{ $startDate ?? $minAllowedDate }}"
                            max="{{ $maxAllowedDate }}"
-                           @if($userId === null) disabled @endif
+                           @if($currentUserId === null) disabled @endif
                            >
                 </div>
 
@@ -41,7 +41,7 @@
                 <div class="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-1/3">
                         <button type="button"
                             wire:click="applyFilters"
-                            @if($userId === null) disabled @endif
+                            @if($currentUserId === null) disabled @endif
                             class="w-full md:w-auto inline-flex items-center px-4 py-2 text-white bg-cvsu rounded-xl hover:bg-cvsu-700 disabled:opacity-50 transition justify-center">
                         Apply
                     </button>

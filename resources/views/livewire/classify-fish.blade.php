@@ -20,37 +20,35 @@
 
 
     {{-- Buttons Row --}}
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 space-x-0 sm:space-x-4 gap-2"> {{-- Use flex for row layout; stack on mobile --}}
-        {{-- Predict Button (Keep blue) --}}
-        <div>
-                <button wire:click="predictFishType"
-                    class="px-4 py-2 text-white transition rounded {{ $canPredict ? 'bg-cvsu hover:bg-cvsu-700' : 'bg-gray-400 cursor-not-allowed' }}"
-                    {{ !$canPredict ? 'disabled' : '' }}
-                    wire:loading.attr="disabled" wire:target="predictFishType, trainModel" {{-- Disable while predicting OR training --}}
-                    title="{{ !$canPredict && $isAdminView ? 'Please select a user first' : 'Predict suitable fish type based on average water quality' }}">
-                 <span wire:loading.remove wire:target="predictFishType">Predict Fish Type</span>
-                 <span wire:loading wire:target="predictFishType">Predicting...</span>
+    <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between mb-4"> {{-- Stack on mobile, row on sm+ --}}
+        {{-- Predict Button (primary) --}}
+        <div class="w-full sm:w-auto">
+            <button type="button" wire:click="predictFishType"
+                class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 text-white transition rounded-md text-sm font-medium {{ $canPredict ? 'bg-cvsu hover:bg-cvsu-700' : 'bg-gray-400 cursor-not-allowed' }}"
+                {{ !$canPredict ? 'disabled' : '' }}
+                wire:loading.attr="disabled" wire:target="predictFishType, trainModel"
+                title="{{ !$canPredict && $isAdminView ? 'Please select a user first' : 'Predict suitable fish type based on average water quality' }}">
+                <span wire:loading.remove wire:target="predictFishType">Predict Fish Type</span>
+                <span wire:loading wire:target="predictFishType">Predicting...</span>
             </button>
         </div>
 
         {{-- Train Button and Timestamp (Admin Only) --}}
         @if($isAdminView)
-            <div class="text-right"> {{-- Align content to the right --}}
-                 {{-- Changed button color to blue --}}
-                <button wire:click="trainModel"
-                            class="px-4 py-2 text-white transition bg-cvsu rounded hover:bg-cvsu-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        wire:loading.attr="disabled" wire:target="predictFishType, trainModel" {{-- Disable while predicting OR training --}}
-                        {{ $isTraining ? 'disabled' : '' }}>
+            <div class="w-full sm:w-auto sm:ml-auto text-right">
+                <button type="button" wire:click="trainModel"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 text-white transition bg-cvsu rounded-md hover:bg-cvsu-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
+                    wire:loading.attr="disabled" wire:target="predictFishType, trainModel" {{ $isTraining ? 'disabled' : '' }}>
                     <span wire:loading.remove wire:target="trainModel">Train Model</span>
                     <span wire:loading wire:target="trainModel">Training...</span>
                 </button>
-                {{-- Keep timestamp text gray --}}
+
                 @if($lastTrainedTimestamp && $lastTrainedTimestamp !== 'Error fetching date' && $lastTrainedTimestamp !== 'N/A')
-                    <p class="mt-1 text-xs text-gray-500">Last Trained: {{ $lastTrainedTimestamp }}</p>
+                    <p class="mt-2 sm:mt-1 text-xs text-gray-500">Last Trained: {{ $lastTrainedTimestamp }}</p>
                 @elseif($lastTrainedTimestamp)
-                     <p class="mt-1 text-xs text-red-500">{{ $lastTrainedTimestamp }}</p> {{-- Show errors/NA in red --}}
-                 @endif
-                </div>
+                    <p class="mt-2 sm:mt-1 text-xs text-red-500">{{ $lastTrainedTimestamp }}</p>
+                @endif
+            </div>
         @endif
     </div>
 

@@ -1,16 +1,16 @@
-<div {{ $attributes->merge(['class' => 'bg-white dark:bg-slate-800 rounded-lg shadow-card ring-1 ring-slate-100 dark:ring-slate-700 overflow-hidden']) }}>
+<div {{ $attributes->merge(['class' => 'bg-white dark:bg-slate-800 rounded-lg shadow-card ring-1 ring-slate-100 dark:ring-slate-700 overflow-hidden p-6']) }}>
     @if (isset($header))
-        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+        <div class="mb-4">
             {{ $header }}
         </div>
     @endif
 
-    <div class="p-6">
+    <div>
         {{ $slot }}
     </div>
 
     @if (isset($footer))
-        <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700">
+        <div class="mt-4">
             {{ $footer }}
         </div>
     @endif

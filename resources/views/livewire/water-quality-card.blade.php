@@ -1,27 +1,67 @@
 <div>
-    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="flex flex-col px-4 py-8 text-center rounded-lg bg-cvsu-50">
-            <dt class="order-last text-lg font-medium text-gray-500">Temperature</dt>
+    {{-- Mobile-first: 2 columns (2x2 grid) by default, expand to 4 columns on larger screens --}}
+    <dl class="grid grid-cols-2 gap-4 md:grid-cols-4">
+        @php
+            $tempStatus = $this->statusFor('temperature', $this->temperature);
+            $salStatus = $this->statusFor('salinity', $this->salinity);
+            $doStatus = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
+            $phStatus = $this->statusFor('ph_level', $this->ph_level);
+        @endphp
 
-            <dd class="text-4xl font-extrabold text-cvsu-600 md:text-5xl">{{ $this->temperature ?? '-' }}</dd>
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-8 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($tempStatus) }}">
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature</dt>
+
+            <dd class="flex items-baseline gap-2">
+                <span class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cvsu-600">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
+                <span class="text-sm text-gray-600">{{ $this->unitFor('temperature') }}</span>
+            </dd>
+
+            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
+                {{-- Trend / sparkline placeholder (reserved slot) --}}
+                <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
+            </div>
         </div>
 
-        <div class="flex flex-col px-4 py-8 text-center rounded-lg bg-cvsu-50">
-            <dt class="order-last text-lg font-medium text-gray-500">Salinity</dt>
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-8 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($salStatus) }}">
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity</dt>
 
-            <dd class="text-4xl font-extrabold text-cvsu-600 md:text-5xl">{{ $this->salinity ?? '-' }}</dd>
+            <dd class="flex items-baseline gap-2">
+                <span class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cvsu-600">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
+                <span class="text-sm text-gray-600">{{ $this->unitFor('salinity') }}</span>
+            </dd>
+
+            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
+                {{-- Trend / sparkline placeholder --}}
+                <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
+            </div>
         </div>
 
-        <div class="flex flex-col px-4 py-8 text-center rounded-lg bg-cvsu-50">
-            <dt class="order-last text-lg font-medium text-gray-500">Dissolved Oxygen</dt>
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-8 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($doStatus) }}">
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen</dt>
 
-            <dd class="text-4xl font-extrabold text-cvsu-600 md:text-5xl">{{ $this->dissolved_oxygen ?? '-' }}</dd>
+            <dd class="flex items-baseline gap-2">
+                <span class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cvsu-600">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
+                <span class="text-sm text-gray-600">{{ $this->unitFor('dissolved_oxygen') }}</span>
+            </dd>
+
+            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
+                {{-- Trend / sparkline placeholder --}}
+                <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
+            </div>
         </div>
 
-        <div class="flex flex-col px-4 py-8 text-center rounded-lg bg-cvsu-50">
-            <dt class="order-last text-lg font-medium text-gray-500">pH</dt>
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-8 text-center rounded-2xl min-h-24 border {{ $this->classesForStatus($phStatus) }}">
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH</dt>
 
-            <dd class="text-4xl font-extrabold text-cvsu-600 md:text-5xl">{{ $this->ph_level ?? '-'}}</dd>
+            <dd class="flex items-baseline gap-2">
+                <span class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-cvsu-600">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
+                <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
+            </dd>
+
+            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
+                {{-- Trend / sparkline placeholder --}}
+                <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
+            </div>
         </div>
     </dl>
 </div>

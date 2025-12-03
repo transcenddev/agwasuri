@@ -31,12 +31,35 @@
 
         <x-card class="mb-6">
             <x-slot name="header">
-                <x-card-header>
-                    <x-slot name="title">Water Quality Summary</x-slot>
-                </x-card-header>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-lg font-semibold text-gray-700">Water Quality Summary</h3>
+                        {{-- Pond selector removed here to avoid duplicate search inputs; top filter remains --}}
+                    </div>
+
+                    <div class="flex items-center gap-4 text-sm text-gray-600">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-500">Last updated</span>
+                            <span class="ml-1 font-medium text-gray-700" aria-live="polite">—</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-rose-400" aria-hidden="true"></span>
+                            <span class="font-medium">Disconnected</span>
+                        </div>
+                    </div>
+                </div>
             </x-slot>
-            {{-- <livewire:water-quality-card :userId="Auth::id()" /> --}}
-             <livewire:water-quality-card :userId="$activeUserId" wire:key="wq-card-{{ $activeUserId }}" />
+
+            {{-- KPI cards: mobile-first 2x2 grid, desktop single row --}}
+            <div class="mt-4">
+                <livewire:water-quality-card :userId="$activeUserId" wire:key="wq-card-{{ $activeUserId }}" />
+            </div>
+
+            {{-- Recommendation placeholder card (separate Livewire component) --}}
+            <div class="mt-4">
+                <livewire:recommendation-card :userId="$activeUserId" wire:key="rec-card-{{ $activeUserId }}" />
+            </div>
         </x-card>
 
         <x-card class="mb-6">
