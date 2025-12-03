@@ -8,6 +8,11 @@
         </div>
         <div class="text-xs text-gray-500">Based on current metrics</div>
     </div>
+    @if(strtolower($overallStatus ?? $this->overallStatus) === 'disconnected')
+        <div class="mb-4">
+            <p class="text-xs text-amber-700">Check power or sensor cable</p>
+        </div>
+    @endif
     {{-- Mobile-first: 2 columns (2x2 grid) by default, expand to 4 columns on larger screens --}}
     <dl class="grid grid-cols-2 gap-4 md:grid-cols-4">
         @php

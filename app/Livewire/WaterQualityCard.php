@@ -151,6 +151,7 @@ class WaterQualityCard extends Component
             'healthy' => 'bg-green-50 text-green-800',
             'warning' => 'bg-yellow-50 text-yellow-800',
             'critical' => 'bg-rose-50 text-rose-700',
+            'disconnected' => 'bg-amber-50 text-amber-800',
             default => 'bg-gray-50 text-gray-700',
         };
     }
