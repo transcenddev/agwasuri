@@ -21,9 +21,12 @@ class WaterQualityChart extends Component
     // A lightweight legend structure used by the blade
     public array $legendData = [];
 
-    // Use the official LineChartModel from livewire-charts so the
-    // `livewire-line-chart` child component can mount and render it.
-    public $lineChartModel;
+    // Keep the actual LineChartModel as a protected object to avoid Livewire
+    // attempting to synthesize it. Expose a serializable array for the view.
+    protected $lineChartModel;
+
+    // Public serializable model (array) consumed by the Blade and client JS.
+    public array $lineChartModelArray = [];
 
     #[On('user-selected')]
     public function updateUser($userId)
@@ -164,6 +167,13 @@ class WaterQualityChart extends Component
         $model->setColors(array_values($colors));
 
         $this->lineChartModel = $model;
+
+        // Expose an array copy for Livewire's hydration/dehydration.
+        $this->lineChartModelArray = $this->lineChartModel->toArray();
+
+        // Dispatch a browser event so the client can re-render the chart
+        // without relying on Livewire to synthesize the object.
+        $this->dispatchBrowserEvent('wq-chart-updated', ['model' => $this->lineChartModelArray]);
     }
 
     /**

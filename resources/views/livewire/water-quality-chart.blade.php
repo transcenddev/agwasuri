@@ -32,12 +32,10 @@
             <div class="w-full">
                 <div class="relative">
                     <div class="w-full p-4 max-w-content-xl mx-auto">
-                        {{-- Use the LivewireLineChart child component. We pass the
-                            `LineChartModel` instance and key by its reactiveKey so
-                            Livewire will remount the child when the model changes. --}}
-                        @if($lineChartModel)
-                            @livewire('livewire-line-chart', ['lineChartModel' => $lineChartModel], key($lineChartModel->reactiveKey()))
-                        @endif
+                        {{-- Render the chart container and attach a serializable model
+                            produced server-side. We avoid passing the LineChartModel
+                            object directly to Livewire to prevent synthesizer errors. --}}
+                        <div id="livewire-charts-container-{{ md5(json_encode($lineChartModelArray)) }}" class="h-64" data-model='@json($lineChartModelArray)'></div>
                     </div>
                 </div>
             </div>
@@ -87,6 +85,81 @@
 
             document.addEventListener('click', (e) => { if (!kebabMenu) return; if (kebabMenu.classList.contains('hidden')) return; const target = e.target; if (kebabMenu.contains(target) || (kebabBtn && kebabBtn.contains(target))) return; closeMenu(); });
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+        })();
+
+        // Minimal ApexCharts renderer + update handler. It reads the
+        // serialized model (from LineChartModel->toArray()) and renders a
+        // multi-series line chart. It also listens for the
+        // `wq-chart-updated` browser event to re-render on updates.
+        (function(){
+            // helper to build Apex-compatible series from the package model
+            function modelToSeries(model) {
+                if (!model || !model.data) return [];
+
+                // model.data: { seriesName: [ {seriesName,title,value,...}, ... ] }
+                return Object.keys(model.data).map(function(name){
+                    var points = (model.data[name] || []).map(function(p){ return p.value; });
+                    return { name: name, data: points };
+                });
+            }
+
+            function modelToCategories(model) {
+                // Extract categories (titles) from the first series or xAxis
+                if (model.xAxis && model.xAxis.categories && model.xAxis.categories.length) return model.xAxis.categories;
+                var first = Object.values(model.data || {})[0] || [];
+                return first.map(function(p){ return p.title; });
+            }
+
+            window._wq_charts = window._wq_charts || {};
+
+            function renderContainer(container) {
+                var key = container.id;
+                var model = JSON.parse(container.getAttribute('data-model') || '{}');
+                if (!model || !model.data) return;
+
+                var series = modelToSeries(model);
+                var categories = modelToCategories(model);
+
+                if (window._wq_charts[key]) {
+                    try { window._wq_charts[key].destroy(); } catch(e){}
+                }
+
+                var options = {
+                    chart: { type: 'line', height: '100%', toolbar: { show: false } },
+                    series: series,
+                    xaxis: { categories: categories },
+                    stroke: { curve: 'smooth' },
+                    markers: { size: 3 },
+                    tooltip: { shared: true, intersect: false }
+                };
+
+                if (typeof ApexCharts === 'undefined') {
+                    console.warn('ApexCharts not found - include it in your build');
+                    return;
+                }
+
+                try {
+                    var chart = new ApexCharts(container, options);
+                    chart.render();
+                    window._wq_charts[key] = chart;
+                } catch (e) {
+                    console.error('Failed to render water quality chart', e);
+                }
+            }
+
+            // Initial render for existing containers
+            document.querySelectorAll('[id^="livewire-charts-container-"]').forEach(renderContainer);
+
+            // Listen for explicit browser event dispatched by the Livewire component
+            window.addEventListener('wq-chart-updated', function(e){
+                try {
+                    // Find container(s) and update their data-model then re-render
+                    document.querySelectorAll('[id^="livewire-charts-container-"]').forEach(function(container){
+                        container.setAttribute('data-model', JSON.stringify(e.detail.model || {}));
+                        renderContainer(container);
+                    });
+                } catch (err) { console.warn('wq-chart-updated handler failed', err); }
+            });
         })();
     </script>
 
