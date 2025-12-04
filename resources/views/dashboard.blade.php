@@ -48,6 +48,7 @@
                                 <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-400"></span>
                             </div>
                             <span class="font-medium">Disconnected</span>
+                            <span class="sr-only"> — Sensor offline</span>
                         </div>
                     </div>
                 </div>
