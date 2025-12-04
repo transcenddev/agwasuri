@@ -74,19 +74,13 @@
             // kebab menu interactions remain; keep minimal logic here
             const kebabBtn = document.getElementById('waterChart-kebab-btn');
             const kebabMenu = document.getElementById('waterChart-kebab-menu');
-            const kebabReset = document.getElementById('kebab-reset');
 
             function closeMenu() { if (!kebabMenu) return; kebabMenu.classList.add('hidden'); if (kebabBtn) kebabBtn.setAttribute('aria-expanded','false'); }
             function openMenu() { if (!kebabMenu) return; kebabMenu.classList.remove('hidden'); if (kebabBtn) kebabBtn.setAttribute('aria-expanded','true'); }
 
             if (kebabBtn) kebabBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!kebabMenu) return; if (kebabMenu.classList.contains('hidden')) openMenu(); else closeMenu(); });
 
-            window._resetAndShowAll = function() {
-                try { if (window._showAllSeries) window._showAllSeries(); } catch (e) { console.warn('showAllSeries failed', e); }
-                setTimeout(() => { try { if (window._resetZoom) window._resetZoom(); const live = document.querySelector('#chart-reset-live'); if (live) live.textContent = 'Chart reset. All series visible.'; } catch (e) { console.warn('resetZoom failed', e); } }, 50);
-            };
-
-            if (kebabReset) kebabReset.addEventListener('click', (e) => { e.stopPropagation(); closeMenu(); if (window._resetAndShowAll) window._resetAndShowAll(); });
+            // Reset helper and kebab reset listener removed — no visible reset controls exist.
 
             document.addEventListener('click', (e) => { if (!kebabMenu) return; if (kebabMenu.classList.contains('hidden')) return; const target = e.target; if (kebabMenu.contains(target) || (kebabBtn && kebabBtn.contains(target))) return; closeMenu(); });
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
