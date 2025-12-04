@@ -150,16 +150,19 @@
             // Initial render for existing containers
             document.querySelectorAll('[id^="livewire-charts-container-"]').forEach(renderContainer);
 
-            // Listen for explicit browser event dispatched by the Livewire component
-            window.addEventListener('wq-chart-updated', function(e){
-                try {
-                    // Find container(s) and update their data-model then re-render
-                    document.querySelectorAll('[id^="livewire-charts-container-"]').forEach(function(container){
-                        container.setAttribute('data-model', JSON.stringify(e.detail.model || {}));
-                        renderContainer(container);
-                    });
-                } catch (err) { console.warn('wq-chart-updated handler failed', err); }
-            });
+            // Listen for Livewire-emitted events and update the chart.
+            if (typeof Livewire !== 'undefined' && Livewire.on) {
+                Livewire.on('wqChartUpdated', function(model){
+                    try {
+                        document.querySelectorAll('[id^="livewire-charts-container-"]').forEach(function(container){
+                            container.setAttribute('data-model', JSON.stringify(model || {}));
+                            renderContainer(container);
+                        });
+                    } catch (err) { console.warn('wqChartUpdated handler failed', err); }
+                });
+            } else {
+                console.warn('Livewire not found - real-time chart updates via Livewire will not work.');
+            }
         })();
     </script>
 

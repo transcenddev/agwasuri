@@ -171,9 +171,11 @@ class WaterQualityChart extends Component
         // Expose an array copy for Livewire's hydration/dehydration.
         $this->lineChartModelArray = $this->lineChartModel->toArray();
 
-        // Dispatch a browser event so the client can re-render the chart
-        // without relying on Livewire to synthesize the object.
-        $this->dispatchBrowserEvent('wq-chart-updated', ['model' => $this->lineChartModelArray]);
+        // Emit a Livewire event with the serializable model so the client
+        // JS can listen via `Livewire.on` and update the chart. Some
+        // Livewire versions don't provide dispatchBrowserEvent on the
+        // component instance, so `emit` is more portable here.
+        $this->emit('wqChartUpdated', $this->lineChartModelArray);
     }
 
     /**
