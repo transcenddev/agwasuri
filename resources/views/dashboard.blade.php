@@ -40,7 +40,6 @@
                     <div class="flex items-center gap-4 text-sm text-gray-600">
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-gray-500">Last updated</span>
-                            <span class="ml-1 font-medium text-gray-700" aria-live="polite">—</span>
                         </div>
 
                         <div class="flex items-center gap-2">
