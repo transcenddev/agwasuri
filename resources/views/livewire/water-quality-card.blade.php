@@ -9,11 +9,12 @@
             'critical' => 'Immediate action needed: DO critically low',
         ];
         $reasonText = $reasons[$statusKey] ?? '';
-        // Badge classes: use explicit amber styling for disconnected status
+        // Badge classes: base badge styling + status-specific classes
+        $badgeBase = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold';
         if ($statusKey === 'disconnected') {
-            $badgeClasses = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-amber-100 text-amber-800';
+            $badgeClasses = $badgeBase . ' bg-amber-100 text-amber-800';
         } else {
-            $badgeClasses = $this->overallClassesForStatus($status);
+            $badgeClasses = $badgeBase . ' ' . $this->overallClassesForStatus($status);
         }
     @endphp
 
@@ -34,14 +35,13 @@
     {{-- When disconnected, show a more prominent alert with troubleshooting link --}}
     @if(strtolower($overallStatus ?? $this->overallStatus) === 'disconnected')
         <div class="mb-4">
-            <div class="rounded-md bg-amber-50 p-3 border border-amber-100" role="alert" aria-live="assertive">
+            <div class="rounded-md bg-amber-50 p-3 border border-amber-100">
                 <div class="flex items-start gap-3">
                     <svg class="h-5 w-5 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
                     </svg>
                     <div class="flex-1 text-sm text-amber-700">
-                        <span class="sr-only">Sensor offline. Check power, battery, or network connection.</span>
-                        <span aria-hidden="true">Sensor offline. Check power, battery, or network connection.</span>
+                        Sensor offline. Check power, battery, or network connection.
                         <a href="#troubleshooting" class="ml-2 text-sm text-amber-700 underline">Troubleshooting tips</a>
                     </div>
                 </div>
