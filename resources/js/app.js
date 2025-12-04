@@ -38,6 +38,3 @@ if (window.Livewire) {
         } catch (e) {}
     });
 }
-
-// Charts: initialize water-quality interactive charts (main + mini overview)
-import "./charts/water-quality";

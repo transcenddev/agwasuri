@@ -1,6 +1,6 @@
 {{-- Outer container using flex column layout --}}
 <div class="flex flex-col">
-    @if($lineChartModel)
+    @if(!empty($lineChartModelArray))
         {{-- Single root element for Livewire + compact header --}}
         <div class="w-full">
             <div class="px-4 py-2 flex items-center justify-between"> {{-- header --}}
@@ -28,14 +28,11 @@
                 </div>
             </div>
 
-            {{-- Chart Area: render using the official livewire-charts component. --}}
+            {{-- Chart Area: render via the lightweight wrapper that consumes the serializable model array --}}
             <div class="w-full">
                 <div class="relative">
                     <div class="w-full p-4 max-w-content-xl mx-auto">
-                        {{-- Render the chart container and attach a serializable model
-                            produced server-side. We avoid passing the LineChartModel
-                            object directly to Livewire to prevent synthesizer errors. --}}
-                        <div id="livewire-charts-container-{{ md5(json_encode($lineChartModelArray)) }}" class="h-64" data-model='@json($lineChartModelArray)'></div>
+                        @livewire('livewire-charts-line-wrapper', ['lineChartModel' => $lineChartModelArray], key(md5(json_encode($lineChartModelArray))))
                     </div>
                 </div>
             </div>
@@ -83,91 +80,13 @@
 
             if (kebabBtn) kebabBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!kebabMenu) return; if (kebabMenu.classList.contains('hidden')) openMenu(); else closeMenu(); });
 
+            // Reset helper and kebab reset listener removed — no visible reset controls exist.
+
             document.addEventListener('click', (e) => { if (!kebabMenu) return; if (kebabMenu.classList.contains('hidden')) return; const target = e.target; if (kebabMenu.contains(target) || (kebabBtn && kebabBtn.contains(target))) return; closeMenu(); });
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
         })();
 
-        // Minimal ApexCharts renderer + update handler. It reads the
-        // serialized model (from LineChartModel->toArray()) and renders a
-        // multi-series line chart. It also listens for the
-        // `wq-chart-updated` browser event to re-render on updates.
-        (function(){
-            // helper to build Apex-compatible series from the package model
-            function modelToSeries(model) {
-                if (!model || !model.data) return [];
-
-                // model.data: { seriesName: [ {seriesName,title,value,...}, ... ] }
-                return Object.keys(model.data).map(function(name){
-                    var points = (model.data[name] || []).map(function(p){ return p.value; });
-                    return { name: name, data: points };
-                });
-            }
-
-            function modelToCategories(model) {
-                // Extract categories (titles) from the first series or xAxis
-                if (model.xAxis && model.xAxis.categories && model.xAxis.categories.length) return model.xAxis.categories;
-                var first = Object.values(model.data || {})[0] || [];
-                return first.map(function(p){ return p.title; });
-            }
-
-            window._wq_charts = window._wq_charts || {};
-
-            function renderContainer(container) {
-                var key = container.id;
-                var model = JSON.parse(container.getAttribute('data-model') || '{}');
-                if (!model || !model.data) return;
-
-                var series = modelToSeries(model);
-                var categories = modelToCategories(model);
-
-                if (window._wq_charts[key]) {
-                    try { window._wq_charts[key].destroy(); } catch(e){}
-                }
-
-                var options = {
-                    chart: { type: 'line', height: '100%', toolbar: { show: false } },
-                    series: series,
-                    xaxis: { categories: categories },
-                    stroke: { curve: 'smooth' },
-                    markers: { size: 3 },
-                    tooltip: { shared: true, intersect: false }
-                };
-
-                if (typeof ApexCharts === 'undefined') {
-                    console.warn('ApexCharts not found - include it in your build');
-                    return;
-                }
-
-                try {
-                    var chart = new ApexCharts(container, options);
-                    chart.render();
-                    window._wq_charts[key] = chart;
-                } catch (e) {
-                    console.error('Failed to render water quality chart', e);
-                }
-            }
-
-            // Initial render for existing containers
-            document.querySelectorAll('[id^="livewire-charts-container-"]').forEach(renderContainer);
-
-            // Use Livewire.hook to detect when Livewire finishes processing
-            // a message and then re-render chart containers. This avoids
-            // relying on specific server-side event methods across
-            // different Livewire versions.
-            if (typeof Livewire !== 'undefined' && Livewire.hook) {
-                Livewire.hook('message.processed', (message, component) => {
-                    try {
-                        document.querySelectorAll('[id^="livewire-charts-container-"]').forEach(function(container){
-                            // The server updates the `data-model` attribute in
-                            // the DOM during hydration, so just re-read it.
-                            renderContainer(container);
-                        });
-                    } catch (err) { console.warn('Livewire hook chart update failed', err); }
-                });
-            } else {
-                console.warn('Livewire.hook not found - chart will render only on initial load.');
-            }
-        })();
+        // Chart rendering is performed by the vendor view included via the wrapper component.
     </script>
 
     <!-- Screen-reader live region for reset announcements -->

@@ -9,13 +9,13 @@
         "dev-reset": "npm run dev-start -- --fresh"
     },
     "devDependencies": {
-        "@tailwindcss/forms": "^0.5.2",
         "@commitlint/cli": "^17.6.7",
         "@commitlint/config-conventional": "^17.6.7",
-        "husky": "^8.0.0",
+        "@tailwindcss/forms": "^0.5.2",
         "autoprefixer": "^10.4.2",
         "axios": "^1.7.4",
         "concurrently": "^9.0.1",
+        "husky": "^8.0.0",
         "laravel-echo": "^2.2.6",
         "laravel-vite-plugin": "^1.0",
         "postcss": "^8.4.31",
@@ -24,9 +24,10 @@
         "vite": "^6.0"
     },
     "dependencies": {
+        "apexcharts": "^5.3.6",
         "chart.js": "^4.4.9",
+        "chartjs-adapter-luxon": "^1.0.1",
         "chartjs-plugin-zoom": "^2.0.1",
-        "luxon": "^3.4.0",
-        "chartjs-adapter-luxon": "^1.0.1"
+        "luxon": "^3.4.0"
     }
 }

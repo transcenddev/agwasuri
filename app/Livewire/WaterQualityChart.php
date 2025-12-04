@@ -3,11 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\WaterQualityData;
-use Asantibanez\LivewireCharts\Models\LineChartModel;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Asantibanez\LivewireCharts\Models\LineChartModel;
 
 class WaterQualityChart extends Component
 {
@@ -21,11 +21,8 @@ class WaterQualityChart extends Component
     // A lightweight legend structure used by the blade
     public array $legendData = [];
 
-    // Keep the actual LineChartModel as a protected object to avoid Livewire
-    // attempting to synthesize it. Expose a serializable array for the view.
+    // Livewire-charts model (protected) and a serializable array for Blade
     protected $lineChartModel;
-
-    // Public serializable model (array) consumed by the Blade and client JS.
     public array $lineChartModelArray = [];
 
     #[On('user-selected')]
@@ -148,32 +145,76 @@ class WaterQualityChart extends Component
             ];
         })->values()->all();
 
-        // Build an official LineChartModel (multi-line) provided by
-        // asantibanez/livewire-charts so we can render the canonical
-        // `livewire-line-chart` component in the Blade.
-        $model = (new LineChartModel())->multiLine()->setTitle('Water Quality Data')->setAnimated(false);
+        // Build a livewire-charts LineChartModel and expose a serializable array.
+        try {
+            $model = new LineChartModel();
 
-        // Add points per series using the package API. The method
-        // `addSeriesPoint($seriesName, $title, $value)` will build the
-        // multi-series payload the component expects.
-        foreach ($series as $seriesName => $values) {
-            foreach ($labels as $idx => $label) {
-                $v = $values[$idx] ?? null;
-                $model->addSeriesPoint($seriesName, $label, $v);
+            // prefer multi-line behavior when available
+            if (method_exists($model, 'multiLine')) {
+                $model->multiLine();
             }
+
+            // add series points
+            foreach ($series as $seriesName => $values) {
+                foreach ($labels as $idx => $label) {
+                    $v = $values[$idx] ?? null;
+                    if (method_exists($model, 'addSeriesPoint')) {
+                        $model->addSeriesPoint($seriesName, $label, $v);
+                    }
+                }
+            }
+
+            if (method_exists($model, 'setColors')) {
+                // setColors often expects an array of hex values matching series order
+                $model->setColors(array_values($colors));
+            }
+
+            if (method_exists($model, 'setTitle')) {
+                $model->setTitle('Water Quality Data');
+            }
+
+            $this->lineChartModel = $model;
+
+            if (method_exists($model, 'toArray')) {
+                $this->lineChartModelArray = $model->toArray();
+            } else {
+                // fallback to a conservative array shape
+                $lineData = [];
+                foreach ($series as $seriesName => $values) {
+                    $points = [];
+                    foreach ($labels as $idx => $label) {
+                        $points[] = ['title' => $label, 'value' => $values[$idx] ?? null, 'extras' => new \stdClass()];
+                    }
+                    $lineData[$seriesName] = $points;
+                }
+
+                $this->lineChartModelArray = [
+                    'title' => 'Water Quality Data',
+                    'data' => $lineData,
+                    'xAxis' => ['categories' => $labels],
+                    'colors' => $colors,
+                    'animated' => false,
+                ];
+            }
+        } catch (\Throwable $e) {
+            // If something goes wrong building the model, keep a safe-array fallback
+            $lineData = [];
+            foreach ($series as $seriesName => $values) {
+                $points = [];
+                foreach ($labels as $idx => $label) {
+                    $points[] = ['title' => $label, 'value' => $values[$idx] ?? null, 'extras' => new \stdClass()];
+                }
+                $lineData[$seriesName] = $points;
+            }
+
+            $this->lineChartModelArray = [
+                'title' => 'Water Quality Data',
+                'data' => $lineData,
+                'xAxis' => ['categories' => $labels],
+                'colors' => $colors,
+                'animated' => false,
+            ];
         }
-
-        // Apply colors in the same order as our series array.
-        $model->setColors(array_values($colors));
-
-        $this->lineChartModel = $model;
-
-        // Expose an array copy for Livewire's hydration/dehydration.
-        $this->lineChartModelArray = $this->lineChartModel->toArray();
-
-        // Do not call client event methods here (compatibility across
-        // Livewire versions). The Blade's JS will detect DOM updates
-        // and re-render the chart after Livewire finishes processing.
     }
 
     /**

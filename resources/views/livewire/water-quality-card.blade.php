@@ -1,4 +1,29 @@
 <div>
+    {{-- Connection status indicator --}}
+    <div class="flex items-center justify-end gap-4 text-sm text-gray-600 mb-3">
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-500">Last updated: {{ $lastUpdated ? \Illuminate\Support\Carbon::parse($lastUpdated)->format('M d, Y H:i:s') : 'Never' }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            @if($connectionStatus === 'connected')
+                <div class="relative w-3 h-3 flex items-center justify-center" aria-hidden="true">
+                    <span class="absolute inset-0 m-auto inline-flex h-3 w-3 rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-400"></span>
+                </div>
+                <span class="font-medium text-emerald-600">Connected</span>
+                <span class="sr-only"> Sensor online</span>
+            @else
+                <div class="relative w-3 h-3 flex items-center justify-center" aria-hidden="true">
+                    <span class="absolute inset-0 m-auto inline-flex h-3 w-3 rounded-full bg-rose-400 opacity-75 animate-ping"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-400"></span>
+                </div>
+                <span class="font-medium text-rose-600">Disconnected</span>
+                <span class="sr-only"> Sensor offline</span>
+            @endif
+        </div>
+    </div>
+
     {{-- Overall status pill (aggregated) --}}
     @php
         $status = $overallStatus ?? $this->overallStatus;

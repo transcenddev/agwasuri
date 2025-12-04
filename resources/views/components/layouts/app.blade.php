@@ -31,6 +31,7 @@
         {{ $slot }}
 
         @livewireScripts
+        @livewireChartsScripts
             @if (view()->exists('components.theme-init-listeners'))
                 @include('components.theme-init-listeners')
             @endif

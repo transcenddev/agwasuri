@@ -105,9 +105,9 @@ if ($Infinite) {
   # dissolved_oxygen: 2.5 - 12.0 mg/L
   # pH: 6.0 - 8.5
 
-  # Introduce diurnal variation and occasional events
-  $minuteOffset = $i * $TimeStepMinutes
-  $timestamp = $startDt.AddMinutes($minuteOffset)
+  # Advance time using the configured interval so consecutive records have different seconds
+  $secondsOffset = ($i * $IntervalMs) / 1000.0
+  $timestamp = $startDt.AddSeconds($secondsOffset)
 
   # seed randomness for reproducible outputs when requested
   if ($Seed -ne 0) { Get-Random -SetSeed $Seed + $i | Out-Null }
@@ -137,6 +137,19 @@ if ($Infinite) {
 
   # Small chance for low-oxygen event
   if (($i % 200) -eq 150) { $do = Get-RandomFloat -min 2.2 -max 4.0 -round 2 }
+
+  # Deterministic status cycle overlay so we see Healthy -> Warning -> Critical patterns
+  # every 60 records force a critical-like reading, every 20 records force a warning-ish reading
+  if (($i % 60) -eq 0) {
+    # critical: high temp, very low DO
+    $temp = [math]::Round([math]::Max(35.0, $temp + (Get-RandomFloat -min 2.0 -max 6.0 -round 2)), 2)
+    $do = [math]::Round([math]::Min(2.5, $do - (Get-RandomFloat -min 1.5 -max 3.5 -round 2)), 2)
+    $sal = [math]::Round($sal + (Get-RandomFloat -min 0.0 -max 2.0 -round 2), 2)
+  } elseif (($i % 20) -eq 0) {
+    # warning: slightly elevated temp or lower DO
+    $temp = [math]::Round($temp + (Get-RandomFloat -min 1.0 -max 3.0 -round 2), 2)
+    $do = [math]::Round($do - (Get-RandomFloat -min 0.5 -max 1.2 -round 2), 2)
+  }
 
   # pH: mildly buffered but affected by rain events and organic loading
   $phEffect = 0
@@ -184,6 +197,8 @@ if ($Infinite) {
       }
 
       Start-Sleep -Milliseconds $IntervalMs
+      # increment loop counter so offsets and deterministic events progress
+      $i++
     }
   }
 

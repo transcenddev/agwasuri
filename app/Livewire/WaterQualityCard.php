@@ -18,6 +18,12 @@ class WaterQualityCard extends Component
     public $connectionStatus = 'disconnected';
     public $overallStatus = 'Disconnected';
 
+    // Delta properties (difference between latest and previous measurement)
+    public ?float $temperatureDelta = null;
+    public ?float $dissolvedOxygenDelta = null;
+    public ?float $phLevelDelta = null;
+    public ?float $salinityDelta = null;
+
     public ?int $userId = null;
 
     public ?string $startDate = null;
@@ -79,18 +85,19 @@ class WaterQualityCard extends Component
 
     public function loadData()
     {
-        $query = WaterQualityData::where('user_id', $this->userId);
+        $baseQuery = WaterQualityData::where('user_id', $this->userId);
 
         if ($this->startDate && $this->endDate) {
-            $query->whereBetween('recorded_at', [
+            $baseQuery->whereBetween('recorded_at', [
                 Carbon::parse($this->startDate)->startOfDay(),
                 Carbon::parse($this->endDate)->endOfDay()
             ]);
         } elseif ($this->startDate) {
-            $query->whereDate('recorded_at', $this->startDate);
+            $baseQuery->whereDate('recorded_at', $this->startDate);
         }
 
-        $waterQualityData = $query->latest('recorded_at')->first();
+        // latest reading
+        $waterQualityData = (clone $baseQuery)->orderBy('recorded_at', 'desc')->first();
 
         if ($waterQualityData) {
             $this->temperature = $waterQualityData->temperature;
@@ -98,8 +105,37 @@ class WaterQualityCard extends Component
             $this->ph_level = $waterQualityData->ph_level;
             $this->dissolved_oxygen = $waterQualityData->dissolved_oxygen;
             $this->lastUpdated = Carbon::parse($waterQualityData->recorded_at)->toDateTimeString();
-            // connection status can be extended later; for now mark connected when we have a row
             $this->connectionStatus = 'connected';
+
+            // Try to fetch the previous reading (if any) to compute deltas
+            $previous = (clone $baseQuery)
+                ->where('recorded_at', '<', $waterQualityData->recorded_at)
+                ->orderBy('recorded_at', 'desc')
+                ->first();
+
+            if ($previous) {
+                $this->temperatureDelta = is_numeric($this->temperature) && is_numeric($previous->temperature)
+                    ? (float) $this->temperature - (float) $previous->temperature
+                    : null;
+
+                $this->dissolvedOxygenDelta = is_numeric($this->dissolved_oxygen) && is_numeric($previous->dissolved_oxygen)
+                    ? (float) $this->dissolved_oxygen - (float) $previous->dissolved_oxygen
+                    : null;
+
+                $this->phLevelDelta = is_numeric($this->ph_level) && is_numeric($previous->ph_level)
+                    ? (float) $this->ph_level - (float) $previous->ph_level
+                    : null;
+
+                $this->salinityDelta = is_numeric($this->salinity) && is_numeric($previous->salinity)
+                    ? (float) $this->salinity - (float) $previous->salinity
+                    : null;
+            } else {
+                $this->temperatureDelta = null;
+                $this->dissolvedOxygenDelta = null;
+                $this->phLevelDelta = null;
+                $this->salinityDelta = null;
+            }
+
             // compute overall status after loading latest metrics
             $this->computeOverallStatus();
         } else {
@@ -110,6 +146,11 @@ class WaterQualityCard extends Component
             $this->lastUpdated = null;
             $this->connectionStatus = 'disconnected';
             $this->overallStatus = 'Disconnected';
+
+            $this->temperatureDelta = null;
+            $this->dissolvedOxygenDelta = null;
+            $this->phLevelDelta = null;
+            $this->salinityDelta = null;
         }
     }
 
@@ -214,6 +255,46 @@ class WaterQualityCard extends Component
             'ph_level' => 'pH',
             default => ''
         };
+    }
+
+    /**
+     * Returns classes for the numeric value text color given a status
+     */
+    public function numberColorForStatus(string $status): string
+    {
+        return match($status) {
+            'good' => 'text-cvsu-700',
+            'warning' => 'text-yellow-700',
+            'danger' => 'text-rose-700',
+            default => 'text-gray-700',
+        };
+    }
+
+    /**
+     * Format a delta value for display with a metric's unit and sign
+     */
+    public function formatDelta(string $metric, ?float $delta): string
+    {
+        if ($delta === null) return '';
+
+        // choose decimals per metric
+        $decimals = $metric === 'ph_level' ? 2 : ($metric === 'salinity' ? 2 : 1);
+        $sign = $delta > 0 ? '+' : ($delta < 0 ? '' : '');
+        $abs = number_format(abs($delta), $decimals);
+        $unit = $this->unitFor($metric);
+
+        return "{$sign}{$abs} {$unit}";
+    }
+
+    /**
+     * Return a text color class for a trend delta: positive -> green, negative -> red
+     */
+    public function trendClass(?float $delta): string
+    {
+        if ($delta === null) return 'text-gray-500';
+        if ($delta > 0) return 'text-green-600';
+        if ($delta < 0) return 'text-rose-600';
+        return 'text-gray-500';
     }
 
     public function render()

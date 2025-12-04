@@ -29,28 +29,16 @@
             </div>
         </x-card>
 
-        <x-card class="mb-6">
+        <div class="grid grid-cols-1 gap-4">
+
+            <x-card>
             <x-slot name="header">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
                     <div class="flex items-center gap-3">
                         <h3 class="text-lg font-semibold text-gray-700">Water Quality Summary</h3>
                         {{-- Pond selector removed here to avoid duplicate search inputs; top filter remains --}}
                     </div>
-
-                    <div class="flex items-center gap-4 text-sm text-gray-600">
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-500">Last updated</span>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <div class="relative w-3 h-3 flex items-center justify-center" aria-hidden="true">
-                                <span class="absolute inset-0 m-auto inline-flex h-3 w-3 rounded-full bg-rose-400 opacity-75 animate-ping"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-400"></span>
-                            </div>
-                            <span class="font-medium">Disconnected</span>
-                            <span class="sr-only"> — Sensor offline</span>
-                        </div>
-                    </div>
+                    {{-- Connection status moved into WaterQualityCard component --}}
                 </div>
             </x-slot>
 
@@ -68,17 +56,18 @@
             @endif
         </x-card>
 
-        <x-card class="mb-6">
+        <x-card class="mt-4">
             <x-slot name="header">
                 <x-card-header>
                     <x-slot name="title">Trends</x-slot>
                 </x-card-header>
             </x-slot>
-            {{-- <livewire:water-quality-chart :userId="Auth::id()" /> --}}
-             <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-chart-{{ $activeUserId }}" />
-        </x-card>
+             <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-trends-{{ $activeUserId }}" />
+            </x-card>
 
-        <x-card>
+        </div>
+
+        <x-card class="mt-4">
             <x-slot name="header">
                 <x-card-header>
                     <x-slot name="title">Measurements</x-slot>
