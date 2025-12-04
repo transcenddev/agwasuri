@@ -71,7 +71,7 @@
     @endphp
 
     <button
-        id="theme-toggle-btn"
+        data-role="theme-toggle-btn"
         type="button"
         data-variant="{{ $variant }}"
         onclick="window.toggleTheme && window.toggleTheme()"
@@ -94,58 +94,61 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
         </svg> 
     </button>
-
     <script>
     (function(){
-        const btn = document.getElementById('theme-toggle-btn');
-        if (!btn) return;
+        const buttons = document.querySelectorAll('[data-role="theme-toggle-btn"]');
+        if (!buttons || buttons.length === 0) return;
 
-        const sun = btn.querySelector('[data-role="icon-sun"]');
-        const moon = btn.querySelector('[data-role="icon-moon"]');
+        function initButton(btn) {
+            const sun = btn.querySelector('[data-role="icon-sun"]');
+            const moon = btn.querySelector('[data-role="icon-moon"]');
 
-        function setIcons(theme) {
-            const dark = theme === 'dark' || (!theme && document.documentElement.classList.contains('dark'));
-            if (dark) {
-                sun.classList.remove('opacity-100','scale-100');
-                sun.classList.add('opacity-0','scale-0','absolute');
-                moon.classList.remove('opacity-0','scale-0','absolute');
-                moon.classList.add('opacity-100','scale-100');
-                btn.setAttribute('title','Switch to Light Mode');
-                btn.setAttribute('aria-pressed','true');
-            } else {
-                moon.classList.remove('opacity-100','scale-100');
-                moon.classList.add('opacity-0','scale-0','absolute');
-                sun.classList.remove('opacity-0','scale-0','absolute');
-                sun.classList.add('opacity-100','scale-100');
-                btn.setAttribute('title','Switch to Dark Mode');
-                btn.setAttribute('aria-pressed','false');
+            function setIcons(theme) {
+                const dark = theme === 'dark' || (!theme && document.documentElement.classList.contains('dark'));
+                if (dark) {
+                    sun.classList.remove('opacity-100','scale-100');
+                    sun.classList.add('opacity-0','scale-0','absolute');
+                    moon.classList.remove('opacity-0','scale-0','absolute');
+                    moon.classList.add('opacity-100','scale-100');
+                    btn.setAttribute('title','Switch to Light Mode');
+                    btn.setAttribute('aria-pressed','true');
+                } else {
+                    moon.classList.remove('opacity-100','scale-100');
+                    moon.classList.add('opacity-0','scale-0','absolute');
+                    sun.classList.remove('opacity-0','scale-0','absolute');
+                    sun.classList.add('opacity-100','scale-100');
+                    btn.setAttribute('title','Switch to Dark Mode');
+                    btn.setAttribute('aria-pressed','false');
+                }
             }
+
+            // initial state: check shared localStorage key first, then document class
+            const saved = localStorage.getItem('agwasuri_theme');
+            setIcons(saved);
+
+            // If this is the login variant, show a one-time pulse hint to draw attention
+            try {
+                const isLogin = btn.dataset.variant === 'login';
+                if (isLogin && !localStorage.getItem('themeHintShown')) {
+                    btn.classList.add('animate-pulse');
+                    setTimeout(() => {
+                        btn.classList.remove('animate-pulse');
+                        localStorage.setItem('themeHintShown', '1');
+                    }, 1600);
+                }
+            } catch (e) {}
+
+            // quick visual flip on click (immediate feedback)
+            btn.addEventListener('click', () => {
+                const cur = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                setIcons(cur);
+            });
+
+            // listen for theme change events from shared helper and update this button
+            window.addEventListener('agwasuri:theme-changed', (e) => setIcons(e.detail));
         }
 
-        // initial state: check shared localStorage key first, then document class
-        const saved = localStorage.getItem('agwasuri_theme');
-        setIcons(saved);
-
-        // If this is the login variant, show a one-time pulse hint to draw attention
-        try {
-            const isLogin = btn.dataset.variant === 'login';
-            if (isLogin && !localStorage.getItem('themeHintShown')) {
-                btn.classList.add('animate-pulse');
-                setTimeout(() => {
-                    btn.classList.remove('animate-pulse');
-                    localStorage.setItem('themeHintShown', '1');
-                }, 1600);
-            }
-        } catch (e) {}
-
-        // listen for theme change events from shared helper
-        window.addEventListener('agwasuri:theme-changed', (e) => setIcons(e.detail));
-
-        // quick visual flip on click (immediate feedback)
-        btn.addEventListener('click', () => {
-            const cur = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-            setIcons(cur);
-        });
+        buttons.forEach(initButton);
     })();
     </script>
 </div>
