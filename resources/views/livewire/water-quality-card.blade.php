@@ -19,11 +19,15 @@
 
     <div class="mb-3">
         <div>
-            <span class="{{ $badgeClasses }}">
-                {{ $status }}
-            </span>
-            @if(!empty($reasonText))
-                <div class="mt-1 text-xs text-gray-500 truncate max-w-[18rem] sm:max-w-none">{{ $reasonText }}</div>
+            @if($statusKey !== 'disconnected')
+                <span class="{{ $badgeClasses }}">
+                    {{ $status }}
+                </span>
+                @if(!empty($reasonText))
+                    <div class="mt-1 text-xs text-gray-500 truncate max-w-[18rem] sm:max-w-none">{{ $reasonText }}</div>
+                @endif
+            @else
+                {{-- badge hidden when disconnected to avoid duplicate messaging (alert shown above) --}}
             @endif
         </div>
     </div>
