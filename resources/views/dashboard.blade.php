@@ -1,6 +1,6 @@
 <x-app-layout>
    
-       <x-container class="pt-20 py-12">
+    <x-container class="pt-6 sm:pt-10 py-6">
             @php
                 $activeUserId = request('user') ?? session('selected_user', Auth::id());
             @endphp
@@ -44,7 +44,10 @@
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-rose-400" aria-hidden="true"></span>
+                            <div class="relative w-3 h-3 flex items-center justify-center" aria-hidden="true">
+                                <span class="absolute inset-0 m-auto inline-flex h-3 w-3 rounded-full bg-rose-400 opacity-75 animate-ping"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-400"></span>
+                            </div>
                             <span class="font-medium">Disconnected</span>
                         </div>
                     </div>
@@ -56,10 +59,13 @@
                 <livewire:water-quality-card :userId="$activeUserId" wire:key="wq-card-{{ $activeUserId }}" />
             </div>
 
-            {{-- Recommendation placeholder card (separate Livewire component) --}}
-            <div class="mt-4">
-                <livewire:recommendation-card :userId="$activeUserId" wire:key="rec-card-{{ $activeUserId }}" />
-            </div>
+            {{-- Recommendation placeholder card (separate Livewire component)
+                 Hidden temporarily — re-enable by changing the condition below to true. --}}
+            @if(false)
+                <div class="mt-4">
+                    <livewire:recommendation-card :userId="$activeUserId" wire:key="rec-card-{{ $activeUserId }}" />
+                </div>
+            @endif
         </x-card>
 
         <x-card class="mb-6">
