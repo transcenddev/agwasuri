@@ -28,11 +28,16 @@
                 </div>
             </div>
 
-            {{-- Chart Area: render ApexCharts using the lineChartModel produced server-side --}}
+            {{-- Chart Area: render using the official livewire-charts component. --}}
             <div class="w-full">
                 <div class="relative">
                     <div class="w-full p-4 max-w-content-xl mx-auto">
-                        <div id="livewire-charts-container-{{ md5(json_encode($lineChartModel)) }}" class="h-64" data-model='@json($lineChartModel)'></div>
+                        {{-- Use the LivewireLineChart child component. We pass the
+                            `LineChartModel` instance and key by its reactiveKey so
+                            Livewire will remount the child when the model changes. --}}
+                        @if($lineChartModel)
+                            @livewire('livewire-line-chart', ['lineChartModel' => $lineChartModel], key($lineChartModel->reactiveKey()))
+                        @endif
                     </div>
                 </div>
             </div>
@@ -80,60 +85,8 @@
 
             if (kebabBtn) kebabBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!kebabMenu) return; if (kebabMenu.classList.contains('hidden')) openMenu(); else closeMenu(); });
 
-            // Reset helper and kebab reset listener removed — no visible reset controls exist.
-
             document.addEventListener('click', (e) => { if (!kebabMenu) return; if (kebabMenu.classList.contains('hidden')) return; const target = e.target; if (kebabMenu.contains(target) || (kebabBtn && kebabBtn.contains(target))) return; closeMenu(); });
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
-        })();
-
-        // Render ApexCharts from the server-built lineChartModel for each container
-        (function(){
-            // helper to safely get/parse model from data-model attribute
-            function parseModel(el) {
-                try { return JSON.parse(el.getAttribute('data-model') || '{}'); } catch(e) { return null; }
-            }
-
-            // destroy existing charts cache
-            window._wq_charts = window._wq_charts || {};
-
-            document.querySelectorAll('[id^="livewire-charts-container-"]').forEach(function(container){
-                const key = container.id;
-                const model = parseModel(container);
-                if (!model || !model.data) return;
-
-                // build series for ApexCharts
-                const series = Object.keys(model.data).map(function(name){
-                    return { name: name, data: model.data[name].map(function(p){ return p.value; }) };
-                });
-
-                const categories = (model.xAxis && model.xAxis.categories && model.xAxis.categories.length) ? model.xAxis.categories : (model.data && Object.values(model.data)[0].map(function(p){ return p.title; }));
-
-                // destroy previous chart if present
-                if (window._wq_charts[key]) {
-                    try { window._wq_charts[key].destroy(); } catch(e){}
-                }
-
-                const options = {
-                    chart: { type: 'line', height: '100%', toolbar: { show: false } },
-                    series: series,
-                    xaxis: { categories: categories },
-                    stroke: { curve: 'smooth' },
-                    markers: { size: 3 },
-                    tooltip: { shared: true, intersect: false }
-                };
-
-                try {
-                    if (typeof ApexCharts === 'undefined') {
-                        console.warn('ApexCharts not found - include it in your build');
-                        return;
-                    }
-                    const chart = new ApexCharts(container, options);
-                    chart.render();
-                    window._wq_charts[key] = chart;
-                } catch (e) {
-                    console.error('Failed to render water quality chart', e);
-                }
-            });
         })();
     </script>
 
