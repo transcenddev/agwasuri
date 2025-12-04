@@ -20,8 +20,8 @@ $logout = function (Logout $logout) {
                     <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span>
                 </a>
 
-                <!-- Navigation Links -->
-                <div class="hidden md:flex md:items-center md:space-x-2 h-full">
+                <!-- Navigation Links (show only on large screens; use hamburger on tablet/mobile) -->
+                <div class="hidden lg:flex lg:items-center lg:space-x-2 h-full">
                     <x-nav-link :href="route('dashboard', ['user' => request('user')])" :active="request()->routeIs('dashboard')" wire:navigate>
                         Dashboard
                     </x-nav-link>
@@ -42,8 +42,8 @@ $logout = function (Logout $logout) {
                 </div>
             </div>
 
-            <!-- Right Side: Dark Mode Toggle + User Dropdown -->
-            <div class="hidden md:flex md:items-center md:space-x-4 h-full">
+            <!-- Right Side: Dark Mode Toggle + User Dropdown (show only on large screens) -->
+            <div class="hidden lg:flex lg:items-center lg:space-x-4 h-full">
                 <!-- Dark Mode Toggle -->
                 <livewire:dark-mode-toggle variant="green" />
                 
@@ -85,8 +85,8 @@ $logout = function (Logout $logout) {
                 </x-dropdown>
             </div>
 
-            <!-- Hamburger + mobile theme toggle -->
-            <div class="flex items-center gap-2 -me-2 md:hidden">
+            <!-- Hamburger + mobile theme toggle (visible on tablet and mobile) -->
+            <div class="flex items-center gap-2 -me-2 lg:hidden">
                 <div class="me-1">
                     <livewire:dark-mode-toggle variant="green" />
                 </div>
@@ -105,7 +105,7 @@ $logout = function (Logout $logout) {
     </div>
 
         <!-- Responsive Navigation Menu -->
-                <div :class="{ 'block': open, 'hidden': !open }" class="hidden md:hidden">
+                <div :class="{ 'block': open, 'hidden': !open }" class="hidden lg:hidden">
             <div class="pt-2 pb-3 space-y-1">
                 <x-responsive-nav-link :href="route('dashboard', ['user' => request('user')])" :active="request()->routeIs('dashboard')" wire:navigate>
                     Dashboard
