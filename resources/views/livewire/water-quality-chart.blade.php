@@ -58,8 +58,15 @@
                         </button>
                     </div>
 
-                    {{-- Mobile only: kebab menu that opens dropdown with the same actions --}}
-                    <div class="sm:hidden relative">
+                    {{-- Mobile only: simple selector for series + kebab menu for actions --}}
+                    <div class="sm:hidden relative flex items-center gap-2">
+                        <label for="chart-mobile-show" class="sr-only">Show series</label>
+                        <select id="chart-mobile-show" class="text-sm px-2 py-1 rounded border border-slate-200 bg-white" aria-label="Show series">
+                            <option value="do-only">DO only</option>
+                            <option value="all">All parameters</option>
+                        </select>
+
+                        <div class="relative">
                         <button id="waterChart-kebab-btn" aria-haspopup="true" aria-expanded="false" type="button" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-cvsu/20">
                             <span class="sr-only">Open menu</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-slate-700 dark:text-slate-200">
@@ -187,6 +194,38 @@
             // Close on Escape
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') closeMenu();
+            });
+        })();
+    </script>
+
+    <script>
+        // Wire mobile select to Livewire for series visibility and default to DO-only on small screens
+        (function(){
+            const mobileSelect = document.getElementById('chart-mobile-show');
+            function setMode(mode){
+                if (window.Livewire && typeof Livewire.emit === 'function') {
+                    Livewire.emit('set-series-visibility', mode);
+                }
+            }
+
+            if (mobileSelect) {
+                mobileSelect.addEventListener('change', (e) => {
+                    setMode(e.target.value);
+                });
+            }
+
+            // When Livewire is ready, default mobile to DO only if viewport is small
+            document.addEventListener('livewire:load', () => {
+                try {
+                    const isSmall = window.innerWidth < 640; // tailwind 'sm' breakpoint
+                    if (isSmall) {
+                        const defaultMode = mobileSelect ? mobileSelect.value || 'do-only' : 'do-only';
+                        setMode(defaultMode);
+                        if (mobileSelect) mobileSelect.value = defaultMode;
+                    }
+                } catch (e) {
+                    // ignore
+                }
             });
         })();
     </script>

@@ -136,6 +136,8 @@ class WaterQualityChart extends Component
     {
         if ($mode === 'all') {
             $this->visibleSeries = ['Temperature', 'pH Level', 'Dissolved Oxygen', 'Salinity'];
+        } elseif ($mode === 'do-only') {
+            $this->visibleSeries = ['Dissolved Oxygen'];
         }
         // Add other modes if needed
     }
