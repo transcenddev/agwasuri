@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\DeleteSampleUsers::class,
         \App\Console\Commands\DeleteBulkUsers::class,
         \App\Console\Commands\SeedWaterQualitySamples::class,
+        \App\Console\Commands\DeleteWaterQualityForUser::class,
     ];
 
     /**

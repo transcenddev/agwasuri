@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Asantibanez\LivewireCharts\Models\LineChartModel;
+use App\Services\WaterQualityChartService;
 
 class WaterQualityChart extends Component
 {
@@ -63,7 +64,36 @@ class WaterQualityChart extends Component
         }
 
         if ($matchesDate) {
-            $this->loadData();
+            // Dispatch a lightweight browser event with only the new point payload.
+            // The client will append this point to ApexCharts without reloading the full model.
+            $w = $event['waterQualityData'];
+            $payload = [
+                'recorded_at' => Carbon::parse($w['recorded_at'])->toIsoString(),
+                'temperature' => isset($w['temperature']) ? (float) $w['temperature'] : null,
+                'dissolved_oxygen' => isset($w['dissolved_oxygen']) ? (float) $w['dissolved_oxygen'] : null,
+                'salinity' => isset($w['salinity']) ? (float) $w['salinity'] : null,
+                'ph_level' => isset($w['ph_level']) ? (float) $w['ph_level'] : null,
+            ];
+
+            $this->dispatchBrowserEvent('water-quality:point', $payload);
+        }
+    }
+
+    /**
+     * Compatibility helper: Livewire v3 doesn't provide dispatchBrowserEvent by default
+     * in the Component base used here. Provide a small shim that uses the `js()` helper
+     * to emit a DOM CustomEvent on the client with the given payload.
+     */
+    public function dispatchBrowserEvent(string $eventName, $payload = null): void
+    {
+        // Safely JSON-encode payload for inline JS
+        $payloadJson = $payload !== null ? json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES) : 'null';
+
+        $expression = "window.dispatchEvent(new CustomEvent(" . json_encode($eventName) . ", { detail: " . $payloadJson . " }));";
+
+        // Use Livewire's js() helper to schedule the JS to run on the client side after the update
+        if (method_exists($this, 'js')) {
+            $this->js($expression);
         }
     }
 
@@ -102,7 +132,10 @@ class WaterQualityChart extends Component
             return;
         }
 
-        $labels = $rows->map(fn($r) => Carbon::parse($r->recorded_at)->format('Y-m-d H:i'))->all();
+        // Use shorter labels (time only) to reduce x-axis vertical space and avoid wrapping
+        // Use second-resolution labels (H:i:s) so client-side appends can use
+        // a unique x key and avoid accidental deduplication for high-frequency updates.
+        $labels = $rows->map(fn($r) => Carbon::parse($r->recorded_at)->format('H:i:s'))->all();
 
         $temperatureSeries = $rows->map(fn($r) => $r->temperature !== null ? (float) $r->temperature : null)->all();
         $doSeries = $rows->map(fn($r) => $r->dissolved_oxygen !== null ? (float) $r->dissolved_oxygen : null)->all();
@@ -178,43 +211,59 @@ class WaterQualityChart extends Component
             if (method_exists($model, 'toArray')) {
                 $this->lineChartModelArray = $model->toArray();
             } else {
-                // fallback to a conservative array shape
-                $lineData = [];
-                foreach ($series as $seriesName => $values) {
-                    $points = [];
-                    foreach ($labels as $idx => $label) {
-                        $points[] = ['title' => $label, 'value' => $values[$idx] ?? null, 'extras' => new \stdClass()];
-                    }
-                    $lineData[$seriesName] = $points;
-                }
-
-                $this->lineChartModelArray = [
-                    'title' => 'Water Quality Data',
-                    'data' => $lineData,
-                    'xAxis' => ['categories' => $labels],
-                    'colors' => $colors,
-                    'animated' => false,
-                ];
+                // fallback to service-built array shape
+                $service = new WaterQualityChartService();
+                $this->lineChartModelArray = $service->buildLineChartModelArray($labels, $series, $colors, $visible, (int) $this->userId);
             }
         } catch (\Throwable $e) {
             // If something goes wrong building the model, keep a safe-array fallback
-            $lineData = [];
-            foreach ($series as $seriesName => $values) {
-                $points = [];
-                foreach ($labels as $idx => $label) {
-                    $points[] = ['title' => $label, 'value' => $values[$idx] ?? null, 'extras' => new \stdClass()];
-                }
-                $lineData[$seriesName] = $points;
-            }
-
-            $this->lineChartModelArray = [
-                'title' => 'Water Quality Data',
-                'data' => $lineData,
-                'xAxis' => ['categories' => $labels],
-                'colors' => $colors,
-                'animated' => false,
-            ];
+            $service = new WaterQualityChartService();
+            $this->lineChartModelArray = $service->buildLineChartModelArray($labels, $series, $colors, $visible, (int) $this->userId);
         }
+
+        // Ensure x-axis density and labels rotation are included for the client
+        $labelCount = count($labels);
+        $tickAmount = min(8, max(2, $labelCount));
+
+        if (! isset($this->lineChartModelArray['xaxis']) || ! is_array($this->lineChartModelArray['xaxis'])) {
+            $this->lineChartModelArray['xaxis'] = [];
+        }
+        $this->lineChartModelArray['xaxis']['tickAmount'] = $this->lineChartModelArray['xaxis']['tickAmount'] ?? $tickAmount;
+        $this->lineChartModelArray['xaxis']['labels'] = $this->lineChartModelArray['xaxis']['labels'] ?? ['rotate' => -30];
+
+        // Ensure jsonConfig.chart.height and id exist so vendor JS receives numeric height and predictable id
+        if (! isset($this->lineChartModelArray['jsonConfig']) || ! is_array($this->lineChartModelArray['jsonConfig'])) {
+            $this->lineChartModelArray['jsonConfig'] = [];
+        }
+        if (! isset($this->lineChartModelArray['jsonConfig']['chart']) || ! is_array($this->lineChartModelArray['jsonConfig']['chart'])) {
+            $this->lineChartModelArray['jsonConfig']['chart'] = [];
+        }
+        $this->lineChartModelArray['jsonConfig']['chart']['height'] = $this->lineChartModelArray['jsonConfig']['chart']['height'] ?? ($this->lineChartModelArray['chart']['height'] ?? 700);
+        $this->lineChartModelArray['jsonConfig']['chart']['id'] = $this->lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-' . ($this->userId ?? '0');
+
+        // Promote visual defaults into jsonConfig so the vendor bundle (ApexCharts) picks them up directly.
+        // Colors: ensure an ordered array matching series order.
+        $this->lineChartModelArray['jsonConfig']['colors'] = $this->lineChartModelArray['jsonConfig']['colors'] ?? array_values($colors);
+
+        // Stroke widths (temperature emphasized)
+        $this->lineChartModelArray['jsonConfig']['stroke'] = $this->lineChartModelArray['jsonConfig']['stroke'] ?? ['width' => [2.6, 1.6, 1.6, 1.6]];
+
+        // Markers
+        $this->lineChartModelArray['jsonConfig']['markers'] = $this->lineChartModelArray['jsonConfig']['markers'] ?? ['size' => 3];
+
+        // Mirror x-axis density and label rotation into jsonConfig.xaxis for vendor merging
+        if (! isset($this->lineChartModelArray['jsonConfig']['xaxis']) || ! is_array($this->lineChartModelArray['jsonConfig']['xaxis'])) {
+            $this->lineChartModelArray['jsonConfig']['xaxis'] = [];
+        }
+        $this->lineChartModelArray['jsonConfig']['xaxis']['tickAmount'] = $this->lineChartModelArray['jsonConfig']['xaxis']['tickAmount'] ?? $tickAmount;
+        $this->lineChartModelArray['jsonConfig']['xaxis']['labels'] = $this->lineChartModelArray['jsonConfig']['xaxis']['labels'] ?? ['rotate' => -30];
+
+        // Ensure metadata for client-side mapping (series_keys in same order as series names)
+        if (! isset($this->lineChartModelArray['meta']) || ! is_array($this->lineChartModelArray['meta'])) {
+            $this->lineChartModelArray['meta'] = [];
+        }
+        $this->lineChartModelArray['meta']['series_names'] = $this->lineChartModelArray['meta']['series_names'] ?? array_keys($series);
+        $this->lineChartModelArray['meta']['series_keys'] = $this->lineChartModelArray['meta']['series_keys'] ?? ['temperature','dissolved_oxygen','salinity','ph_level'];
     }
 
     /**
