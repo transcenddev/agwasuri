@@ -6,6 +6,7 @@ use App\Models\WaterQualityData;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Asantibanez\LivewireCharts\Models\LineChartModel;
 use App\Services\WaterQualityChartService;
@@ -64,8 +65,13 @@ class WaterQualityChart extends Component
         }
 
         if ($matchesDate) {
-            // Dispatch a lightweight browser event with only the new point payload.
-            // The client will append this point to ApexCharts without reloading the full model.
+            // Primary update path: reload server-side chart data so Livewire
+            // re-renders the vendor chart exactly like the cards component.
+            // This mirrors the pattern in `WaterQualityCard::handleNewDataCreated`.
+            $this->loadData();
+
+            // Also keep the lightweight browser event as a fast-path append
+            // (client may append immediately). This is optional but harmless.
             $w = $event['waterQualityData'];
             $payload = [
                 'recorded_at' => Carbon::parse($w['recorded_at'])->toIsoString(),
@@ -132,15 +138,29 @@ class WaterQualityChart extends Component
             return;
         }
 
-        // Use shorter labels (time only) to reduce x-axis vertical space and avoid wrapping
-        // Use second-resolution labels (H:i:s) so client-side appends can use
-        // a unique x key and avoid accidental deduplication for high-frequency updates.
-        $labels = $rows->map(fn($r) => Carbon::parse($r->recorded_at)->format('H:i:s'))->all();
+        // Use ISO timestamps for series points so the client can use a datetime x-axis.
+        // This is more robust for real-time updates than category labels ('HH:mm:ss').
+        $labels = $rows->map(fn($r) => Carbon::parse($r->recorded_at)->toIsoString())->all();
 
-        $temperatureSeries = $rows->map(fn($r) => $r->temperature !== null ? (float) $r->temperature : null)->all();
-        $doSeries = $rows->map(fn($r) => $r->dissolved_oxygen !== null ? (float) $r->dissolved_oxygen : null)->all();
-        $salinitySeries = $rows->map(fn($r) => $r->salinity !== null ? (float) $r->salinity : null)->all();
-        $phSeries = $rows->map(fn($r) => $r->ph_level !== null ? (float) $r->ph_level : null)->all();
+        $temperatureSeries = $rows->map(fn($r) => [
+            'x' => Carbon::parse($r->recorded_at)->toIsoString(),
+            'y' => $r->temperature !== null ? (float) $r->temperature : null,
+        ])->all();
+
+        $doSeries = $rows->map(fn($r) => [
+            'x' => Carbon::parse($r->recorded_at)->toIsoString(),
+            'y' => $r->dissolved_oxygen !== null ? (float) $r->dissolved_oxygen : null,
+        ])->all();
+
+        $salinitySeries = $rows->map(fn($r) => [
+            'x' => Carbon::parse($r->recorded_at)->toIsoString(),
+            'y' => $r->salinity !== null ? (float) $r->salinity : null,
+        ])->all();
+
+        $phSeries = $rows->map(fn($r) => [
+            'x' => Carbon::parse($r->recorded_at)->toIsoString(),
+            'y' => $r->ph_level !== null ? (float) $r->ph_level : null,
+        ])->all();
 
         $colors = [
             'Temperature' => '#ef4444', // red-ish
@@ -163,6 +183,7 @@ class WaterQualityChart extends Component
             'pH' => true,
         ];
 
+        // Provide series as arrays of {x: ISO, y: value} objects for datetime charts
         $this->chartData = [
             'labels' => $labels,
             'series' => $series,
@@ -258,6 +279,9 @@ class WaterQualityChart extends Component
         $this->lineChartModelArray['jsonConfig']['xaxis']['tickAmount'] = $this->lineChartModelArray['jsonConfig']['xaxis']['tickAmount'] ?? $tickAmount;
         $this->lineChartModelArray['jsonConfig']['xaxis']['labels'] = $this->lineChartModelArray['jsonConfig']['xaxis']['labels'] ?? ['rotate' => -30];
 
+        // Use a datetime x-axis so appends can use ISO timestamps reliably.
+        $this->lineChartModelArray['jsonConfig']['xaxis']['type'] = $this->lineChartModelArray['jsonConfig']['xaxis']['type'] ?? 'datetime';
+
         // Ensure metadata for client-side mapping (series_keys in same order as series names)
         if (! isset($this->lineChartModelArray['meta']) || ! is_array($this->lineChartModelArray['meta'])) {
             $this->lineChartModelArray['meta'] = [];
@@ -288,6 +312,12 @@ class WaterQualityChart extends Component
 
         // Emit an event so client code can react if necessary
         $this->emit('chartSeriesToggled', $name, $this->chartData['visible'][$name]);
+    }
+
+    #[Renderless]
+    public function poll()
+    {
+        // Triggers re-render
     }
 
     public function render()
