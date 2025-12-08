@@ -1,3 +1,4 @@
+@section('title', 'Dashboard')
 <x-app-layout>
    
     <x-container class="pt-6 sm:pt-10 py-6">

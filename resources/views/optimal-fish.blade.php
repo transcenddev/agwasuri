@@ -1,3 +1,4 @@
+@section('title', 'Optimal Fish')
 <x-app-layout>
     <x-container class="pt-20 py-12">
                                                                                                                 @php

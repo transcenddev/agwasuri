@@ -1,3 +1,4 @@
+@section('title', 'Historical Data')
 <x-app-layout>
     <x-container class="pt-20 py-12">
         @php

@@ -1,3 +1,4 @@
+@section('title', 'Account Management')
 <x-app-layout>
     <x-container class="pt-20 py-12">
         {{-- Button moved to UserTable component --}}
