@@ -4,35 +4,7 @@
         {{-- Single root element for Livewire + compact header --}}
         <div class="w-full">
             <div class="px-4 py-2 flex items-center justify-between"> {{-- header --}}
-                <h3 class="text-lg font-semibold text-gray-700">Water Quality Data</h3>
-
-                <div class="flex items-center gap-2">
-                        {{-- Reset removed (UI simplified) --}}
-
-                    <div class="sm:hidden relative flex items-center gap-2">
-                        <div class="relative">
-                            <button id="waterChart-kebab-btn" aria-haspopup="true" aria-expanded="false" type="button" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-cvsu/20">
-                                <span class="sr-only">Open menu</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-slate-700 dark:text-slate-200">
-                                    <path d="M12 7a2 2 0 110-4 2 2 0 010 4zm0 7a2 2 0 110-4 2 2 0 010 4zm0 7a2 2 0 110-4 2 2 0 010 4z" />
-                                </svg>
-                            </button>
-
-                            <div id="waterChart-kebab-menu" class="hidden absolute right-0 mt-2 w-44 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg z-50">
-                                <ul class="py-1 text-sm text-slate-700 dark:text-slate-200">
-                                    {{-- Reset menu item removed for simplified chart actions --}}
-                                </ul>
-                            </div>
-                        </div>
-                    @if(config('app.debug'))
-                        <div class="ml-2" wire:ignore>
-                            <button onclick="window.__dispatchWaterQualityTestPoint()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded shadow">
-                                Test Chart Append
-                            </button>
-                        </div>
-                    @endif
-                    </div>
-                </div>
+                <div class="flex items-center gap-2">&nbsp;</div>
             </div>
 
             {{-- Chart Area: render via the lightweight wrapper that consumes the serializable model array --}}
@@ -80,12 +52,9 @@
             </div>
         </div>
     @else
-        {{-- Minimal header when there's no data --}}
+        {{-- Minimal header when there's no data (header intentionally omitted) --}}
         <div class="px-4 py-2 shrink-0 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-700">Water Quality Data</h3>
-            <div class="flex items-center gap-2">
-                {{-- Reset removed (UI simplified) --}}
-            </div>
+            <div class="flex items-center gap-2">&nbsp;</div>
         </div>
 
         {{-- Even when there's no data, output the canvases so the JS initializer can find them.
@@ -110,26 +79,7 @@
         </div>
     @endif
 
-    {{-- Kebab menu small script: wire mobile menu to existing helpers --}}
-    <script>
-        (function(){
-            // kebab menu interactions remain; keep minimal logic here
-            const kebabBtn = document.getElementById('waterChart-kebab-btn');
-            const kebabMenu = document.getElementById('waterChart-kebab-menu');
-
-            function closeMenu() { if (!kebabMenu) return; kebabMenu.classList.add('hidden'); if (kebabBtn) kebabBtn.setAttribute('aria-expanded','false'); }
-            function openMenu() { if (!kebabMenu) return; kebabMenu.classList.remove('hidden'); if (kebabBtn) kebabBtn.setAttribute('aria-expanded','true'); }
-
-            if (kebabBtn) kebabBtn.addEventListener('click', (e) => { e.stopPropagation(); if (!kebabMenu) return; if (kebabMenu.classList.contains('hidden')) openMenu(); else closeMenu(); });
-
-            // Reset helper and kebab reset listener removed — no visible reset controls exist.
-
-            document.addEventListener('click', (e) => { if (!kebabMenu) return; if (kebabMenu.classList.contains('hidden')) return; const target = e.target; if (kebabMenu.contains(target) || (kebabBtn && kebabBtn.contains(target))) return; closeMenu(); });
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
-        })();
-
-        // Chart rendering is performed by the vendor view included via the wrapper component.
-    </script>
+    {{-- Kebab/menu removed: header actions intentionally omitted for cleaner UI --}}
 
     {{-- Lightweight append-only listener for realtime points. Will attempt to append points to ApexCharts when ready. --}}
     <script>
@@ -1378,131 +1328,7 @@
         })();
     </script>
 
-            @if(config('app.debug'))
-                <div id="water-chart-dev-test" wire:ignore class="fixed right-4 top-1/2 -translate-y-1/2 z-50">
-                    <button onclick="window.__dispatchWaterQualityTestPoint()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded shadow">
-                        Test Chart Append
-                    </button>
-                </div>
-
-                <script>
-                    window.__dispatchWaterQualityTestPoint = function() {
-                        const now = new Date();
-                        const payload = {
-                            recorded_at: now.toISOString(),
-                            temperature: +(20 + Math.random() * 10).toFixed(2),
-                            dissolved_oxygen: +(4 + Math.random() * 4).toFixed(2),
-                            salinity: +(5 + Math.random() * 20).toFixed(2),
-                            ph_level: +(6.5 + Math.random() * 1.5).toFixed(2)
-                        };
-                        // First dispatch the client-side event so developer tooling sees it
-                        window.dispatchEvent(new CustomEvent('water-quality:point', { detail: payload }));
-                        console.info('Dispatched test water-quality:point (event)', payload);
-
-                        // If we have a debug API key, POST the payload to the real ingestion endpoint
-                        try {
-                            const root = document.getElementById('water-quality-chart-root');
-                            const apiKey = root ? root.getAttribute('data-api-key') : null;
-                            const userId = root ? root.getAttribute('data-user-id') : null;
-
-                            // Prefer posting using the debug API key if available
-                            if (apiKey && userId) {
-                                fetch('/store-water-quality-data', {
-                                    method: 'POST',
-                                    credentials: 'same-origin',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': 'Bearer ' + apiKey
-                                    },
-                                    body: JSON.stringify({
-                                        user_id: userId,
-                                        recorded_at: payload.recorded_at,
-                                        temperature: payload.temperature,
-                                        dissolved_oxygen: payload.dissolved_oxygen,
-                                        salinity: payload.salinity,
-                                        ph_level: payload.ph_level
-                                    })
-                                }).then(async (res) => {
-                                    if (!res.ok) {
-                                        const text = await res.text().catch(() => '');
-                                        console.warn('Test append POST failed', res.status, text);
-                                        // If API key failed (401), try dev endpoint fallback
-                                        if (res.status === 401 && window.location.hostname === 'localhost') {
-                                            tryDevPost();
-                                        }
-                                        return;
-                                    }
-                                    const json = await res.json().catch(() => null);
-                                    console.info('Test append POST succeeded', json);
-                                }).catch(err => {
-                                    console.error('Test append POST error', err);
-                                    // network error -> try dev fallback
-                                    tryDevPost();
-                                });
-                            } else {
-                                // No API key: prefer the dev helper route (session-authenticated)
-                                tryDevPost();
-                            }
-
-                            function tryDevPost() {
-                                // Only attempt dev route if present (app.debug) and using same-origin cookies
-                                fetch('/dev/store-water-quality-data', {
-                                    method: 'POST',
-                                    credentials: 'same-origin',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        recorded_at: payload.recorded_at,
-                                        temperature: payload.temperature,
-                                        dissolved_oxygen: payload.dissolved_oxygen,
-                                        salinity: payload.salinity,
-                                        ph_level: payload.ph_level
-                                    })
-                                }).then(async (res) => {
-                                    if (!res.ok) {
-                                        const text = await res.text().catch(() => '');
-                                        console.warn('Dev test append POST failed', res.status, text);
-                                        return;
-                                    }
-                                    const json = await res.json().catch(() => null);
-                                    console.info('Dev test append POST succeeded', json);
-                                }).catch(err => console.error('Dev test append POST error', err));
-                            }
-                        } catch (err) {
-                            console.error('Test append POST setup error', err);
-                        }
-                        // Also try direct append via ApexCharts.exec so we can diagnose failures immediately
-                        try {
-                            const root = document.getElementById('water-quality-chart-root');
-                            const chartId = root ? root.getAttribute('data-chart-id') : null;
-                            const seriesNames = root ? JSON.parse(root.getAttribute('data-series-names') || '[]') : [];
-                            const seriesKeys = root ? JSON.parse(root.getAttribute('data-series-keys') || '[]') : [];
-
-                            // Match the category label format used by the chart (HH:mm)
-                            const dt = new Date(payload.recorded_at);
-                            const pad = (n) => n.toString().padStart(2, '0');
-                            const timeLabel = pad(dt.getHours()) + ':' + pad(dt.getMinutes()) + ':' + pad(dt.getSeconds());
-
-                            const series = seriesKeys.map((key, idx) => ({
-                                name: seriesNames[idx] ?? key,
-                                data: [{ x: timeLabel, y: payload[key] }]
-                            }));
-
-                            if (window.ApexCharts && typeof window.ApexCharts.exec === 'function') {
-                                try {
-                                    window.ApexCharts.exec(chartId, 'appendData', { series });
-                                    console.info('ApexCharts.exec appendData called', { chartId, series });
-                                } catch (err) {
-                                    console.error('ApexCharts.exec appendData threw', err, { chartId, series });
-                                }
-                            } else {
-                                console.warn('ApexCharts.exec not available yet.');
-                            }
-                        } catch (err) {
-                            console.error('Failed to perform direct append attempt', err);
-                        }
-                    };
-                </script>
-            @endif
+            <!-- debug/test UI removed -->
 
             <!-- Screen-reader live region for reset announcements -->
             <span id="chart-reset-live" class="sr-only" aria-live="polite" aria-atomic="true"></span>

@@ -57,13 +57,8 @@
         </x-card>
 
         <x-card class="mt-4">
-            <x-slot name="header">
-                <x-card-header>
-                    <x-slot name="title">Trends</x-slot>
-                </x-card-header>
-            </x-slot>
              <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-trends-{{ $activeUserId }}" />
-            </x-card>
+        </x-card>
 
         </div>
 
