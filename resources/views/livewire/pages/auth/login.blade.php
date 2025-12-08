@@ -1,3 +1,4 @@
+@section('title', 'Login')
 <?php
 
 use App\Livewire\Forms\LoginForm;
