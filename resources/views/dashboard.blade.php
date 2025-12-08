@@ -29,7 +29,7 @@
             </div>
         </x-card>
 
-        <div class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-1 gap-6">
 
             <x-card>
             <x-slot name="header">
@@ -56,13 +56,11 @@
             @endif
         </x-card>
 
-        <x-card class="mt-4">
-             <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-trends-{{ $activeUserId }}" />
-        </x-card>
+           <x-card>
+               <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-trends-{{ $activeUserId }}" />
+           </x-card>
 
-        </div>
-
-        <x-card class="mt-4">
+           <x-card>
             <x-slot name="header">
                 <x-card-header>
                     <x-slot name="title">Measurements</x-slot>
