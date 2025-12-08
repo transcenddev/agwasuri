@@ -67,14 +67,14 @@
                         }
                     @endphp
 
-                    <div id="water-quality-chart-root" wire:poll.2s="poll" class="w-full p-4 max-w-content-xl mx-auto"
+                    <div id="water-quality-chart-root" wire:ignore class="w-full p-4 max-w-content-xl mx-auto"
                         data-chart-id="{{ $__chartId }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
                         data-series-keys='@json($__seriesKeys)'
                         data-initial='@json($chartData)'
                         data-user-id="{{ request()->get('user') ?? session('selected_user', auth()->id()) }}">
-                        @livewire('livewire-charts-line-wrapper', ['lineChartModel' => $lineChartModelArray], key(md5(json_encode($lineChartModelArray))))
+                        @livewire('livewire-charts-line-wrapper', ['lineChartModel' => $lineChartModelArray], key('water-quality-' . $__chartId))
                     </div>
                 </div>
             </div>
@@ -169,6 +169,23 @@
                     } catch(e){}
                 };
             } catch(e){}
+
+            // Forward Livewire-emitted events to the existing window event path.
+            // This helps when server-side emits reach Livewire JS but not a raw browser event.
+            try {
+                if (window.Livewire && typeof Livewire.on === 'function') {
+                    Livewire.on('water-quality:point', (data) => {
+                        try {
+                            console.debug('Livewire event received:', data);
+                            window.dispatchEvent(new CustomEvent('water-quality:point', { detail: data }));
+                        } catch (e) {
+                            console.debug('waterChart: forwarding Livewire event failed', e);
+                        }
+                    });
+                }
+            } catch (e) {
+                // ignore Livewire binding errors
+            }
 
             // Polling fallback: periodically fetch latest rows and dispatch events
             try {
@@ -297,7 +314,7 @@
                     // Update chart categories to reflect trimmed state. We avoid
                     // forcing a full updateSeries here because real-time appends
                     // will be coalesced and flushed separately to reduce redraws.
-                    try { window.ApexCharts.exec(cid, 'updateOptions', { xaxis: { categories: seriesState.categories } }, false, true); } catch (e) {}
+                    try { safeUpdateOptions(cid, { xaxis: { categories: seriesState.categories } }); } catch (e) {}
                 } catch (e) {
                     // ignore trim errors
                 }
@@ -310,8 +327,38 @@
                 try {
                     while (seriesState.categories.length > MAX_POINTS) seriesState.categories.shift();
                     seriesState.series.forEach(s => { while (s.data.length > MAX_POINTS) s.data.shift(); });
-                    try { window.ApexCharts.exec(cid, 'updateOptions', { xaxis: { categories: seriesState.categories } }, false, true); } catch (e) {}
+                    try { safeUpdateOptions(cid, { xaxis: { categories: seriesState.categories } }); } catch (e) {}
                 } catch (e) {}
+            }
+
+            // Guarded updateOptions helper: applies given options only once per
+            // chart id unless `force` is true. This prevents frequent reconfiguration
+            // that can change stroke/marker settings and cause visual glitches.
+            window.__waterQualityOptionsApplied = window.__waterQualityOptionsApplied || {};
+            function safeUpdateOptions(cid, opts, force = false) {
+                try {
+                    if (!window.ApexCharts || typeof window.ApexCharts.exec !== 'function') return;
+                    if (!cid) return;
+                    window.__waterQualityOptionsApplied[cid] = window.__waterQualityOptionsApplied[cid] || {};
+                    const normalizedOpts = opts || {};
+
+                    // Ensure immutable visual defaults are always present unless explicitly forced off.
+                    const immutableDefaults = {
+                        stroke: { show: true, curve: 'smooth', width: 2, lineCap: 'round' },
+                        markers: { size: 0 },
+                        xaxis: { type: 'datetime' }
+                    };
+
+                    // Shallow merge - caller opts override defaults where specified
+                    const finalOpts = Object.assign({}, immutableDefaults, normalizedOpts);
+
+                    const sig = JSON.stringify(finalOpts || {});
+                    if (!force && window.__waterQualityOptionsApplied[cid][sig]) return;
+                    window.ApexCharts.exec(cid, 'updateOptions', finalOpts, false, true);
+                    window.__waterQualityOptionsApplied[cid][sig] = true;
+                } catch (e) {
+                    try { console.debug('waterChart: safeUpdateOptions failed', e); } catch (_) {}
+                }
             }
 
             // After an append attempt, schedule a short check and force a full
@@ -366,7 +413,8 @@
             // re-renders the chart DOM. This helps appended points survive a
             // model refresh that may recreate the ApexCharts instance.
             window.__waterQualityAppendBuffer = window.__waterQualityAppendBuffer || {};
-            window.__waterQualityAppendedSet = window.__waterQualityAppendedSet || {};
+            // Use a Map for appended keys so we can store insertion timestamps
+            window.__waterQualityAppendedMap = window.__waterQualityAppendedMap || {};
             // Coalesce buffers to reduce frequent updateSeries calls
             window.__waterQualityCoalesce = window.__waterQualityCoalesce || {};
             // Persist mapping chartId -> actual DOM instance id so future appends
@@ -440,7 +488,7 @@
             // when append attempts repeatedly fail.
             window.__waterQualityFailureCount = window.__waterQualityFailureCount || {};
             const appendBuffer = window.__waterQualityAppendBuffer[chartId] = window.__waterQualityAppendBuffer[chartId] || [];
-            const appendedSet = window.__waterQualityAppendedSet[chartId] = window.__waterQualityAppendedSet[chartId] || new Set();
+            const appendedMap = window.__waterQualityAppendedMap[chartId] = window.__waterQualityAppendedMap[chartId] || new Map();
             // track last forced update timestamp per chart to rate-limit forced redraws
             window.__waterQualityLastForcedAt = window.__waterQualityLastForcedAt || {};
             const MAX_BUFFER = 64; // keep last N appended points to replay after re-render
@@ -496,6 +544,8 @@
                                 try {
                                     window.ApexCharts.exec(cid, 'appendData', { series: appendSeries });
                                     console.debug('WaterQualityChart: coalesce appendData applied', { chartId: cid, bufLen });
+                                    // Force an immediate redraw to ensure the appended points render
+                                    try { safeUpdateOptions(cid, {}); } catch (e) {}
                                     coalesce.buf = [];
                                 } catch (appendErr) {
                                     console.error('WaterQualityChart: coalesce appendData failed, falling back to updateSeries', appendErr, { chartId: cid, bufLen });
@@ -515,20 +565,61 @@
                 } catch (e) { console.error('WaterQualityChart: scheduleCoalesceFlush scheduling failed', e); }
             }
 
+            // Prune appendedMap to limit memory: keep at most `MAX_APPENDED_KEYS` entries
+            // and remove entries older than `MAX_APPENDED_AGE_MS`.
+            const MAX_APPENDED_KEYS = 500;
+            const MAX_APPENDED_AGE_MS = 30 * 60 * 1000; // 30 minutes
+            function pruneAppendedMap(map) {
+                try {
+                    if (!map || typeof map.entries !== 'function') return;
+
+                    const now = Date.now();
+
+                    // First remove entries older than age threshold
+                    for (const [key, ts] of map.entries()) {
+                        if (now - ts > MAX_APPENDED_AGE_MS) {
+                            map.delete(key);
+                        }
+                    }
+
+                    // If map still too large, remove oldest entries (Map preserves insertion order)
+                    while (map.size > MAX_APPENDED_KEYS) {
+                        const firstKey = map.keys().next().value;
+                        if (!firstKey) break;
+                        map.delete(firstKey);
+                    }
+                } catch (e) {
+                    // ignore pruning errors
+                    try { console.debug('waterChart: pruneAppendedMap error', e); } catch (_) {}
+                }
+            }
+
             function tryFlush(){
                 if (!window.ApexCharts || typeof window.ApexCharts.exec !== 'function') return;
                 // consider chart ready if exec exists and we can call a no-op
                 ready = true;
 
-                // Disable animations for realtime charts to reduce render lag
+                // Enable dynamic animations for realtime updates and ensure datetime axis if needed
                 try {
                     const cid = window.__waterQualityKnownChartId[chartId] || chartId || ('apexcharts' + chartId);
-                    window.ApexCharts.exec(cid, 'updateOptions', { chart: { animations: { enabled: false } } }, false, true);
+                    safeUpdateOptions(
+                        cid,
+                        {
+                            chart: {
+                                id: cid,
+                                animations: {
+                                    enabled: true,
+                                    easing: 'linear',
+                                    dynamicAnimation: { enabled: true, speed: 350 }
+                                }
+                            }
+                        }
+                    );
                     try {
                         // If our client state uses numeric timestamps, ensure chart xaxis is datetime
                         const state = window.__waterQualitySeriesState && window.__waterQualitySeriesState[chartId];
-                        if (state && state.series && state.series[0] && state.series[0].data && state.series[0].data[0] && typeof state.series[0].data[0].x === 'number') {
-                            window.ApexCharts.exec(cid, 'updateOptions', { xaxis: { type: 'datetime' } }, false, true);
+                            if (state && state.series && state.series[0] && state.series[0].data && state.series[0].data[0] && typeof state.series[0].data[0].x === 'number') {
+                            safeUpdateOptions(cid, { xaxis: { type: 'datetime' } });
                         }
                     } catch (e) {}
                 } catch (e) {}
@@ -717,7 +808,7 @@
                                     // persist the mapping so subsequent appends go directly there.
                                     for (const cid of candidatesToTry) {
                                         try {
-                                            window.ApexCharts.exec(cid, 'updateOptions', { xaxis: { categories: newCategories } }, false, true);
+                                            safeUpdateOptions(cid, { xaxis: { categories: newCategories } });
                                             window.ApexCharts.exec(cid, 'appendData', { series });
 
                                             // Persist mapping for future direct targeting
@@ -1041,7 +1132,7 @@
                                 const rebuilt = seriesState.series.map(s => ({ name: s.name, data: s.data.map(p => p.y) }));
                                 const categoriesCopy = seriesState.categories.slice();
 
-                                try { window.ApexCharts.exec(fallbackCid, 'updateOptions', { xaxis: { categories: categoriesCopy } }, false, true); } catch (e) {}
+                                try { safeUpdateOptions(fallbackCid, { xaxis: { categories: categoriesCopy } }); } catch (e) {}
                                 try { window.ApexCharts.exec(fallbackCid, 'updateSeries', rebuilt); } catch (e) {}
 
                                 try { appendedSet.add(timeLabel); } catch (e) {}
@@ -1070,290 +1161,111 @@
             // Minimal realtime handler (Option B): authoritative updateSeries-only path.
             // We update the small client-side series snapshot then call updateOptions/updateSeries
             // so the chart always renders the newest point reliably (no appendData reliance).
-            window.addEventListener('water-quality:point', (e) => {
-                const payload = e && e.detail ? e.detail : e;
-                console.log('waterChart: event received', payload);
-                try { if (typeof window.__waterQualityDumpInstances === 'function') window.__waterQualityDumpInstances(); } catch (err) { console.debug('waterChart: dump instances failed', err); }
-
-                const rootEl = document.getElementById('water-quality-chart-root');
-                const cidAttr = rootEl ? rootEl.getAttribute('data-chart-id') : null;
-                const keys = rootEl ? JSON.parse(rootEl.getAttribute('data-series-keys') || '[]') : [];
-                const names = rootEl ? JSON.parse(rootEl.getAttribute('data-series-names') || '[]') : keys.slice();
-
-                // Build a simple category label (HH:mm:ss)
-                const dt = new Date(payload.recorded_at);
-                const pad = (n) => n.toString().padStart(2, '0');
-                const timeLabel = pad(dt.getHours()) + ':' + pad(dt.getMinutes()) + ':' + pad(dt.getSeconds());
-
-                // Maintain client-side state keyed by the authoritative chart instance id
-                const cid = window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[cidAttr] ? window.__waterQualityKnownChartId[cidAttr] : cidAttr;
-                window.__waterQualitySeriesState = window.__waterQualitySeriesState || {};
-                const state = window.__waterQualitySeriesState[cidAttr] = window.__waterQualitySeriesState[cidAttr] || { categories: [], series: keys.map((k, i) => ({ name: names[i] || k, data: [] })) };
-
-                // push into state
-                // Detect if incoming payload uses ISO datetime (device style). If so,
-                // normalize to numeric ms timestamps and treat chart as datetime.
-                const payloadIsIso = typeof payload.recorded_at === 'string' && payload.recorded_at.indexOf('T') !== -1;
-                const numericTs = payloadIsIso ? (Number.isFinite(Date.parse(payload.recorded_at)) ? Date.parse(payload.recorded_at) : null) : null;
-
-                if (payloadIsIso && numericTs !== null) {
-                    // datetime mode: store numeric timestamp values for x
-                    state.series.forEach((s, i) => {
-                        s.data.push({ x: numericTs, y: payload[keys[i]] });
-                    });
-                    // keep a human label for categories array too for legacy UI, but it's not used when datetime mode
-                    state.categories.push(timeLabel);
-                } else {
-                    // category mode: store human-readable label on x
-                    state.categories.push(timeLabel);
-                    state.series.forEach((s, i) => {
-                        s.data.push({ x: timeLabel, y: payload[keys[i]] });
-                    });
+            window.addEventListener('water-quality:point', (event) => {
+                // Accept either a single point or an array of points. If an array
+                // is received, process each point in order.
+                const payloads = [];
+                if (event && event.detail) {
+                    if (Array.isArray(event.detail)) payloads.push(...event.detail);
+                    else payloads.push(event.detail);
+                } else if (event) {
+                    payloads.push(event);
                 }
 
-                // trim to last N
-                const MAX = 200;
-                while (state.categories.length > MAX) state.categories.shift();
-                state.series.forEach(s => { while (s.data.length > MAX) s.data.shift(); });
+                if (!payloads.length) return;
 
-                // Decide if chart should be treated as datetime or category
-                const firstPoint = state.series && state.series[0] && state.series[0].data && state.series[0].data[0] ? state.series[0].data[0].x : null;
-                const firstPointLooksLikeIso = typeof firstPoint === 'string' && firstPoint.indexOf('T') !== -1;
-                const isDatetime = !!(firstPoint && (typeof firstPoint === 'number' || firstPointLooksLikeIso));
+                const logicalId = root.getAttribute('data-chart-id') || chartId;
 
-                // Build rebuilt payload expected by updateSeries
-                let rebuilt;
-                if (isDatetime) {
-                    rebuilt = state.series.map(s => ({ name: s.name, data: s.data.map(p => ({ x: (typeof p.x === 'number' ? p.x : (Number.isFinite(Date.parse(p.x)) ? Date.parse(p.x) : p.x)), y: p.y })) }));
-                } else {
-                    // For category charts ApexCharts expects arrays of y values; keep category labels in updateOptions
-                    rebuilt = state.series.map(s => ({ name: s.name, data: state.categories.map((lbl, idx) => { const val = s.data[idx] ? s.data[idx].y : null; return val; }) }));
-                }
-
-                // Target the visible instance (try persisted known id first)
-                const targetCidCandidates = [];
-                if (cid) targetCidCandidates.push(cid);
-                if (cidAttr) targetCidCandidates.push(cidAttr);
-                targetCidCandidates.push('apexcharts' + cidAttr);
-                try {
-                    const canvases = Array.from(document.querySelectorAll('.apexcharts-canvas'));
-                    canvases.forEach(c => {
-                        const parent = c.closest('[id]');
-                        if (parent && parent.id) targetCidCandidates.push(parent.id);
-                    });
-                } catch (err) {}
-
-                const tried = new Set();
-                let success = false;
-                for (const targetCid of targetCidCandidates) {
-                    if (!targetCid || tried.has(targetCid)) continue;
-                    tried.add(targetCid);
+                function locateChartInstanceByLogicalId(id) {
+                    const tried = new Set();
+                    const candidates = [];
                     try {
-                            try {
-                                // Request a redraw from ApexCharts so the instance does a full internal re-render
-                                if (isDatetime) {
-                                    window.ApexCharts.exec(targetCid, 'updateOptions', { xaxis: { type: 'datetime' } }, true, true);
-                                } else {
-                                    // copy categories array to avoid mutation issues
-                                    window.ApexCharts.exec(targetCid, 'updateOptions', { xaxis: { categories: state.categories.slice() } }, true, true);
-                                }
-                            } catch (e) {
-                                // ignore updateOptions errors
-                            }
+                        if (window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[id]) candidates.push(window.__waterQualityKnownChartId[id]);
+                        candidates.push(id);
+                        candidates.push('apexcharts' + id);
+                        candidates.push('apexcharts-' + id);
+                        candidates.push(id + '-chart');
 
-                            try {
-                                // DEBUG: log shape and axis type before applying series
-                                try {
-                                    const firstSeries = rebuilt && rebuilt[0] ? rebuilt[0] : null;
-                                    const firstSeriesPoints = firstSeries && firstSeries.data ? firstSeries.data.length : (Array.isArray(firstSeries) ? firstSeries.length : null);
-                                    const lastPoint = firstSeries && firstSeries.data ? firstSeries.data.slice(-1)[0] : null;
-                                    const xAxisType = firstSeries && firstSeries.data && firstSeries.data[0] && typeof firstSeries.data[0].x !== 'undefined' ? (typeof firstSeries.data[0].x) : 'unknown';
-                                    console.log('🔵 About to updateSeries', {
-                                        chartId: targetCid,
-                                        seriesCount: Array.isArray(rebuilt) ? rebuilt.length : 0,
-                                        firstSeriesPoints: firstSeriesPoints,
-                                        lastPoint: lastPoint,
-                                        xAxisType: xAxisType
-                                    });
-                                } catch (e) {
-                                    console.debug('WaterQualityChart: pre-updateSeries debug failed', e);
-                                }
-
-                                // Apply the new series incrementally using appendData to avoid
-                                // full redraws which cause flicker. Build per-series arrays
-                                // of only the most-recent point(s) and call appendData.
-                                try {
-                                    const appendSeries = state.series.map((s) => {
-                                        const last = (s.data && s.data.length) ? s.data.slice(-1)[0] : null;
-                                        if (!last) return { name: s.name, data: [] };
-                                        return { name: s.name, data: [ { x: last.x, y: last.y } ] };
-                                    });
-
-                                    try {
-                                        window.ApexCharts.exec(targetCid, 'appendData', { series: appendSeries });
-                                        console.info('waterChart: appendData applied', { chartId: targetCid });
-                                    } catch (appendErr) {
-                                        // Fallback to updateSeries if appendData isn't available
-                                        console.debug('WaterQualityChart: appendData failed, falling back to updateSeries', appendErr);
-                                        window.ApexCharts.exec(targetCid, 'updateSeries', rebuilt);
-                                        console.info('waterChart: updateSeries applied (fallback)', { chartId: targetCid });
-                                    }
-                                } catch (e) {
-                                    throw e;
-                                }
-
-                                try {
-                                    window.ApexCharts.exec(targetCid, 'updateOptions', {
-                                        chart: { animations: { enabled: true, dynamicAnimation: { enabled: true, speed: 350 } } }
-                                    }, false, false);
-                                } catch (e) {}
-
-                                try {
-                                    const chartInstance = (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') ? window.ApexCharts.getChartByID(targetCid) : null;
-                                    console.debug('waterChart: chartInstanceById', { targetCid: targetCid, found: !!chartInstance });
-                                    if (chartInstance && typeof chartInstance.updateSeries === 'function') {
-                                        try {
-                                            chartInstance.updateSeries(rebuilt);
-                                            console.debug('waterChart: instance.updateSeries called for', targetCid);
-                                        } catch (e) {
-                                            console.debug('waterChart: instance.updateSeries threw', e);
-                                        }
-                                    } else {
-                                        // Try to discover a likely visible chart id and update that instance
-                                        try {
-                                            const canvases = Array.from(document.querySelectorAll('.apexcharts-canvas'));
-                                            let visibleId = null;
-                                            for (const c of canvases) {
-                                                const parent = c.closest('[id]');
-                                                if (parent && parent.id) {
-                                                    // prefer ones that contain the logical chart id or our cidAttr
-                                                    if (parent.id.indexOf(cidAttr) !== -1 || parent.id.indexOf(chartId) !== -1) { visibleId = parent.id; break; }
-                                                    // fallback to first visible canvas
-                                                    if (!visibleId && parent.offsetWidth > 0 && parent.offsetHeight > 0) visibleId = parent.id;
-                                                }
-                                            }
-                                            if (visibleId && visibleId !== targetCid) {
-                                                try {
-                                                    const inst2 = window.ApexCharts.getChartByID(visibleId);
-                                                    if (inst2 && typeof inst2.updateSeries === 'function') {
-                                                        inst2.updateSeries(rebuilt);
-                                                        console.debug('waterChart: updated visible instance', visibleId);
-                                                    }
-                                                } catch (e) {
-                                                    console.debug('waterChart: updating visible instance failed', e);
-                                                }
-                                            }
-                                        } catch (e) {
-                                            // ignore discovery errors
-                                        }
-                                    }
-                                } catch (e) {
-                                    // ignore diagnostics errors
-                                }
-
-                                // As a final "nuclear" fallback: only run after repeated failures to avoid
-                                // destroying/recreating the chart on every single update (which causes flashing).
-                                try {
-                                    const FAILURE_THRESHOLD = 5;
-                                    const failures = (window.__waterQualityFailureCount && window.__waterQualityFailureCount[chartId]) || 0;
-                                    if (failures < FAILURE_THRESHOLD) {
-                                        // Not enough consecutive failures yet; skip nuclear recreate.
-                                        console.debug('waterChart: nuclear recreate suppressed - failures', { chartId: chartId, failures: failures, threshold: FAILURE_THRESHOLD });
-                                    } else {
-                                        const firstSeries = rebuilt && rebuilt[0] ? rebuilt[0] : null;
-                                        const lastPoint = firstSeries && firstSeries.data ? firstSeries.data.slice(-1)[0] : null;
-                                        const lastLabel = lastPoint && typeof lastPoint.x === 'number' ? new Date(lastPoint.x).toISOString() : (lastPoint && lastPoint.x ? String(lastPoint.x) : null);
-                                        setTimeout(() => {
-                                            try {
-                                                let found = false;
-                                                try {
-                                                    const nodes = Array.from(document.querySelectorAll('#' + targetCid + ' .apexcharts-xaxis-texts-g text'));
-                                                    for (const n of nodes) {
-                                                        const t = (n.textContent || '').trim();
-                                                        if (!t) continue;
-                                                        if (lastLabel && t.indexOf(lastLabel.slice(11,19)) !== -1) { found = true; break; }
-                                                    }
-                                                } catch (e) { /* ignore */ }
-
-                                                if (!found) {
-                                                    console.warn('waterChart: post-updateSeries DOM check failed for', targetCid, '- attempting nuclear recreate (failures=' + failures + ')');
-                                                    // Find visible element
-                                                    let visibleEl = null;
-                                                    try {
-                                                        const canvases = Array.from(document.querySelectorAll('.apexcharts-canvas'));
-                                                        for (const c of canvases) {
-                                                            const parent = c.closest('[id]');
-                                                            if (parent && parent.id && parent.offsetWidth > 0 && parent.offsetHeight > 0) { visibleEl = parent; break; }
-                                                        }
-                                                    } catch (e) {}
-
-                                                    if (visibleEl) {
-                                                        try {
-                                                            const vid = visibleEl.id;
-                                                            const inst = window.ApexCharts.getChartByID(vid);
-                                                            const opts = inst && inst.w && inst.w.config ? inst.w.config : { chart: { id: vid }, series: rebuilt, xaxis: { type: 'datetime' } };
-                                                            try { if (inst && typeof inst.destroy === 'function') inst.destroy(); } catch(e) {}
-                                                            try {
-                                                                const newChart = new ApexCharts(visibleEl, opts);
-                                                                newChart.render();
-                                                                console.info('waterChart: recreated chart instance for', vid);
-                                                            } catch (e) { console.error('waterChart: recreate failed', e); }
-                                                        } catch (e) { console.error('waterChart: nuclear recreate error', e); }
-                                                    } else {
-                                                        console.warn('waterChart: no visible chart element found for nuclear recreate');
-                                                    }
-                                                }
-                                            } catch (e) { /* ignore */ }
-                                        }, 250);
-                                    }
-                                } catch (e) {}
-                            } catch (err) {
-                                // rethrow so outer logic can handle candidate failure
-                                throw err;
-                            }
-                        // persist mapping for future calls
-                        try { window.__waterQualityKnownChartId[cidAttr] = targetCid; localStorage.setItem('waterQualityKnownChartId:' + cidAttr, targetCid); } catch (e) {}
-                        success = true;
-                        break;
-                    } catch (err) {
-                        // try next candidate
-                    }
-                }
-
-                // Extra aggressive fallback: try updating the plain logical chartId instance
-                if (!success) {
-                    try {
-                        const plainId = chartId; // root logical id (e.g. 'water-quality-23')
-                        if (plainId && window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') {
-                            try {
-                                const instPlain = window.ApexCharts.getChartByID(plainId);
-                                if (instPlain && typeof instPlain.updateSeries === 'function') {
-                                    try {
-                                        instPlain.updateSeries(rebuilt);
-                                        // force a render in case the instance is out-of-sync
-                                        try { if (typeof instPlain.render === 'function') instPlain.render(); } catch(e){}
-                                        console.info('waterChart: direct plain instance updateSeries+render applied', { chartId: plainId });
-                                        try { window.__waterQualityKnownChartId[cidAttr] = plainId; localStorage.setItem('waterQualityKnownChartId:' + cidAttr, plainId); } catch (e) {}
-                                        success = true;
-                                    } catch (e) { console.debug('waterChart: plain instance updateSeries threw', e); }
-                                } else {
-                                    console.debug('waterChart: no plain ApexCharts instance found for', plainId);
-                                }
-                            } catch (e) { console.debug('waterChart: getChartByID(plainId) failed', e); }
+                        // Search DOM ids that contain or are contained by logical id
+                        const all = Array.from(document.querySelectorAll('[id]'));
+                        for (const el of all) {
+                            const cid = el.id;
+                            if (!cid) continue;
+                            if (cid.indexOf(id) !== -1 || id.indexOf(cid) !== -1) candidates.push(cid);
                         }
-                    } catch (e) {}
+
+                        // Consider visible apexcharts canvases and their closest id'd parent
+                        const canvases = Array.from(document.querySelectorAll('.apexcharts-canvas'));
+                        for (const c of canvases) {
+                            const p = c.closest('[id]');
+                            if (p && p.id) candidates.push(p.id);
+                        }
+                    } catch (e) { /* ignore DOM search errors */ }
+
+                    for (const cid of candidates) {
+                        if (!cid || tried.has(cid)) continue;
+                        tried.add(cid);
+                        try {
+                            // Prefer ApexCharts.getChartByID when available
+                            if (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') {
+                                const inst = window.ApexCharts.getChartByID(cid);
+                                if (inst && typeof inst.updateSeries === 'function') return { instance: inst, id: cid };
+                            }
+
+                            // Fallback: element stored instance
+                            const el = document.getElementById(cid);
+                            if (el && el.__apexChartInstance) return { instance: el.__apexChartInstance, id: cid };
+                        } catch (e) {
+                            // ignore candidate errors and continue
+                        }
+                    }
+                    return null;
                 }
 
-                if (!success) {
-                    // If no candidate succeeded, fall back to dispatching to the buffer/replay machinery
+                const located = locateChartInstanceByLogicalId(logicalId);
+                if (!located) {
+                    console.error('waterChart: Chart not found for logical id:', logicalId);
+                    return;
+                }
+
+                // Persist mapping for faster lookups later
+                try {
+                    window.__waterQualityKnownChartId = window.__waterQualityKnownChartId || {};
+                    window.__waterQualityKnownChartId[logicalId] = located.id;
+                    try { localStorage.setItem('waterQualityKnownChartId:' + logicalId, located.id); } catch (e) {}
+                } catch (e) {}
+
+                const chart = located.instance;
+
+                // Process each payload sequentially (apps may send multiple points at once)
+                for (const data of payloads) {
                     try {
-                        const appendBuffer = window.__waterQualityAppendBuffer = window.__waterQualityAppendBuffer || {};
-                        appendBuffer[cidAttr] = appendBuffer[cidAttr] || [];
-                        const buf = appendBuffer[cidAttr];
-                        buf.push(payload);
-                        if (buf.length > 64) buf.shift();
-                        console.debug('waterChart: updateSeries fallback buffered payload', { chartId: cidAttr });
-                    } catch (e) {}
+                        const currentSeries = (chart.w && chart.w.config && Array.isArray(chart.w.config.series)) ? chart.w.config.series : (chart.config && Array.isArray(chart.config.series) ? chart.config.series : []);
+                        const timestamp = Number.isFinite(Date.parse(data.recorded_at)) ? Date.parse(data.recorded_at) : Date.now();
+
+                        const updatedSeries = currentSeries.map((series) => {
+                            const name = series.name || '';
+                            let yValue = null;
+                            const lname = name.toLowerCase();
+                            if (lname.includes('temp')) yValue = parseFloat(data.temperature);
+                            else if (lname.includes('dissolved')) yValue = parseFloat(data.dissolved_oxygen);
+                            else if (lname.includes('salinity')) yValue = parseFloat(data.salinity);
+                            else if (lname.includes('ph')) yValue = parseFloat(data.ph_level);
+
+                            const existing = Array.isArray(series.data) ? series.data.slice() : [];
+                            existing.push({ x: timestamp, y: yValue });
+                            return { name: series.name, data: existing.slice(-200) };
+                        });
+
+                        try {
+                            chart.updateSeries(updatedSeries, true);
+                            console.log('waterChart: chart updated with new point');
+                        } catch (err) {
+                            console.error('waterChart: chart.updateSeries failed', err);
+                        }
+                    } catch (err) {
+                        console.error('waterChart: processing payload failed', err);
+                    }
                 }
             });
 
