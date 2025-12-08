@@ -7,6 +7,9 @@ window.toggleTheme = toggleTheme;
 // Expose initTheme so consumers can re-run initialization after Livewire updates
 window.initTheme = initTheme;
 
+// Initialize water-quality Livewire-aware helpers
+import "./waterQualityInit";
+
 // Ensure Livewire partial updates re-apply theme state and re-dispatch the
 // shared DOM event. This keeps the toggle icons and component state in sync
 // after Livewire replaces DOM fragments (common on dashboard interactions).
