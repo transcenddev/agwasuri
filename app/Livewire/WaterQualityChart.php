@@ -6,7 +6,6 @@ use App\Models\WaterQualityData;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
-use Livewire\Attributes\Renderless;
 use Livewire\Component;
 use Asantibanez\LivewireCharts\Models\LineChartModel;
 use App\Services\WaterQualityChartService;
@@ -45,11 +44,13 @@ class WaterQualityChart extends Component
     #[On('echo:water-quality-data-created,WaterQualityCreated')]
     public function handleNewDataCreated(array $event)
     {
+        // Only handle events for the currently selected user
         $matchesUser = isset($event['waterQualityData']['user_id']) && $event['waterQualityData']['user_id'] == $this->userId;
-        if (!$matchesUser) {
+        if (! $matchesUser) {
             return;
         }
 
+        // Respect the current date range filter if set — ignore events outside range
         $matchesDate = true;
         if ($this->startDate || $this->endDate) {
             try {
@@ -60,29 +61,30 @@ class WaterQualityChart extends Component
                     $matchesDate = $recordDate->isSameDay(Carbon::parse($this->startDate));
                 }
             } catch (\Exception $e) {
-                $matchesDate = false;
+                // If parsing fails, accept the event to avoid dropping real-time updates
+                $matchesDate = true;
             }
         }
 
-        if ($matchesDate) {
-            // Primary update path: reload server-side chart data so Livewire
-            // re-renders the vendor chart exactly like the cards component.
-            // This mirrors the pattern in `WaterQualityCard::handleNewDataCreated`.
-            $this->loadData();
-
-            // Also keep the lightweight browser event as a fast-path append
-            // (client may append immediately). This is optional but harmless.
-            $w = $event['waterQualityData'];
-            $payload = [
-                'recorded_at' => Carbon::parse($w['recorded_at'])->toIsoString(),
-                'temperature' => isset($w['temperature']) ? (float) $w['temperature'] : null,
-                'dissolved_oxygen' => isset($w['dissolved_oxygen']) ? (float) $w['dissolved_oxygen'] : null,
-                'salinity' => isset($w['salinity']) ? (float) $w['salinity'] : null,
-                'ph_level' => isset($w['ph_level']) ? (float) $w['ph_level'] : null,
-            ];
-
-            $this->dispatchBrowserEvent('water-quality:point', $payload);
+        if (! $matchesDate) {
+            return;
         }
+
+        // Build a compact payload containing the expected five fields and dispatch
+        $w = $event['waterQualityData'];
+
+        $payload = [
+            'recorded_at' => isset($w['recorded_at']) ? Carbon::parse($w['recorded_at'])->toIsoString() : now()->toIsoString(),
+            'temperature' => array_key_exists('temperature', $w) ? (is_null($w['temperature']) ? null : (float) $w['temperature']) : null,
+            'dissolved_oxygen' => array_key_exists('dissolved_oxygen', $w) ? (is_null($w['dissolved_oxygen']) ? null : (float) $w['dissolved_oxygen']) : null,
+            'salinity' => array_key_exists('salinity', $w) ? (is_null($w['salinity']) ? null : (float) $w['salinity']) : null,
+            'ph_level' => array_key_exists('ph_level', $w) ? (is_null($w['ph_level']) ? null : (float) $w['ph_level']) : null,
+        ];
+
+        // Emit a Livewire event to the client. IMPORTANT: do NOT call $this->loadData() here
+        // because it triggers a Livewire re-render which recreates the chart DOM.
+        // Emitting lets the frontend (Livewire.on) receive the payload reliably.
+        $this->dispatch('water-quality:point', $payload);
     }
 
     /**
@@ -314,11 +316,7 @@ class WaterQualityChart extends Component
         $this->emit('chartSeriesToggled', $name, $this->chartData['visible'][$name]);
     }
 
-    #[Renderless]
-    public function poll()
-    {
-        // Triggers re-render
-    }
+    
 
     public function render()
     {
