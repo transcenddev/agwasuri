@@ -610,7 +610,7 @@
                                 animations: {
                                     enabled: true,
                                     easing: 'linear',
-                                    dynamicAnimation: { enabled: true, speed: 350 }
+                                    dynamicAnimation: { enabled: false, speed: 350 }
                                 }
                             }
                         }
@@ -664,6 +664,21 @@
                                                 }
                                             }
                                         }
+                                        // Force updateSeries to not animate regardless of caller to avoid flicker
+                                        try {
+                                            if (window.ApexCharts && window.ApexCharts.prototype && !window.__waterQualityPatchedUpdateSeries) {
+                                                window.__waterQualityPatchedUpdateSeries = true;
+                                                const _origUpdateSeries = window.ApexCharts.prototype.updateSeries;
+                                                window.ApexCharts.prototype.updateSeries = function(series, animate, redrawPaths) {
+                                                    try {
+                                                        return _origUpdateSeries.call(this, series, false, redrawPaths);
+                                                    } catch (err) {
+                                                        // Fallback if original signature differs
+                                                        return _origUpdateSeries.call(this, series, animate, redrawPaths);
+                                                    }
+                                                };
+                                            }
+                                        } catch (e) {}
                                     } catch (e) {
                                         // ignore wrapper errors
                                     }
@@ -766,7 +781,7 @@
                                             // store for future direct access
                                             try { const id = inst.w && inst.w.config && inst.w.config.chart && inst.w.config.chart.id; if (id) window.__waterQualityChartInstances[id] = inst; } catch(e) {}
                                             if (typeof inst.updateSeries === 'function') {
-                                                inst.updateSeries(rebuilt, true);
+                                                inst.updateSeries(rebuilt, false);
                                                 console.log('✅ Direct instance updateSeries called', { chartId: inst.w && inst.w.config && inst.w.config.chart && inst.w.config.chart.id });
                                             }
                                         } catch(e) {
@@ -1258,7 +1273,7 @@
                         });
 
                         try {
-                            chart.updateSeries(updatedSeries, true);
+                            chart.updateSeries(updatedSeries, false);
                             console.log('waterChart: chart updated with new point');
                         } catch (err) {
                             console.error('waterChart: chart.updateSeries failed', err);
