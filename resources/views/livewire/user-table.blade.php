@@ -362,26 +362,64 @@
                 let portalEl = null;
                 let escHandler = null;
                 let clickAwayHandler = null;
+                let repositionHandler = null;
 
                 function removePortal() {
                     if (!portalEl) return;
                     if (clickAwayHandler) document.removeEventListener('click', clickAwayHandler, true);
                     if (escHandler) document.removeEventListener('keydown', escHandler, true);
+                    if (repositionHandler) {
+                        window.removeEventListener('resize', repositionHandler);
+                        window.removeEventListener('scroll', repositionHandler, true);
+                        repositionHandler = null;
+                    }
                     portalEl.remove();
                     portalEl = null;
                     clickAwayHandler = null;
                     escHandler = null;
                 }
 
-                function createPortalMenu({ left = 0, top = 0, userId = null }) {
+                function createPortalMenu({ left = 0, top = 0, userId = null, triggerRect = null, coordsArePage = false }) {
+                    // Only show portal on small screens (mobile/tablet). On desktop we prefer inline actions.
+                    if (window.innerWidth >= 1024) return;
+
                     removePortal();
                     portalEl = document.createElement('div');
-                    portalEl.className = 'global-action-menu';
+                    portalEl.className = 'global-action-menu rounded-md bg-white border border-gray-200 shadow-lg';
                     portalEl.setAttribute('role', 'menu');
                     portalEl.style.position = 'fixed';
-                    portalEl.style.left = (left) + 'px';
-                    portalEl.style.top = (top) + 'px';
                     portalEl.style.zIndex = 9999;
+
+                    // Compute position: prefer placing menu below the trigger; if not enough space, place above.
+                    const menuWidth = 180;
+                    const menuHeight = 96; // approximate; two items
+                    const margin = 8;
+
+                    let pageLeft = left;
+                    let pageTop = top;
+                    if (triggerRect && !coordsArePage) {
+                        pageLeft = triggerRect.left + (window.scrollX || 0);
+                        pageTop = triggerRect.bottom + (window.scrollY || 0);
+                    }
+
+                    // clamp horizontally
+                    const maxLeft = window.scrollX + window.innerWidth - menuWidth - margin;
+                    const clampedLeft = Math.min(Math.max(pageLeft, window.scrollX + margin), maxLeft);
+
+                    // vertical placement: try below, else above
+                    let placedTop = pageTop;
+                    const viewportBottom = window.scrollY + window.innerHeight;
+                    if ((pageTop + menuHeight) > viewportBottom - margin) {
+                        // place above trigger if available
+                        if (triggerRect) {
+                            placedTop = (triggerRect.top + window.scrollY) - menuHeight - 6;
+                        } else {
+                            placedTop = Math.max(window.scrollY + margin, pageTop - menuHeight - 6);
+                        }
+                    }
+
+                    portalEl.style.left = clampedLeft + 'px';
+                    portalEl.style.top = (placedTop) + 'px';
                     portalEl.innerHTML = `
                         <div class="py-1">
                             <a href="#" data-action="edit" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit</a>
@@ -412,26 +450,35 @@
                         if (e.key === 'Escape' || e.key === 'Esc') removePortal();
                     };
                     document.addEventListener('keydown', escHandler, true);
+
+                    // Reposition when viewport changes
+                    repositionHandler = function() {
+                        try {
+                            // If the portal was opened via a triggerRect stored on the element, attempt to reposition relative to that trigger
+                            if (!portalEl) return;
+                            // We conservatively do nothing complex here; closing is safer on big layout changes
+                            removePortal();
+                        } catch (err) {
+                            console.warn('repositionHandler error', err);
+                        }
+                    };
+                    window.addEventListener('resize', repositionHandler);
+                    window.addEventListener('scroll', repositionHandler, true);
                 }
 
                 // Listen for open requests (dispatched by kebab buttons)
                 window.addEventListener('open-user-action-menu', function(e){
                     const detail = e.detail || {};
+                    // If the event supplied page coords (left/top already adjusted), use them directly.
+                    const coordsArePage = Boolean(detail.coordsArePage);
                     const rawLeft = (detail.left !== undefined) ? detail.left : (detail.x !== undefined ? detail.x + (window.scrollX || 0) : 0);
                     const rawTop = (detail.top !== undefined) ? detail.top : (detail.y !== undefined ? detail.y + (window.scrollY || 0) : 0);
-                    // Clamp left so menu doesn't overflow viewport
-                    const menuWidth = 160;
-                    const margin = 8;
-                    const maxLeft = window.scrollX + window.innerWidth - menuWidth - margin;
-                    const left = Math.min(Math.max(rawLeft, window.scrollX + margin), maxLeft);
-                    const top = rawTop;
-                    createPortalMenu({ left: left, top: top, userId: detail.userId || null });
+
+                    // If caller provided a rect-like object, pass it through so the menu can anchor above/below precisely
+                    const triggerRect = detail.triggerRect || null;
+
+                    createPortalMenu({ left: rawLeft, top: rawTop, userId: detail.userId || null, triggerRect: triggerRect, coordsArePage: coordsArePage });
                 });
-                // Close on Escape
-                escHandler = function(e) {
-                    if (e.key === 'Escape' || e.key === 'Esc') removePortal();
-                };
-                document.addEventListener('keydown', escHandler, true);
             })();
         </script>
 
