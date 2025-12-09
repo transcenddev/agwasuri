@@ -1,4 +1,4 @@
-f// Theme helper module
+// Theme helper module
 // Exposes `toggleTheme()` and initializes theme behavior.
 export function toggleTheme() {
     const current = document.documentElement.classList.contains("dark")
@@ -15,25 +15,33 @@ export function toggleTheme() {
         const expires = new Date();
         expires.setFullYear(expires.getFullYear() + 10);
         const expiresStr = expires.toUTCString();
-        try { document.cookie = `agwasuri_theme=${next}; expires=${expiresStr}; path=/; SameSite=Lax`; } catch(e){}
-        try { document.cookie = `theme=${next}; expires=${expiresStr}; path=/; SameSite=Lax`; } catch(e){}
+        try {
+            document.cookie = `agwasuri_theme=${next}; expires=${expiresStr}; path=/; SameSite=Lax`;
+        } catch (e) {}
+        try {
+            document.cookie = `theme=${next}; expires=${expiresStr}; path=/; SameSite=Lax`;
+        } catch (e) {}
     } catch (e) {}
     // Inform the server so it can set secure server-side cookies immediately
     try {
-        fetch('/set-theme', {
-            method: 'POST',
+        fetch("/set-theme", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                "Content-Type": "application/json",
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute("content"),
             },
-            credentials: 'same-origin',
-            body: JSON.stringify({ theme: next })
-        }).then(function(response){
-            // We no longer force a full reload here. The app now re-applies the
-            // theme on client-side navigations (Livewire/Alpine) and the server
-            // will also set cookies in the response. This keeps UX smooth.
-        }).catch(function(){});
+            credentials: "same-origin",
+            body: JSON.stringify({ theme: next }),
+        })
+            .then(function (response) {
+                // We no longer force a full reload here. The app now re-applies the
+                // theme on client-side navigations (Livewire/Alpine) and the server
+                // will also set cookies in the response. This keeps UX smooth.
+            })
+            .catch(function () {});
     } catch (e) {}
     try {
         window.dispatchEvent(
@@ -58,8 +66,12 @@ function applyTheme(theme) {
             const expires = new Date();
             expires.setFullYear(expires.getFullYear() + 10);
             const expiresStr = expires.toUTCString();
-            try { document.cookie = `agwasuri_theme=${theme}; expires=${expiresStr}; path=/; SameSite=Lax`; } catch(e){}
-            try { document.cookie = `theme=${theme}; expires=${expiresStr}; path=/; SameSite=Lax`; } catch(e){}
+            try {
+                document.cookie = `agwasuri_theme=${theme}; expires=${expiresStr}; path=/; SameSite=Lax`;
+            } catch (e) {}
+            try {
+                document.cookie = `theme=${theme}; expires=${expiresStr}; path=/; SameSite=Lax`;
+            } catch (e) {}
         } catch (e) {}
 
         // Broadcast a DOM event for non-Livewire consumers
@@ -102,7 +114,9 @@ export function initTheme() {
                     const k = localStorage.key(i);
                     if (!k) continue;
                     // normalize key by removing common invisible characters and trimming
-                    const normalized = k.replace(/\u200B|\uFEFF|\u200E|\u200F/g, "").trim();
+                    const normalized = k
+                        .replace(/\u200B|\uFEFF|\u200E|\u200F/g, "")
+                        .trim();
                     if (normalized === "agwasuri_theme") {
                         try {
                             const v = localStorage.getItem(k);
@@ -110,7 +124,9 @@ export function initTheme() {
                                 // promote to canonical key
                                 localStorage.setItem("agwasuri_theme", v);
                                 // optionally remove the weird key to avoid confusion
-                                try { localStorage.removeItem(k); } catch (e) {}
+                                try {
+                                    localStorage.removeItem(k);
+                                } catch (e) {}
                                 saved = v;
                                 break;
                             }
@@ -123,12 +139,18 @@ export function initTheme() {
         // If still not found, fall back to cookie values (server might have set them)
         if (!saved) {
             try {
-                const cookies = Object.fromEntries(document.cookie.split(/;\s*/).map(c => {
-                    const idx = c.indexOf('=');
-                    return [c.slice(0, idx), decodeURIComponent(c.slice(idx + 1))];
-                }));
-                if (cookies['agwasuri_theme']) saved = cookies['agwasuri_theme'];
-                else if (cookies['theme']) saved = cookies['theme'];
+                const cookies = Object.fromEntries(
+                    document.cookie.split(/;\s*/).map((c) => {
+                        const idx = c.indexOf("=");
+                        return [
+                            c.slice(0, idx),
+                            decodeURIComponent(c.slice(idx + 1)),
+                        ];
+                    })
+                );
+                if (cookies["agwasuri_theme"])
+                    saved = cookies["agwasuri_theme"];
+                else if (cookies["theme"]) saved = cookies["theme"];
             } catch (e) {}
         }
 
