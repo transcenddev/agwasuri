@@ -104,50 +104,52 @@ $logout = function (Logout $logout) {
         </div>
     </div>
 
-        <!-- Responsive Navigation Menu -->
-                <div :class="{ 'block': open, 'hidden': !open }" class="hidden lg:hidden">
-            <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('dashboard', ['user' => request('user')])" :active="request()->routeIs('dashboard')" wire:navigate>
-                    Dashboard
-                </x-responsive-nav-link>
+        <!-- Responsive Navigation Menu: Apple-style fullscreen panel for mobile/tablet -->
+        <div x-show="open" x-cloak x-transition.duration.300ms class="lg:hidden">
+            <div class="fixed inset-0 z-50 flex">
+                <!-- Backdrop -->
+                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="open = false" aria-hidden="true"></div>
 
-                <x-responsive-nav-link :href="route('optimal-fish')" :active="request()->routeIs('optimal-fish')" wire:navigate>
-                    Optimal Fish
-                </x-responsive-nav-link>
+                <!-- Panel -->
+                <nav x-trap="open" class="relative z-10 w-full max-w-md bg-white dark:bg-black overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                        <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-xl font-serif tracking-normal"> <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span></a>
+                        <button @click="open = false" aria-label="Close navigation" class="p-2 text-gray-600 hover:bg-gray-100 rounded-md focus:outline-none">
+                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
 
-                <x-responsive-nav-link :href="route('historical-data', ['user' => request('user')])" :active="request()->routeIs('historical-data')" wire:navigate>
-                    History
-                </x-responsive-nav-link>
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <input id="mobile-nav-search" type="search" placeholder="Search navigation" class="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:ring-cvsu-300 focus:border-cvsu-500" />
+                        </div>
 
-                @if (auth()->user()->isAdmin())
-                    <x-responsive-nav-link :href="route('account_management')" :active="request()->routeIs('account_management')" wire:navigate>
-                        Accounts
-                    </x-responsive-nav-link>
-                @endif
-            </div>
+                        <ul id="mobile-nav-list" class="space-y-1">
+                            <li><a id="mobile-link-dashboard" href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="block px-3 py-3 text-lg font-medium text-gray-900 rounded-md hover:bg-gray-50">Dashboard</a></li>
+                            <li><a id="mobile-link-optimal" href="{{ route('optimal-fish') }}" wire:navigate class="block px-3 py-3 text-lg text-gray-900 rounded-md hover:bg-gray-50">Optimal Fish</a></li>
+                            <li><a id="mobile-link-history" href="{{ route('historical-data', ['user' => request('user')]) }}" wire:navigate class="block px-3 py-3 text-lg text-gray-900 rounded-md hover:bg-gray-50">History</a></li>
+                            @if (auth()->user()->isAdmin())
+                                <li><a id="mobile-link-accounts" href="{{ route('account_management') }}" wire:navigate class="block px-3 py-3 text-lg text-gray-900 rounded-md hover:bg-gray-50">Accounts</a></li>
+                            @endif
+                        </ul>
+                    </div>
 
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-800">
-            <div class="px-4">
-                <div class="text-base font-medium text-gray-800 dark:text-gray-100" x-data='@json(["name" => (auth()->user()?->name ?? "User")])' x-text="name"
-                    x-on:profile-updated.window="name = $event.detail.name" aria-live="polite">User</div>
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ auth()->user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    Profile
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <button wire:click="logout" class="w-full text-start">
-                    <x-responsive-nav-link>
-                        Log Out
-                    </x-responsive-nav-link>
-                </button>
+                    <div class="mt-auto border-t border-gray-100 dark:border-gray-800 px-6 py-4">
+                        <div class="mb-3">
+                            <div class="text-base font-medium text-gray-900" x-data='@json(["name" => (auth()->user()?->name ?? "User")])' x-text="name" x-on:profile-updated.window="name = $event.detail.name">User</div>
+                            <div class="text-sm text-gray-500">{{ auth()->user()->email }}</div>
+                        </div>
+                        <div class="space-y-1">
+                            <a href="{{ route('profile') }}" wire:navigate class="block px-3 py-2 rounded-md hover:bg-gray-50">Profile</a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-3 py-2 rounded-md text-red-600 hover:bg-gray-50">Log Out</button>
+                            </form>
+                        </div>
+                    </div>
+                </nav>
             </div>
         </div>
-    </div>
 </nav>
 
 <script>
