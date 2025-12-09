@@ -114,9 +114,15 @@ $logout = function (Logout $logout) {
                 <nav x-trap="open" class="relative z-10 w-full h-full bg-white dark:bg-black overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title">
                     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
                         <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-xl font-serif tracking-normal"> <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span></a>
-                        <button @click="open = false" aria-label="Close navigation" class="p-2 text-gray-600 hover:bg-gray-100 rounded-md focus:outline-none">
-                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
+                        <div class="flex items-center gap-3">
+                            {{-- Theme toggle inside the mobile panel header (matches desktop toggle) --}}
+                            <div class="me-1">
+                                <livewire:dark-mode-toggle variant="green" />
+                            </div>
+                            <button @click="open = false" aria-label="Close navigation" class="p-2 text-gray-600 hover:bg-gray-100 rounded-md focus:outline-none">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="p-6">
