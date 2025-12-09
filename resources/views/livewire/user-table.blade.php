@@ -407,8 +407,7 @@
                         if (!portalEl.contains(e.target)) removePortal();
                     };
                     document.addEventListener('click', clickAwayHandler, true);
-
-                    // Close on Escape
+                    
                     escHandler = function(e) {
                         if (e.key === 'Escape' || e.key === 'Esc') removePortal();
                     };
@@ -427,6 +426,67 @@
                     const left = Math.min(Math.max(rawLeft, window.scrollX + margin), maxLeft);
                     const top = rawTop;
                     createPortalMenu({ left: left, top: top, userId: detail.userId || null });
+                });
+                // Close on Escape
+                escHandler = function(e) {
+                    if (e.key === 'Escape' || e.key === 'Esc') removePortal();
+                };
+                document.addEventListener('keydown', escHandler, true);
+            })();
+        </script>
+
+        <script>
+            // Handle menu actions dispatched from the portal menu. Some mobile
+            // browsers or environments may not have Livewire global helpers wired
+            // exactly the same as desktop, so we trigger the hidden per-row
+            // buttons which are bound to Livewire actions. This keeps behavior
+            // identical across desktop and mobile.
+            (function(){
+                if (window.__agwasuri_menu_action_handler_installed) return;
+                window.__agwasuri_menu_action_handler_installed = true;
+
+                window.addEventListener('menuActionFromUI', function(e){
+                    try {
+                        const d = e && e.detail ? e.detail : {};
+                        const action = (d.action || '').toString();
+                        const userId = d.userId || d.user_id || null;
+                        if (!userId) return;
+
+                        // Map the action to the hidden button id we defined in the
+                        // template: user-action-edit-{id}, user-action-edit-user-{id}, user-action-delete-{id}
+                        let btnId = null;
+                        if (action === 'edit') btnId = 'user-action-edit-user-' + userId;
+                        else if (action === 'delete') btnId = 'user-action-delete-' + userId;
+                        else if (action === 'details' || action === 'view') btnId = 'user-action-edit-' + userId;
+
+                        if (btnId) {
+                            const btn = document.getElementById(btnId);
+                            if (btn) {
+                                try { btn.click(); return; } catch (err) { /* fallthrough */ }
+                            }
+
+                            // Fallback: try Livewire.find + call appropriate method
+                            if (window.Livewire && typeof Livewire.find === 'function') {
+                                try {
+                                    // find nearest component root and call
+                                    const root = document.querySelector('[wire\\:id]');
+                                    if (root) {
+                                        const lwId = root.getAttribute('wire:id');
+                                        const comp = Livewire.find(lwId);
+                                        if (comp) {
+                                            if (action === 'edit') comp.call('editUser', userId);
+                                            else if (action === 'delete') comp.call('confirmDelete', userId);
+                                            else if (action === 'details') comp.call('showDetails', userId);
+                                        }
+                                    }
+                                } catch (err) {
+                                    console.warn('menuActionFromUI: Livewire fallback failed', err);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('menuActionFromUI handler error', e);
+                    }
                 });
             })();
         </script>

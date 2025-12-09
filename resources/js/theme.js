@@ -1,4 +1,4 @@
-// Theme helper module
+f// Theme helper module
 // Exposes `toggleTheme()` and initializes theme behavior.
 export function toggleTheme() {
     const current = document.documentElement.classList.contains("dark")
