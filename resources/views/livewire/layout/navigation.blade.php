@@ -13,7 +13,7 @@ $logout = function (Logout $logout) {
 <nav x-data="{ open: false }" style="--header-height:64px; --nav-icon: var(--cvsu-500);" class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
     <!-- Primary Navigation Menu -->
     <div class="px-6 py-0 mx-auto max-w-7xl">
-        <div class="flex justify-between items-center h-16">
+        <div id="nav-topbar" class="flex justify-between items-center h-16">
             <div class="flex items-center space-x-8 h-full">
                 <!-- Logo -->
                 <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-2xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-opacity">
@@ -113,8 +113,12 @@ $logout = function (Logout $logout) {
                 <!-- Panel (full-screen on mobile & tablet) -->
                 <nav x-trap="open" class="relative z-10 w-full h-full bg-white dark:bg-black overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title">
                     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                        <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-xl font-serif tracking-normal"> <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span></a>
-                        <button @click="open = false" aria-label="Close navigation" class="p-2 text-gray-600 hover:bg-gray-100 rounded-md focus:outline-none">
+                        <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-2xl font-serif font-normal md:font-medium tracking-normal"> <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span></a>
+                                <div class="flex items-center gap-2">
+                                    <div class="me-2">
+                                        <livewire:dark-mode-toggle variant="green" />
+                                    </div>
+                                    <button @click="open = false" aria-label="Close navigation" class="p-2 text-gray-600 hover:bg-gray-100 rounded-md focus:outline-none">
                             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -161,8 +165,8 @@ $logout = function (Logout $logout) {
             if (window.ResizeObserver) {
                 try {
                     var ro = new ResizeObserver(setHeaderHeight);
-                    var navEl = document.querySelector('nav');
-                    if (navEl) ro.observe(navEl);
+                    var topbarEl = document.getElementById('nav-topbar') || document.querySelector('nav');
+                    if (topbarEl) ro.observe(topbarEl);
                 } catch (e) {
                     // ignore
                 }
