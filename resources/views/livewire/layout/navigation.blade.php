@@ -120,10 +120,6 @@ $logout = function (Logout $logout) {
                     </div>
 
                     <div class="p-6">
-                        <div class="mb-4">
-                            <input id="mobile-nav-search" type="search" placeholder="Search navigation" class="w-full rounded-md border border-gray-200 px-3 py-2 text-sm focus:ring-cvsu-300 focus:border-cvsu-500" />
-                        </div>
-
                         <ul id="mobile-nav-list" class="space-y-1">
                             <li><a id="mobile-link-dashboard" href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="block px-3 py-3 text-lg font-medium text-gray-900 rounded-md hover:bg-gray-50">Dashboard</a></li>
                             <li><a id="mobile-link-optimal" href="{{ route('optimal-fish') }}" wire:navigate class="block px-3 py-3 text-lg text-gray-900 rounded-md hover:bg-gray-50">Optimal Fish</a></li>
