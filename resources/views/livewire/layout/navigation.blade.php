@@ -110,8 +110,8 @@ $logout = function (Logout $logout) {
                 <!-- Backdrop -->
                 <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="open = false" aria-hidden="true"></div>
 
-                <!-- Panel -->
-                <nav x-trap="open" class="relative z-10 w-full max-w-md bg-white dark:bg-black overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title">
+                <!-- Panel (full-screen on mobile & tablet) -->
+                <nav x-trap="open" class="relative z-10 w-full h-full bg-white dark:bg-black overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title">
                     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
                         <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-xl font-serif tracking-normal"> <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span></a>
                         <button @click="open = false" aria-label="Close navigation" class="p-2 text-gray-600 hover:bg-gray-100 rounded-md focus:outline-none">
