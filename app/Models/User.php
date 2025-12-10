@@ -62,4 +62,13 @@ class User extends Authenticatable
     {
         return $this->account_type === 'admin';
     }
+
+    /**
+     * Backwards-compatible `id` attribute for tests and libraries
+     * that expect `$user->id` when the primary key is `user_id`.
+     */
+    public function getIdAttribute()
+    {
+        return $this->getAttribute($this->getKeyName());
+    }
 }
