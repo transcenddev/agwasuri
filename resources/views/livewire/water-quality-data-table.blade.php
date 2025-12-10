@@ -84,31 +84,9 @@
                             <tbody class="divide-y divide-gray-100">
                                 @foreach ($water_quality_data as $entry)
                                     @php
-                                        $temp = is_numeric($entry->temperature) ? (float) $entry->temperature : null;
-                                        $ph = is_numeric($entry->ph_level) ? (float) $entry->ph_level : null;
-                                        $do = is_numeric($entry->dissolved_oxygen) ? (float) $entry->dissolved_oxygen : null;
-                                        $sal = is_numeric($entry->salinity) ? (float) $entry->salinity : null;
-
-                                        $temp_ok = $temp !== null && $temp >= 25 && $temp <= 30;
-                                        $ph_ok = $ph !== null && $ph >= 6.5 && $ph <= 8.5;
-                                        $do_ok = $do !== null && $do > 5;
-                                        $sal_ok = $sal !== null && $sal >= 0 && $sal <= 20;
-
-                                        $ok_count = ($temp_ok ? 1 : 0) + ($ph_ok ? 1 : 0) + ($do_ok ? 1 : 0) + ($sal_ok ? 1 : 0);
-
-                                        if ($ok_count === 4) {
-                                            $statusBorderClass = 'border-l-4 border-green-500';
-                                            $badgeClass = 'text-green-700 bg-green-100';
-                                            $statusLabel = 'Optimal';
-                                        } elseif ($ok_count === 0) {
-                                            $statusBorderClass = 'border-l-4 border-red-500';
-                                            $badgeClass = 'text-red-700 bg-red-100';
-                                            $statusLabel = 'Critical';
-                                        } else {
-                                            $statusBorderClass = 'border-l-4 border-yellow-400';
-                                            $badgeClass = 'text-yellow-700 bg-yellow-100';
-                                            $statusLabel = 'Warning';
-                                        }
+                                        $statusBorderClass = $entry->statusBorderClass ?? 'border-l-4 border-gray-200';
+                                        $badgeClass = $entry->statusBadgeClass ?? 'text-gray-700 bg-gray-100';
+                                        $statusLabel = $entry->statusLabel ?? 'Unknown';
                                     @endphp
 
                                     <tr class="bg-white odd:bg-white even:bg-gray-50 hover:bg-gray-100">
@@ -132,31 +110,9 @@
             <div class="block md:hidden space-y-3">
                 @foreach ($water_quality_data as $entry)
                     @php
-                        $temp = is_numeric($entry->temperature) ? (float) $entry->temperature : null;
-                        $ph = is_numeric($entry->ph_level) ? (float) $entry->ph_level : null;
-                        $do = is_numeric($entry->dissolved_oxygen) ? (float) $entry->dissolved_oxygen : null;
-                        $sal = is_numeric($entry->salinity) ? (float) $entry->salinity : null;
-
-                        $temp_ok = $temp !== null && $temp >= 25 && $temp <= 30;
-                        $ph_ok = $ph !== null && $ph >= 6.5 && $ph <= 8.5;
-                        $do_ok = $do !== null && $do > 5;
-                        $sal_ok = $sal !== null && $sal >= 0 && $sal <= 20;
-
-                        $ok_count = ($temp_ok ? 1 : 0) + ($ph_ok ? 1 : 0) + ($do_ok ? 1 : 0) + ($sal_ok ? 1 : 0);
-
-                        if ($ok_count === 4) {
-                            $statusClass = 'border-l-4 border-green-500 bg-green-50';
-                            $badgeClass = 'text-green-700 bg-green-100';
-                            $statusLabel = 'Optimal';
-                        } elseif ($ok_count === 0) {
-                            $statusClass = 'border-l-4 border-red-500 bg-red-50';
-                            $badgeClass = 'text-red-700 bg-red-100';
-                            $statusLabel = 'Critical';
-                        } else {
-                            $statusClass = 'border-l-4 border-yellow-400 bg-yellow-50';
-                            $badgeClass = 'text-yellow-700 bg-yellow-100';
-                            $statusLabel = 'Warning';
-                        }
+                        $statusClass = $entry->statusBorderClass ? ($entry->statusBorderClass . ' bg-white') : 'border-l-4 border-gray-200 bg-white';
+                        $badgeClass = $entry->statusBadgeClass ?? 'text-gray-700 bg-gray-100';
+                        $statusLabel = $entry->statusLabel ?? 'Unknown';
                     @endphp
 
                     <div class="bg-white border rounded-md p-3 hover:bg-gray-50 {{ $statusClass }}">

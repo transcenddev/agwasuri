@@ -112,6 +112,54 @@ class WaterQualityDataTable extends Component
         $water_quality_data = $query->latest('recorded_at')
             ->paginate(perPage: $this->paginate_num);
 
+        // Annotate each row with a computed status using the shared classifier.
+        $collection = $water_quality_data->getCollection()->transform(function ($entry) {
+            try {
+                $tempLabel = strtoupper(classifyWaterParam('temperature', $entry->temperature)['label'] ?? 'UNKNOWN');
+            } catch (\Throwable $e) { $tempLabel = 'UNKNOWN'; }
+            try {
+                $phLabel = strtoupper(classifyWaterParam('ph', $entry->ph_level)['label'] ?? 'UNKNOWN');
+            } catch (\Throwable $e) { $phLabel = 'UNKNOWN'; }
+            try {
+                $doLabel = strtoupper(classifyWaterParam('do', $entry->dissolved_oxygen)['label'] ?? 'UNKNOWN');
+            } catch (\Throwable $e) { $doLabel = 'UNKNOWN'; }
+            try {
+                $salLabel = strtoupper(classifyWaterParam('salinity', $entry->salinity)['label'] ?? 'UNKNOWN');
+            } catch (\Throwable $e) { $salLabel = 'UNKNOWN'; }
+
+            // Consider these labels as OK (non-critical)
+            $okish = ['GOOD', 'LOW', 'MODERATE', 'OK', 'OPTIMAL'];
+
+            $temp_ok = in_array($tempLabel, $okish, true);
+            $ph_ok = in_array($phLabel, $okish, true);
+            $do_ok = in_array($doLabel, $okish, true);
+            $sal_ok = in_array($salLabel, $okish, true);
+
+            $ok_count = ($temp_ok ? 1 : 0) + ($ph_ok ? 1 : 0) + ($do_ok ? 1 : 0) + ($sal_ok ? 1 : 0);
+
+            if ($ok_count === 4) {
+                $statusBorderClass = 'border-l-4 border-green-500';
+                $badgeClass = 'text-green-700 bg-green-100';
+                $statusLabel = 'Optimal';
+            } elseif ($ok_count === 0) {
+                $statusBorderClass = 'border-l-4 border-red-500';
+                $badgeClass = 'text-red-700 bg-red-100';
+                $statusLabel = 'Critical';
+            } else {
+                $statusBorderClass = 'border-l-4 border-yellow-400';
+                $badgeClass = 'text-yellow-700 bg-yellow-100';
+                $statusLabel = 'Warning';
+            }
+
+            $entry->statusLabel = $statusLabel;
+            $entry->statusBadgeClass = $badgeClass;
+            $entry->statusBorderClass = $statusBorderClass;
+
+            return $entry;
+        });
+
+        $water_quality_data->setCollection($collection);
+
         return \view('livewire.water-quality-data-table', compact('water_quality_data'));
     }
 }
