@@ -12,6 +12,17 @@
             @endif
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
+        {{-- Provide a lightweight fallback so Alpine x-data expressions referencing
+             livewireCharts* helpers don't throw before the vendor bundle loads. --}}
+        <script>
+            (function(){
+                if (!window.livewireChartsMultiLineChart) {
+                    window.livewireChartsMultiLineChart = function(){
+                        return { init: function(){}, mounted: function(){}, destroy: function(){} };
+                    };
+                }
+            })();
+        </script>
     </head>
     <body class="font-sans antialiased">
     <!-- Home page dark mode toggle: high-contrast, accessible button -->

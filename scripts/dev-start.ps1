@@ -19,9 +19,8 @@ if (!(Test-Path -Path .env)) {
     php artisan key:generate
 }
 
-# Ensure database folder and sqlite file exist
+# Ensure database folder exists (do not auto-create sqlite file when using MySQL)
 if (!(Test-Path -Path database)) { New-Item -ItemType Directory -Path database | Out-Null }
-if (!(Test-Path -Path database/database.sqlite)) { New-Item -ItemType File -Path database/database.sqlite | Out-Null; Write-Host 'Created database/database.sqlite' }
 
 php artisan config:clear | Out-Null
 php artisan cache:clear | Out-Null

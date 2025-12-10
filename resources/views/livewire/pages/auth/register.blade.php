@@ -5,8 +5,16 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
 use function Livewire\Volt\layout;
+use function Livewire\Volt\state;
 
 layout('layouts.guest');
+
+state([
+    'name' => fn () => '',
+    'email' => fn () => '',
+    'password' => fn () => '',
+    'password_confirmation' => fn () => '',
+]);
 
 $register = function () {
     $this->validate([
@@ -15,8 +23,14 @@ $register = function () {
         'password' => 'required|string|confirmed|min:8',
     ]);
 
+    // Split the provided `name` into first and last name for the User model
+    $parts = preg_split('/\s+/', trim($this->name));
+    $first = $parts[0] ?? '';
+    $last = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : '';
+
     $user = User::create([
-        'name' => $this->name,
+        'first_name' => $first,
+        'last_name' => $last,
         'email' => $this->email,
         'password' => Hash::make($this->password),
     ]);

@@ -46,7 +46,7 @@
                         data-series-keys='@json($__seriesKeys)'
                         data-initial='@json($chartData)'
                         data-user-id="{{ request()->get('user') ?? session('selected_user', auth()->id()) }}">
-                        @livewire('livewire-charts-line-wrapper', ['lineChartModel' => $lineChartModelArray], key('water-quality-' . $__chartId))
+                        @livewire(\App\Livewire\LivewireChartsLineWrapper::class, ['lineChartModel' => $lineChartModelArray], key('water-quality-' . $__chartId))
                     </div>
                 </div>
             </div>

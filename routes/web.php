@@ -31,4 +31,7 @@ Route::post('/set-theme', [ThemeController::class, 'set'])->name('theme.set');
 
 Route::post('store-water-quality-data', [WaterQualityDataController::class, 'store']);
 
+// API endpoint used by client-side chart polling and snapshot requests
+Route::get('api/water-quality/latest', [WaterQualityDataController::class, 'latest']);
+
 require __DIR__.'/auth.php';

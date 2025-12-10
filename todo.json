@@ -1,92 +1,92 @@
 [
-  {
-    "id": 1,
-    "title": "Install dependencies & local build",
-    "description": "Install PHP and JS dependencies and verify local dev server. Run in PowerShell: `composer install`, `npm install`, `php artisan key:generate`, then start dev stack with `composer run dev` (or `pwsh .\\scripts\\dev-start.ps1`).",
-    "status": "in-progress"
-  },
-  {
-    "id": 2,
-    "title": "Run unit & feature tests",
-    "description": "Run backend tests to ensure no regressions: `php artisan test`. Fix failing tests or skip only with documented justification.",
-    "status": "not-started"
-  },
-  {
-    "id": 3,
-    "title": "Build production assets locally",
-    "description": "Produce a production asset build to validate bundling and hashed outputs: `npm run build`. Confirm output in `public/build` (or configured build path).",
-    "status": "not-started"
-  },
-  {
-    "id": 4,
-    "title": "Smoke test theme & navigation",
-    "description": "Manually verify theme and navigation across main views — open app in browser (http://127.0.0.1:8000) and check header, responsive behavior and theme variables in `resources/js/theme.js` and `resources/views/livewire/layout/navigation.blade.php`. Capture screenshots of desktop/mobile states for PR.",
-    "status": "not-started"
-  },
-  {
-    "id": 5,
-    "title": "Smoke test charts and real-time flows",
-    "description": "Verify charts render and real-time updates work by exercising pages that use Livewire charts and `WaterQualityCreated` event; run `php artisan reverb:start` and open dashboards that consume `water-quality-data-created` channel. Confirm no console errors.",
-    "status": "not-started"
-  },
-  {
-    "id": 6,
-    "title": "Asset handling — fonts & images",
-    "description": "Identify large fonts/images under `resources/fonts` and `public/assets`; optimize (subsetting fonts, compress images) and add to Git LFS if >5MB. Rebuild assets after changes.",
-    "status": "not-started"
-  },
-  {
-    "id": 7,
-    "title": "Update README and developer docs",
-    "description": "Document frontend redesign notes, new dev-start steps, and asset handling in `README.md` and `docs/WEB_DESIGN.md`; include commands to start dev stack and troubleshooting tips for PowerShell.",
-    "status": "not-started"
-  },
-  {
-    "id": 8,
-    "title": "CI pipeline: add frontend build & tests",
-    "description": "Update GitHub Actions workflow to run `composer install`, `npm ci`, `npm run build`, and `php artisan test` on PRs. Ensure caching for node_modules and composer cache.",
-    "status": "not-started"
-  },
-  {
-    "id": 9,
-    "title": "Accessibility smoke tests",
-    "description": "Run automated accessibility checks (Lighthouse/axe/pa11y) against key pages (navigation, dashboard, charts) and document issues to fix.",
-    "status": "not-started"
-  },
-  {
-    "id": 10,
-    "title": "End-to-end (E2E) tests",
-    "description": "Add or run E2E tests exercising login, navigation, theme toggle, and chart live updates using Cypress or Playwright; ensure tests run in CI or are flake-resistant.",
-    "status": "not-started"
-  },
-  {
-    "id": 11,
-    "title": "Verify backend compatibility & models",
-    "description": "Confirm no API or model contract changes break backend flows: check `app/Livewire/*`, `app/Services/*`, and routes. Run targeted feature tests that post sensor data to `POST /store-water-quality-data`.",
-    "status": "not-started"
-  },
-  {
-    "id": 12,
-    "title": "Confirm broadcast & event channels",
-    "description": "Ensure `water-quality-data-created` channel and event payloads remain compatible; test broadcast locally with sample events and confirm Livewire/Reverb clients receive them.",
-    "status": "not-started"
-  },
-  {
-    "id": 13,
-    "title": "Prepare PR & required description",
-    "description": "Create PR from `feat/frontend-redesign` into `main` and include the summary, testing steps, screenshots and rollout notes. Use `gh pr create` or the GitHub UI and paste the prepared PR body.",
-    "status": "not-started"
-  },
-  {
-    "id": 14,
-    "title": "Final merge checklist",
-    "description": "Before merging ensure: CI checks passed, at least one approval, no failing tests, no pending migrations, and changelog updated. Merge using GH UI or `gh pr merge` once green.",
-    "status": "not-started"
-  },
-  {
-    "id": 15,
-    "title": "Post-merge steps & monitoring",
-    "description": "After merge, run production build/deploy steps (`npm run build`, `php artisan migrate --force`) and monitor logs and real-time channels for regressions for 24–48 hours. Prepare rollback plan if needed.",
-    "status": "not-started"
-  }
+    {
+        "id": 1,
+        "title": "Install dependencies & local build",
+        "description": "Install PHP and JS dependencies and verify local dev server. Run in PowerShell: `composer install`, `npm install`, `php artisan key:generate`, then start dev stack with `composer run dev` (or `pwsh .\\scripts\\dev-start.ps1`).",
+        "status": "in-progress"
+    },
+    {
+        "id": 2,
+        "title": "Run unit & feature tests",
+        "description": "Run backend tests to ensure no regressions: `php artisan test`. Fix failing tests or skip only with documented justification.",
+        "status": "not-started"
+    },
+    {
+        "id": 3,
+        "title": "Build production assets locally",
+        "description": "Produce a production asset build to validate bundling and hashed outputs: `npm run build`. Confirm output in `public/build` (or configured build path).",
+        "status": "not-started"
+    },
+    {
+        "id": 4,
+        "title": "Smoke test theme & navigation",
+        "description": "Manually verify theme and navigation across main views — open app in browser (http://127.0.0.1:8000) and check header, responsive behavior and theme variables in `resources/js/theme.js` and `resources/views/livewire/layout/navigation.blade.php`. Capture screenshots of desktop/mobile states for PR.",
+        "status": "not-started"
+    },
+    {
+        "id": 5,
+        "title": "Smoke test charts and real-time flows",
+        "description": "Verify charts render and real-time updates work by exercising pages that use Livewire charts and `WaterQualityCreated` event; run `php artisan reverb:start` and open dashboards that consume `water-quality-data-created` channel. Confirm no console errors.",
+        "status": "not-started"
+    },
+    {
+        "id": 6,
+        "title": "Asset handling — fonts & images",
+        "description": "Identify large fonts/images under `resources/fonts` and `public/assets`; optimize (subsetting fonts, compress images) and add to Git LFS if >5MB. Rebuild assets after changes.",
+        "status": "not-started"
+    },
+    {
+        "id": 7,
+        "title": "Update README and developer docs",
+        "description": "Document frontend redesign notes, new dev-start steps, and asset handling in `README.md` and `docs/WEB_DESIGN.md`; include commands to start dev stack and troubleshooting tips for PowerShell.",
+        "status": "not-started"
+    },
+    {
+        "id": 8,
+        "title": "CI pipeline: add frontend build & tests",
+        "description": "Update GitHub Actions workflow to run `composer install`, `npm ci`, `npm run build`, and `php artisan test` on PRs. Ensure caching for node_modules and composer cache.",
+        "status": "not-started"
+    },
+    {
+        "id": 9,
+        "title": "Accessibility smoke tests",
+        "description": "Run automated accessibility checks (Lighthouse/axe/pa11y) against key pages (navigation, dashboard, charts) and document issues to fix.",
+        "status": "not-started"
+    },
+    {
+        "id": 10,
+        "title": "End-to-end (E2E) tests",
+        "description": "Add or run E2E tests exercising login, navigation, theme toggle, and chart live updates using Cypress or Playwright; ensure tests run in CI or are flake-resistant.",
+        "status": "not-started"
+    },
+    {
+        "id": 11,
+        "title": "Verify backend compatibility & models",
+        "description": "Confirm no API or model contract changes break backend flows: check `app/Livewire/*`, `app/Services/*`, and routes. Run targeted feature tests that post sensor data to `POST /store-water-quality-data`.",
+        "status": "not-started"
+    },
+    {
+        "id": 12,
+        "title": "Confirm broadcast & event channels",
+        "description": "Ensure `water-quality-data-created` channel and event payloads remain compatible; test broadcast locally with sample events and confirm Livewire/Reverb clients receive them.",
+        "status": "not-started"
+    },
+    {
+        "id": 13,
+        "title": "Prepare PR & required description",
+        "description": "Create PR from `feat/frontend-redesign` into `main` and include the summary, testing steps, screenshots and rollout notes. Use `gh pr create` or the GitHub UI and paste the prepared PR body.",
+        "status": "not-started"
+    },
+    {
+        "id": 14,
+        "title": "Final merge checklist",
+        "description": "Before merging ensure: CI checks passed, at least one approval, no failing tests, no pending migrations, and changelog updated. Merge using GH UI or `gh pr merge` once green.",
+        "status": "not-started"
+    },
+    {
+        "id": 15,
+        "title": "Post-merge steps & monitoring",
+        "description": "After merge, run production build/deploy steps (`npm run build`, `php artisan migrate --force`) and monitor logs and real-time channels for regressions for 24–48 hours. Prepare rollback plan if needed.",
+        "status": "not-started"
+    }
 ]

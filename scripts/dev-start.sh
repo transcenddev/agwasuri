@@ -10,12 +10,8 @@ if [ ! -f .env ]; then
   php artisan key:generate
 fi
 
-# Ensure database dir and sqlite file exist (safe even when using mysql)
+# Ensure database dir exists (do not auto-create sqlite file when using MySQL)
 mkdir -p database
-if [ ! -f database/database.sqlite ]; then
-  touch database/database.sqlite
-  echo "Created database/database.sqlite"
-fi
 
 # Clear config cache so any .env edits are picked up
 php artisan config:clear || true

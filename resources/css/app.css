@@ -159,8 +159,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 @font-face {
   font-family: 'Wulkan Display';
   /* Prefer webfont (woff) when available; reference fonts in resources/fonts so Vite bundles them */
-  src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Medium.woff') format('woff'),
-    url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Medium.otf') format('opentype');
+  src: url('../fonts/Wulkan-Display-Medium.woff') format('woff'),
+    url('../fonts/Wulkan-Display-Medium.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -168,8 +168,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @font-face {
   font-family: 'Wulkan Display';
-  src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Bold.woff') format('woff'),
-    url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Bold.otf') format('opentype');
+  src: url('../fonts/Wulkan-Display-Bold.woff') format('woff'),
+    url('../fonts/Wulkan-Display-Bold.otf') format('opentype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -177,8 +177,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @font-face {
   font-family: 'Wulkan Display';
-  src: url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Black.woff') format('woff'),
-    url('../fonts/wulkan-display-2-0-font/Wulkan-Display-Black.otf') format('opentype');
+  src: url('../fonts/Wulkan-Display-Black.woff') format('woff'),
+    url('../fonts/Wulkan-Display-Black.otf') format('opentype');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -376,6 +376,7 @@ select.select-no-native option:checked {
 .site-overlay {
   pointer-events: none;
 }
+
 .site-overlay.overlay-active {
   pointer-events: auto;
 }
@@ -440,15 +441,37 @@ select.select-no-native option:checked {
    - Targets only elements with the accounts--* classes so it won't affect
      other components that may rely on the existing 1076px breakpoint. */
 @media (min-width: 1130px) {
-  .accounts--table-desktop { display: table !important; }
-  .accounts--table-desktop thead { display: table-header-group !important; }
-  .accounts--table-desktop tbody { display: table-row-group !important; }
-  .accounts--cards-desktop { display: none !important; }
-  .accounts--table-desktop .desktop-actions { display: flex !important; }
+  .accounts--table-desktop {
+    display: table !important;
+  }
+
+  .accounts--table-desktop thead {
+    display: table-header-group !important;
+  }
+
+  .accounts--table-desktop tbody {
+    display: table-row-group !important;
+  }
+
+  .accounts--cards-desktop {
+    display: none !important;
+  }
+
+  .accounts--table-desktop .desktop-actions {
+    display: flex !important;
+  }
 }
 
 @media (max-width: 1129.98px) {
-  .accounts--table-desktop { display: none !important; }
-  .accounts--cards-desktop { display: block !important; }
-  .accounts--table-desktop .desktop-actions { display: none !important; }
+  .accounts--table-desktop {
+    display: none !important;
+  }
+
+  .accounts--cards-desktop {
+    display: block !important;
+  }
+
+  .accounts--table-desktop .desktop-actions {
+    display: none !important;
+  }
 }

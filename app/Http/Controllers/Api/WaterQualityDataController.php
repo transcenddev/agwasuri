@@ -57,4 +57,50 @@ class WaterQualityDataController extends Controller
             return response()->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
+
+    /**
+     * Return latest water quality rows for a given user as JSON shaped for the
+     * client-side charting helpers. Expected query params: user (user_id), limit.
+     */
+    public function latest(Request $request)
+    {
+        $userId = $request->query('user');
+        $limit = (int) $request->query('limit', 32);
+
+        if (!$userId) {
+            return response()->json(['labels' => [], 'series' => []]);
+        }
+
+        $rows = WaterQualityData::where('user_id', $userId)
+            ->orderBy('recorded_at', 'desc')
+            ->limit($limit)
+            ->get()
+            ->reverse() // oldest -> newest
+            ->values();
+
+        $labels = $rows->map(function ($r) {
+            try {
+                if (!$r->recorded_at) {
+                    return null;
+                }
+
+                // Ensure recorded_at is a Carbon instance before formatting
+                $dt = \Illuminate\Support\Carbon::parse($r->recorded_at);
+                return $dt->toIso8601String();
+            } catch (\Throwable $e) {
+                // If parsing fails, skip this label but log for diagnostics
+                Log::warning('Failed to parse recorded_at for water-quality row', ['recorded_at' => $r->recorded_at]);
+                return null;
+            }
+        })->filter()->all();
+
+        $series = [
+            'temperature' => $rows->map(fn($r) => $r->temperature)->all(),
+            'dissolved_oxygen' => $rows->map(fn($r) => $r->dissolved_oxygen)->all(),
+            'salinity' => $rows->map(fn($r) => $r->salinity)->all(),
+            'ph_level' => $rows->map(fn($r) => $r->ph_level)->all(),
+        ];
+
+        return response()->json(['labels' => $labels, 'series' => $series]);
+    }
 }
