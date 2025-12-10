@@ -121,21 +121,35 @@
             } catch(e){}
 
             // Forward Livewire-emitted events to the existing window event path.
-            // This helps when server-side emits reach Livewire JS but not a raw browser event.
-            try {
-                if (window.Livewire && typeof Livewire.on === 'function') {
-                    Livewire.on('water-quality:point', (data) => {
-                        try {
-                            console.debug('Livewire event received:', data);
-                            window.dispatchEvent(new CustomEvent('water-quality:point', { detail: data }));
-                        } catch (e) {
-                            console.debug('waterChart: forwarding Livewire event failed', e);
+            // Bind reliably even if script load order means Livewire isn't available
+            // at the time this inline script runs.
+            (function(){
+                function bindForwarding(){
+                    try {
+                        if (window.Livewire && typeof Livewire.on === 'function'){
+                            // Avoid double-binding
+                            if (window.__waterQualityLivewireForwardBound) return true;
+                            window.__waterQualityLivewireForwardBound = true;
+                            Livewire.on('water-quality:point', (data) => {
+                                try {
+                                    window.dispatchEvent(new CustomEvent('water-quality:point', { detail: data }));
+                                } catch (err) { /* ignore dispatch errors */ }
+                            });
+                            return true;
                         }
-                    });
+                    } catch (e) {}
+                    return false;
                 }
-            } catch (e) {
-                // ignore Livewire binding errors
-            }
+
+                // Try to bind immediately; if Livewire isn't present, listen for the
+                // common `livewire:load` document event and as a last resort poll.
+                try {
+                    if (!bindForwarding()){
+                        document.addEventListener('livewire:load', () => { try { bindForwarding(); } catch(e){} });
+                        const _lwInterval = setInterval(() => { if (bindForwarding()) clearInterval(_lwInterval); }, 300);
+                    }
+                } catch (e) {}
+            })();
 
             // Polling fallback: periodically fetch latest rows and dispatch events
             try {
