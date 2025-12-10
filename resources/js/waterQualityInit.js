@@ -186,4 +186,78 @@
             });
         } catch (e) {}
     })();
+
+    // Apply chart annotations from `data-initial.thresholds` when available.
+    (function () {
+        function buildAnnotationsFromThresholds(thresholds) {
+            const ann = [];
+            if (!thresholds || typeof thresholds !== 'object') return ann;
+            const colorMap = {
+                'dissolved_oxygen_mg_l': '#10b981',
+                'temperature_c': ['#f59e0b', '#ef4444'],
+                'ph': ['#f97316', '#10b981'],
+                'salinity_ppt': ['#06b6d4', '#0ea5a4']
+            };
+
+            Object.keys(thresholds).forEach((k) => {
+                const v = thresholds[k];
+                if (v === null || typeof v === 'undefined') return;
+                const cmap = colorMap[k] || '#f97316';
+                if (Array.isArray(v)) {
+                    v.forEach((vv, i) => {
+                        if (vv === null || typeof vv === 'undefined') return;
+                        const bg = Array.isArray(cmap) ? (cmap[i] || cmap[0]) : cmap;
+                        ann.push({ y: vv, borderColor: bg, label: { text: `${k.replace(/_/g,' ')} = ${vv}`, style: { color: '#fff', background: bg } } });
+                    });
+                } else if (typeof v === 'number') {
+                    const bg = Array.isArray(cmap) ? cmap[0] : cmap;
+                    ann.push({ y: v, borderColor: bg, label: { text: `${k.replace(/_/g,' ')} = ${v}`, style: { color: '#fff', background: bg } } });
+                }
+            });
+            return ann;
+        }
+
+        function applyAnnotationsToRoot(root) {
+            try {
+                if (!root) return;
+                const chartId = root.getAttribute('data-chart-id');
+                const raw = root.getAttribute('data-initial') || '{}';
+                let init = {};
+                try { init = JSON.parse(raw); } catch (e) { init = {}; }
+                const thresholds = init.thresholds || {};
+                const ann = buildAnnotationsFromThresholds(thresholds);
+                if (!ann.length) return;
+
+                const targetCid = (window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[chartId]) || chartId || ('apexcharts' + chartId);
+                try {
+                    if (window.ApexCharts && typeof window.ApexCharts.exec === 'function') {
+                        window.ApexCharts.exec(targetCid, 'updateOptions', { annotations: { yaxis: ann } }, false, true);
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        // Apply on DOMContentLoaded for existing roots
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const roots = Array.from(document.querySelectorAll('[data-chart-id]'));
+                roots.forEach(r => applyAnnotationsToRoot(r));
+            } catch (e) {}
+        });
+
+        // Re-apply when a water-quality:point event occurs (covers instance mapping changes)
+        try {
+            window.addEventListener('water-quality:point', (evt) => {
+                try {
+                    const roots = Array.from(document.querySelectorAll('[data-chart-id]'));
+                    roots.forEach(r => applyAnnotationsToRoot(r));
+                } catch (e) {}
+            });
+        } catch (e) {}
+    })();
+
 })();

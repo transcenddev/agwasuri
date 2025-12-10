@@ -48,4 +48,11 @@ return [
         'source' => 'docs/WATER_QUALITY_SCALES.md',
         'notes' => 'Ranges derived from project documentation and DENR guidance; overlapping entries capture both regulatory optimal ranges and observed typical ranges.',
     ],
+    // Handy numeric thresholds used for chart annotations and quick reference
+    'thresholds' => [
+        'dissolved_oxygen_mg_l' => 5.0,
+        'temperature_c' => [25.0, 31.0],
+        'ph' => [6.5, 8.5],
+        'salinity_ppt' => [7.0, 25.0],
+    ],
 ];

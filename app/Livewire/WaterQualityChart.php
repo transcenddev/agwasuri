@@ -193,6 +193,9 @@ class WaterQualityChart extends Component
             'visible' => $visible,
         ];
 
+        // Expose configured thresholds so client-side can draw annotations
+        $this->chartData['thresholds'] = config('water_quality.thresholds', []);
+
         $this->legendData = collect($colors)->map(function($color, $name) use ($visible) {
             return [
                 'name' => $name,
