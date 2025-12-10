@@ -93,19 +93,20 @@
     window.waterQualityInit = function (root) {
         rediscoverAndReplayRoot(root);
     };
-    
+
     // Robust fallback: when a water-quality event arrives but the per-chart
     // append machinery isn't bound (e.g. due to script load order or
     // Livewire partials), request an authoritative snapshot from the server
     // and update visible ApexCharts instances. Rate-limited to avoid storms.
-    (function(){
-        window.__waterQualityLastSnapshotAt = window.__waterQualityLastSnapshotAt || {};
+    (function () {
+        window.__waterQualityLastSnapshotAt =
+            window.__waterQualityLastSnapshotAt || {};
         const SNAP_INTERVAL = 500; // ms per-chart
 
         async function fetchAndApplySnapshot(root) {
             try {
-                const chartId = root.getAttribute('data-chart-id');
-                const userId = root.getAttribute('data-user-id');
+                const chartId = root.getAttribute("data-chart-id");
+                const userId = root.getAttribute("data-user-id");
                 if (!chartId || !userId) return;
                 const last = window.__waterQualityLastSnapshotAt[chartId] || 0;
                 const now = Date.now();
@@ -113,25 +114,52 @@
                 window.__waterQualityLastSnapshotAt[chartId] = now;
 
                 const limit = 32;
-                const res = await fetch(`/api/water-quality/latest?user=${encodeURIComponent(userId)}&limit=${limit}`, { credentials: 'same-origin' });
+                const res = await fetch(
+                    `/api/water-quality/latest?user=${encodeURIComponent(
+                        userId
+                    )}&limit=${limit}`,
+                    { credentials: "same-origin" }
+                );
                 if (!res.ok) return;
                 const json = await res.json();
                 const labels = json.labels || [];
                 const seriesObj = json.series || {};
-                const keys = JSON.parse(root.getAttribute('data-series-keys') || '[]');
-                const seriesNames = JSON.parse(root.getAttribute('data-series-names') || '[]');
+                const keys = JSON.parse(
+                    root.getAttribute("data-series-keys") || "[]"
+                );
+                const seriesNames = JSON.parse(
+                    root.getAttribute("data-series-names") || "[]"
+                );
 
                 const rebuiltSnapshot = keys.map((key, idx) => {
                     const arr = seriesObj[key] || [];
-                    return { name: seriesNames[idx] || key, data: arr.map((v,i)=>{ const parsed = Date.parse(labels[i]); return { x: Number.isFinite(parsed) ? parsed : labels[i], y: v }; }) };
+                    return {
+                        name: seriesNames[idx] || key,
+                        data: arr.map((v, i) => {
+                            const parsed = Date.parse(labels[i]);
+                            return {
+                                x: Number.isFinite(parsed) ? parsed : labels[i],
+                                y: v,
+                            };
+                        }),
+                    };
                 });
 
-                const targetCid = window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[chartId] || chartId || ('apexcharts' + chartId);
+                const targetCid =
+                    (window.__waterQualityKnownChartId &&
+                        window.__waterQualityKnownChartId[chartId]) ||
+                    chartId ||
+                    "apexcharts" + chartId;
                 try {
-                    if (window.ApexCharts && typeof window.ApexCharts.exec === 'function') {
+                    if (
+                        window.ApexCharts &&
+                        typeof window.ApexCharts.exec === "function"
+                    ) {
                         // Prefer original exec if wrapped
-                        const execFn = window.__waterQualityOriginalExec || window.ApexCharts.exec.bind(window.ApexCharts);
-                        execFn(targetCid, 'updateSeries', rebuiltSnapshot);
+                        const execFn =
+                            window.__waterQualityOriginalExec ||
+                            window.ApexCharts.exec.bind(window.ApexCharts);
+                        execFn(targetCid, "updateSeries", rebuiltSnapshot);
                     }
                 } catch (e) {
                     // ignore apply errors
@@ -145,9 +173,11 @@
         // visible charts via authoritative snapshot. This covers cases where
         // inline append handlers weren't bound due to load order or DOM swaps.
         try {
-            window.addEventListener('water-quality:point', (evt) => {
+            window.addEventListener("water-quality:point", (evt) => {
                 try {
-                    const roots = Array.from(document.querySelectorAll('[data-chart-id]'));
+                    const roots = Array.from(
+                        document.querySelectorAll("[data-chart-id]")
+                    );
                     for (const root of roots) {
                         // fire-and-forget snapshot update per-root
                         fetchAndApplySnapshot(root);

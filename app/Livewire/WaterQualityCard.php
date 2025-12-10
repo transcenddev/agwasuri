@@ -14,6 +14,11 @@ class WaterQualityCard extends Component
     public $dissolved_oxygen;
     public $salinity;
     public $ph_level;
+    // classification arrays returned by classifyWaterParam
+    public $temperatureClassification = [];
+    public $dissolvedOxygenClassification = [];
+    public $salinityClassification = [];
+    public $phClassification = [];
     public $lastUpdated;
     public $connectionStatus = 'disconnected';
     public $overallStatus = 'Disconnected';
@@ -135,6 +140,34 @@ class WaterQualityCard extends Component
                 $this->phLevelDelta = null;
                 $this->salinityDelta = null;
             }
+
+            // compute classifications for each metric using global helper
+            try {
+                $this->temperatureClassification = classifyWaterParam('temperature', $this->temperature);
+            } catch (\Throwable $e) {
+                $this->temperatureClassification = ['label' => 'UNKNOWN', 'note' => 'classification error', 'min' => null, 'max' => null];
+            }
+
+            try {
+                $this->dissolvedOxygenClassification = classifyWaterParam('do', $this->dissolved_oxygen);
+            } catch (\Throwable $e) {
+                $this->dissolvedOxygenClassification = ['label' => 'UNKNOWN', 'note' => 'classification error', 'min' => null, 'max' => null];
+            }
+
+            try {
+                $this->phClassification = classifyWaterParam('ph', $this->ph_level);
+            } catch (\Throwable $e) {
+                $this->phClassification = ['label' => 'UNKNOWN', 'note' => 'classification error', 'min' => null, 'max' => null];
+            }
+
+            try {
+                $this->salinityClassification = classifyWaterParam('salinity', $this->salinity);
+            } catch (\Throwable $e) {
+                $this->salinityClassification = ['label' => 'UNKNOWN', 'note' => 'classification error', 'min' => null, 'max' => null];
+            }
+
+            // add color suggestion derived from label for convenient view usage
+            $this->addClassificationColors();
 
             // compute overall status after loading latest metrics
             $this->computeOverallStatus();
@@ -295,6 +328,37 @@ class WaterQualityCard extends Component
         if ($delta > 0) return 'text-green-600';
         if ($delta < 0) return 'text-rose-600';
         return 'text-gray-500';
+    }
+
+    /**
+     * Add a `color` key to each classification array derived from the label.
+     */
+    protected function addClassificationColors(): void
+    {
+        $this->temperatureClassification['color'] = $this->classificationColor($this->temperatureClassification['label'] ?? null);
+        $this->dissolvedOxygenClassification['color'] = $this->classificationColor($this->dissolvedOxygenClassification['label'] ?? null);
+        $this->phClassification['color'] = $this->classificationColor($this->phClassification['label'] ?? null);
+        $this->salinityClassification['color'] = $this->classificationColor($this->salinityClassification['label'] ?? null);
+    }
+
+    /**
+     * Map a classification label to a Tailwind-friendly text color suggestion.
+     */
+    protected function classificationColor(?string $label): string
+    {
+        if ($label === null) return 'text-gray-700';
+
+        $key = strtoupper(trim((string) $label));
+
+        return match($key) {
+            'GOOD', 'GOOD', 'OK', 'OPTIMAL' => 'text-green-700',
+            'HARMFUL', 'DANGER', 'CRITICAL' => 'text-rose-700',
+            'BAD', 'WARNING' => 'text-yellow-700',
+            'LOW' => 'text-cyan-700',
+            'MODERATE' => 'text-yellow-700',
+            'HIGH' => 'text-rose-700',
+            default => 'text-gray-700',
+        };
     }
 
     public function render()

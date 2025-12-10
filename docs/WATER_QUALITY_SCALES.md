@@ -1,79 +1,91 @@
-Water Quality Classification Scales
-These scales define how AgwaSuri classifies water quality for Philippine fishponds based on pH, temperature, salinity, and dissolved oxygen (DO) ranges from local studies and DENR guidelines.
+# Water Quality Classification Scales
 
-pH Scale
-Research-based ranges
-Regulatory standard: DENR AO Class SC acceptable pH range is 6.50–8.50 for aquaculture.​
+These scales define how AgwaSuri classifies water quality for Philippine fishponds based on pH, temperature, salinity, and dissolved oxygen (DO) ranges reported in local studies and regulatory guidelines [web:26][web:39][web:32].
 
-Observed values:
+## pH Scale
 
-Manila Bay fishponds: 7.89–8.31
+### Research-based ranges
 
-CMU Bukidnon fishponds: 8.36–8.64
+-   Regulatory standard: DENR AO Class SC acceptable pH range is 6.50–8.50 for aquaculture [web:26].
+-   Observed Philippine fishpond values:
+    -   Manila Bay fishponds: roughly 7.9–8.3
+    -   Bukidnon (CMU) ponds: roughly 8.4–8.6
+    -   Candaba, Pampanga ponds: roughly 7.8–8.7 [web:39].
 
-Candaba, Pampanga fishponds: 7.76–8.71.​
+### pH classification
 
-pH classification
-pH range	Label	Suitability
-< 5.0	HARMFUL highly acidic	Lethal to fish
-5.0–6.4	HARMFUL acidic	Suboptimal or harmful
-6.5–9.0	GOOD acceptable	Suitable for fish production
-6.5–8.5	GOOD optimal (DENR)	Recommended range
-7.89–8.31	GOOD typical range	Common in Manila Bay fishponds
-> 9.0	HARMFUL highly alkaline	Harmful to fish
+| pH range | Classification               | Suitability for fish culture   |
+| -------- | ---------------------------- | ------------------------------ |
+| < 5.0    | HARMFUL highly acidic        | Lethal to fish                 |
+| 5.0–6.4  | HARMFUL acidic               | Suboptimal or harmful          |
+| 6.5–9.0  | GOOD acceptable              | Suitable for fish production   |
+| 6.5–8.5  | GOOD optimal (DENR standard) | Recommended range              |
+| 7.9–8.3  | GOOD typical range           | Common in Manila Bay fishponds |
+| > 9.0    | HARMFUL highly alkaline      | Harmful to fish                |
 
-Temperature Scale
-Regulatory standard: DENR 2016 optimum range 25–31 °C for freshwater fish growth and reproduction.​
+## Temperature Scale
 
-Sub-lethal: < 20 °C; lethal to most species above about 35 °C in pond conditions.
+### Research-based ranges
 
-Temperature classification
-Temperature (°C)	Label	Suitability
-< 20	HARMFUL sub-lethal	Harmful to growth and survival
-20–25	BAD suboptimal	Below desirable range
-25–31	GOOD optimal (DENR)	Recommended for fish culture
-26.73–31.03	GOOD typical range	Observed in Philippine fishponds
-31–35	GOOD acceptable	Upper tolerance limit
-> 35	HARMFUL lethal	Fatal to most fish species
+-   Regulatory standard: DENR 2016 optimum range 25–31 °C for freshwater fish growth and reproduction [web:26].
+-   Sub-lethal and lethal bounds: temperatures below about 20 °C or above about 35 °C are reported to cause serious stress or mortality for many cultured species [web:32].
 
-Salinity Scale
-Observed fishpond range around Manila Bay: about 6.32–17.33 psu in flooding/draining cycles.​
+### Temperature classification
 
-Species salinity requirements differ for milkfish, tilapia, shrimp, and crab, generally within low to moderate brackish ranges.​
+| Temperature (°C) | Classification      | Suitability                           |
+| ---------------- | ------------------- | ------------------------------------- |
+| < 20             | HARMFUL sub-lethal  | Harmful to growth and survival        |
+| 20–25            | BAD suboptimal      | Below desirable range                 |
+| 25–31            | GOOD optimal (DENR) | Recommended for fish culture          |
+| 26.7–31.0        | GOOD typical range  | Common in Philippine fishpond studies |
+| 31–35            | GOOD acceptable     | Upper tolerance limit                 |
+| > 35             | HARMFUL lethal      | Fatal to most fish species            |
 
-Salinity level labels
-Salinity (ppt)	Label
-< 7	Low
-7–25	Moderate
-> 25	High
+## Salinity Scale
 
-Salinity by species
-Salinity (ppt)	Classification	Example species
-< 7.0	Freshwater–brackish	Tilapia
-5–25	Low–moderate brackish	Crab
-6.32–17.33	Typical observed range	General fish culture (Manila Bay)
-10–25	Moderate brackish	Shrimp
-< 25	Brackish	Tilapia, shrimp, crab
-> 25	High salinity	Limited freshwater species
+### Research-based ranges
 
-Dissolved Oxygen Scale
-Guideline: DO ≥ 5.0 mg/L is generally recommended for fish production in ponds.​
+-   Manila Bay fishponds typically show salinity from roughly 6.3 to 17.3 psu during flooding and draining cycles [web:26].
+-   Species have different preferred salinity windows (for example tilapia, shrimp, and crab tolerating low to moderate brackish water) [web:26].
 
-Philippine fishpond studies report typical ranges between about 3.75 and 7.57 mg/L, with some high-quality systems reaching 13–14 mg/L.​
+### Salinity level labels
 
-DO classification
-DO (mg/L)	Label	Effect on fish
-< 2.0	HARMFUL critical/lethal	High mortality, disease risk
-2.0–3.0	HARMFUL severe stress	Extreme stress, reduced feeding
-3.0–5.0	GOOD suboptimal	Growth retardation, chronic stress
-≥ 5.0	GOOD optimal (DENR)	Suitable for fish production
-3.75–7.57	GOOD typical range	Common in Manila Bay and Pampanga ponds
-13.04–13.78	GOOD high range	Very good conditions reported in some case studies
+| Salinity (ppt) | Salinity level |
+| -------------- | -------------- |
+| < 7            | Low            |
+| 7–25           | Moderate       |
+| > 25           | High           |
 
-Exact wording from sources:
-"Nevertheless, DO in both flooding and draining were acceptable as it is above the minimum level (DENR AO 2016; Boyd 2003)" and "minimum DO (3.75 mg/L) was found during the draining of an intensive pond, and it is below the recommended level"
-"The results conform to the water quality guideline of > 5.0 mg/L dissolved oxygen for fish production" and "the dissolved oxygen level of the pond water ranged from 13.04 to 13.78 mg/L".
-"The three ponds had the values of 5.20 ± 3 to 7.57 ± 0.77 mg/L of oxygen. This is far above the standard limit of the desirable range of 5.0 mg/L".
+### Salinity and cultured species
 
+| Salinity (ppt) | Classification         | Example suitable species               |
+| -------------- | ---------------------- | -------------------------------------- |
+| < 7.0          | Freshwater–brackish    | Tilapia                                |
+| 5–25           | Low–moderate brackish  | Crab                                   |
+| 6.3–17.3       | Typical observed range | General fish culture around Manila Bay |
+| 10–25          | Moderate brackish      | Shrimp                                 |
+| < 25           | Brackish               | Tilapia, shrimp, crab                  |
+| > 25           | High salinity          | Limited freshwater species             |
 
-## References
+## Dissolved Oxygen (DO) Scale
+
+### Research-based ranges
+
+-   Guideline: DO concentrations at or above about 5.0 mg/L are commonly recommended as suitable for fish production in ponds [web:32].
+-   Philippine fishpond data show typical DO ranges from about 3.8 to 7.6 mg/L, with some high-quality systems reaching around 13–14 mg/L [web:26][web:39].
+
+### DO classification
+
+| DO (mg/L) | Classification               | Effect on fish                                 |
+| --------- | ---------------------------- | ---------------------------------------------- |
+| < 2.0     | HARMFUL critical/lethal      | High mortality, disease risk                   |
+| 2.0–3.0   | HARMFUL severe stress        | Extreme stress, sharply reduced feeding        |
+| 3.0–5.0   | GOOD suboptimal              | Growth retardation and chronic stress          |
+| ≥ 5.0     | GOOD optimal (DENR standard) | Suitable for fish production                   |
+| 3.8–7.6   | GOOD typical range           | Common in Manila Bay and Pampanga ponds        |
+| 13–14     | GOOD high range              | Very favorable conditions in some case studies |
+
+## Usage in the system
+
+-   These ranges should be implemented as configuration data and used to classify each real-time sensor reading as “HARMFUL,” “BAD,” or “GOOD” for dashboard cards, trend chart annotations, and historical status flags.
+-   The same ranges should also back any analysis summaries and fish-species recommendations so that all front-end messaging is consistent with the underlying thresholds [web:26][web:39][web:32].
