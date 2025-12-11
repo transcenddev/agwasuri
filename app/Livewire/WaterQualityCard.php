@@ -29,6 +29,15 @@ class WaterQualityCard extends Component
     public ?float $phLevelDelta = null;
     public ?float $salinityDelta = null;
 
+    // Sparkline SVG path strings for small trend charts on the cards
+    public string $temperatureSparklinePath = '';
+    public string $salinitySparklinePath = '';
+    public string $doSparklinePath = '';
+    public string $phSparklinePath = '';
+
+    // Sparkline stroke colors sourced from config/water_colors
+    public array $sparklineColors = [];
+
     public ?int $userId = null;
 
     public ?string $startDate = null;
@@ -168,6 +177,35 @@ class WaterQualityCard extends Component
 
             // add color suggestion derived from label for convenient view usage
             $this->addClassificationColors();
+
+            // Build sparklines for recent points (12 most recent)
+            try {
+                $recent = (clone $baseQuery)->orderBy('recorded_at', 'desc')->limit(12)->get()->reverse()->values();
+
+                $tempValues = $recent->map(fn($r) => is_null($r->temperature) ? null : (float) $r->temperature)->filter(fn($v) => !is_null($v))->values()->all();
+                $salValues = $recent->map(fn($r) => is_null($r->salinity) ? null : (float) $r->salinity)->filter(fn($v) => !is_null($v))->values()->all();
+                $doValues = $recent->map(fn($r) => is_null($r->dissolved_oxygen) ? null : (float) $r->dissolved_oxygen)->filter(fn($v) => !is_null($v))->values()->all();
+                $phValues = $recent->map(fn($r) => is_null($r->ph_level) ? null : (float) $r->ph_level)->filter(fn($v) => !is_null($v))->values()->all();
+
+                $this->temperatureSparklinePath = $this->buildSparklinePath($tempValues, 72, 28, 4);
+                $this->salinitySparklinePath = $this->buildSparklinePath($salValues, 72, 28, 4);
+                $this->doSparklinePath = $this->buildSparklinePath($doValues, 72, 28, 4);
+                $this->phSparklinePath = $this->buildSparklinePath($phValues, 72, 28, 4);
+            } catch (	hrowable $e) {
+                $this->temperatureSparklinePath = '';
+                $this->salinitySparklinePath = '';
+                $this->doSparklinePath = '';
+                $this->phSparklinePath = '';
+            }
+
+            // Sparkline stroke colors (use series colors from config, fallback to sensible defaults)
+            $series = config('water_colors.series', []);
+            $this->sparklineColors = [
+                'temperature' => $series['temperature'] ?? '#ef4444',
+                'salinity' => $series['salinity'] ?? '#14b8a6',
+                'dissolved_oxygen' => $series['do'] ?? '#2563eb',
+                'ph_level' => $series['ph'] ?? '#8b5cf6',
+            ];
 
             // compute overall status after loading latest metrics
             $this->computeOverallStatus();
@@ -359,6 +397,38 @@ class WaterQualityCard extends Component
             'HIGH' => 'text-rose-700',
             default => 'text-gray-700',
         };
+    }
+
+    /**
+     * Build a simple SVG polyline path (string) from an array of numeric values.
+     * Returns an empty string when insufficient data is available.
+     *
+     * @param array<int|float> $values
+     */
+    protected function buildSparklinePath(array $values, int $width = 72, int $height = 28, int $padding = 4): string
+    {
+        if (empty($values) || count($values) < 2) {
+            return '';
+        }
+
+        $count = count($values);
+        $min = min($values);
+        $max = max($values);
+        // avoid divide by zero
+        $range = ($max - $min) > 0 ? ($max - $min) : 1.0;
+
+        $stepX = ($width - ($padding * 2)) / max(1, $count - 1);
+        $points = [];
+        foreach ($values as $i => $v) {
+            $x = $padding + ($i * $stepX);
+            $normalized = ($v - $min) / $range;
+            // invert y because SVG y grows downward
+            $y = $padding + (1 - $normalized) * ($height - ($padding * 2));
+            $points[] = round($x, 2) . ',' . round($y, 2);
+        }
+
+        // Return a polyline-compatible points string; blade will wrap into <polyline>
+        return implode(' ', $points);
     }
 
     public function render()
