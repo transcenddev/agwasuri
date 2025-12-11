@@ -74,10 +74,10 @@
                                 <tr>
                                     <th class="px-6 py-3 text-sm font-medium text-gray-700 text-left w-56 sticky top-0 bg-white z-10 border-b border-gray-100">Recorded At</th>
                                     <th class="px-4 py-3 text-sm font-medium text-gray-700 text-center sticky top-0 bg-white z-10 border-b border-gray-100">Status</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-red-600 text-right sticky top-0 bg-white z-10 border-b border-gray-100">Temperature (°C)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-green-600 text-right sticky top-0 bg-white z-10 border-b border-gray-100">Salinity (ppt)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-cyan-600 text-right sticky top-0 bg-white z-10 border-b border-gray-100">Dissolved Oxygen (mg/L)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-yellow-600 text-right sticky top-0 bg-white z-10 border-b border-gray-100">pH Level</th>
+                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: {{ config('water_colors.series.temperature', '#EF4444') }}">Temperature (°C)</th>
+                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: {{ config('water_colors.series.salinity', '#14B8A6') }}">Salinity (ppt)</th>
+                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: {{ config('water_colors.series.do', '#2563EB') }}">Dissolved Oxygen (mg/L)</th>
+                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: {{ config('water_colors.series.ph', '#8B5CF6') }}">pH Level</th>
                                 </tr>
                             </thead>
 
@@ -94,10 +94,10 @@
                                         <td class="px-4 py-3 text-sm text-gray-700 text-center">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}">{{ $statusLabel }}</span>
                                         </td>
-                                        <td class="px-6 py-3 text-sm text-gray-700 text-right">{{ $entry->temperature }}</td>
-                                        <td class="px-6 py-3 text-sm text-gray-700 text-right">{{ $entry->salinity }}</td>
-                                        <td class="px-6 py-3 text-sm text-gray-700 text-right">{{ $entry->dissolved_oxygen }}</td>
-                                        <td class="px-6 py-3 text-sm text-gray-700 text-right">{{ $entry->ph_level }}</td>
+                                        <td class="px-6 py-3 text-sm text-right {{ $entry->tempValueClass }}">{{ $entry->temperature }}</td>
+                                        <td class="px-6 py-3 text-sm text-right {{ $entry->salValueClass }}">{{ $entry->salinity }}</td>
+                                        <td class="px-6 py-3 text-sm text-right {{ $entry->doValueClass }}">{{ $entry->dissolved_oxygen }}</td>
+                                        <td class="px-6 py-3 text-sm text-right {{ $entry->phValueClass }}">{{ $entry->ph_level }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -122,44 +122,28 @@
                                 <div class="text-sm font-medium text-gray-700">{{ $entry->recorded_at }}</div>
                             </div>
 
-                            <div class="text-sm text-gray-500">pH <span class="font-semibold">{{ $entry->ph_level }}</span></div>
+                            <div class="text-sm text-gray-500 md:hidden">&nbsp;</div>
                         </div>
 
-                        <div class="mt-2 flex items-center justify-between text-sm text-gray-700">
-                            <div class="flex items-center space-x-4">
-                                <div class="text-right">
-                                    <div class="text-xs text-gray-500 flex items-center justify-end gap-1"> <span>🌡️</span> <span>Temperature (°C)</span></div>
-                                    <div class="font-semibold">{{ $entry->temperature }}</div>
-                                </div>
-
-                                <div class="text-right">
-                                    <div class="text-xs text-gray-500 flex items-center justify-end gap-1"> <span>💧</span> <span>DO (mg/L)</span></div>
-                                    <div class="font-semibold">{{ $entry->dissolved_oxygen }}</div>
-                                </div>
+                        <div class="mt-2 grid grid-cols-2 gap-3 text-sm text-gray-700">
+                            <div class="truncate">
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🌡️</span> <span style="color: {{ config('water_colors.series.temperature', '#EF4444') }}">Temperature (°C)</span></div>
+                                <div class="font-semibold {{ $entry->tempValueClass }}">{{ $entry->temperature }}</div>
                             </div>
 
-                            <div class="flex items-center">
-                                <div x-data="{ open: false }" class="w-full">
-                                    <div class="flex items-center justify-end">
-                                        <button
-                                            @click="open = !open"
-                                            :aria-expanded="open"
-                                            type="button"
-                                            aria-controls="more-{{ $loop->index }}"
-                                            class="inline-flex items-center text-xs text-blue-600 hover:text-blue-700 focus:outline-none"
-                                        >
-                                            <svg :class="{ 'rotate-180': open }" class="transform transition-transform duration-150 w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                            <span x-text="open ? 'Hide' : 'More'"></span>
-                                        </button>
-                                    </div>
+                            <div class="truncate">
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧂</span> <span style="color: {{ config('water_colors.series.salinity', '#14B8A6') }}">Salinity (ppt)</span></div>
+                                <div class="font-semibold {{ $entry->salValueClass }}">{{ $entry->salinity }}</div>
+                            </div>
 
-                                    <div x-show="open" x-transition x-cloak id="more-{{ $loop->index }}" class="mt-2 text-right">
-                                        <div class="text-xs text-gray-500 flex items-center justify-end gap-1"> <span>🧂</span> <span>Salinity (ppt)</span></div>
-                                        <div class="font-semibold">{{ $entry->salinity }}</div>
-                                    </div>
-                                </div>
+                            <div class="truncate">
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>💧</span> <span style="color: {{ config('water_colors.series.do', '#2563EB') }}">Dissolved Oxygen (mg/L)</span></div>
+                                <div class="font-semibold {{ $entry->doValueClass }}">{{ $entry->dissolved_oxygen }}</div>
+                            </div>
+
+                            <div class="truncate">
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧪</span> <span style="color: {{ config('water_colors.series.ph', '#8B5CF6') }}">pH Level</span></div>
+                                <div class="font-semibold {{ $entry->phValueClass }}">{{ $entry->ph_level }}</div>
                             </div>
                         </div>
                     </div>

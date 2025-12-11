@@ -151,6 +151,27 @@ class WaterQualityDataTable extends Component
                 $statusLabel = 'Warning';
             }
 
+            // Map individual parameter labels to a text color class for values.
+            $mapLabelToClass = function (?string $label) use ($okish) {
+                $lab = strtoupper((string) $label);
+                if ($lab === 'UNKNOWN' || $lab === '') {
+                    return 'text-gray-600';
+                }
+                if (in_array($lab, $okish, true)) {
+                    return 'text-green-600';
+                }
+                if ($lab === 'CRITICAL') {
+                    return 'text-red-600';
+                }
+                // Default to warning color for other non-ok states
+                return 'text-yellow-600';
+            };
+
+            $entry->tempValueClass = $mapLabelToClass($tempLabel);
+            $entry->phValueClass = $mapLabelToClass($phLabel);
+            $entry->doValueClass = $mapLabelToClass($doLabel);
+            $entry->salValueClass = $mapLabelToClass($salLabel);
+
             $entry->statusLabel = $statusLabel;
             $entry->statusBadgeClass = $badgeClass;
             $entry->statusBorderClass = $statusBorderClass;
