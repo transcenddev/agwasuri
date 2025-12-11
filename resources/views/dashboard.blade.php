@@ -62,13 +62,8 @@
            </x-card>
 
            <x-card>
-            <x-slot name="header">
-                <x-card-header>
-                    <x-slot name="title">Measurements</x-slot>
-                </x-card-header>
-            </x-slot>
-            {{-- <livewire:water-quality-data-table :userId="Auth::id()" /> --}}
-             <livewire:water-quality-data-table :userId="$activeUserId" wire:key="wq-table-{{ $activeUserId }}" />
+            {{-- Measurements title removed per request; card contains only the table --}}
+            <livewire:water-quality-data-table :userId="$activeUserId" wire:key="wq-table-{{ $activeUserId }}" />
         </x-card>
     </x-container>
 </x-app-layout>
