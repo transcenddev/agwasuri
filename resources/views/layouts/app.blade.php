@@ -22,6 +22,27 @@
             @include('components.theme-init-head')
         @endif
 
+        {{-- Expose canonical series and status colors as CSS variables for use in Blade views and components --}}
+        @php
+            $wqSeries = config('water_colors.series', []);
+            $wqStatus = config('water_quality.status_colors', []);
+        @endphp
+        <style>
+            :root {
+                /* Series colors (chart + sparklines) */
+                --wq-series-temperature: {{ $wqSeries['temperature'] ?? '#EF4444' }};
+                --wq-series-salinity: {{ $wqSeries['salinity'] ?? '#14B8A6' }};
+                --wq-series-do: {{ $wqSeries['do'] ?? '#2563EB' }};
+                --wq-series-ph: {{ $wqSeries['ph'] ?? '#8B5CF6' }};
+
+                /* High-level status colors */
+                --wq-status-good: {{ $wqStatus['good'] ?? '#16A34A' }};
+                --wq-status-warning: {{ $wqStatus['warning'] ?? '#F59E0B' }};
+                --wq-status-harmful: {{ $wqStatus['harmful'] ?? '#DC2626' }};
+                --wq-status-unknown: {{ $wqStatus['unknown'] ?? '#6B7280' }};
+            }
+        </style>
+
         @livewireStyles
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireChartsScripts

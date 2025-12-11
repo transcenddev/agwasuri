@@ -74,10 +74,10 @@
                                 <tr>
                                     <th class="px-6 py-3 text-sm font-medium text-gray-700 text-left w-56 sticky top-0 bg-white z-10 border-b border-gray-100">Recorded At</th>
                                     <th class="px-4 py-3 text-sm font-medium text-gray-700 text-center sticky top-0 bg-white z-10 border-b border-gray-100">Status</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: {{ config('water_colors.series.temperature', '#EF4444') }}">Temperature (°C)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: {{ config('water_colors.series.salinity', '#14B8A6') }}">Salinity (ppt)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: {{ config('water_colors.series.do', '#2563EB') }}">Dissolved Oxygen (mg/L)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: {{ config('water_colors.series.ph', '#8B5CF6') }}">pH Level</th>
+                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-temperature)">Temperature (°C)</th>
+                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-salinity)">Salinity (ppt)</th>
+                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</th>
+                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-ph)">pH Level</th>
                                 </tr>
                             </thead>
 
@@ -127,22 +127,22 @@
 
                         <div class="mt-2 grid grid-cols-2 gap-3 text-sm text-gray-700">
                             <div class="truncate">
-                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🌡️</span> <span style="color: {{ config('water_colors.series.temperature', '#EF4444') }}">Temperature (°C)</span></div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🌡️</span> <span style="color: var(--wq-series-temperature)">Temperature (°C)</span></div>
                                 <div class="font-semibold {{ $entry->tempValueClass }}">{{ $entry->temperature }}</div>
                             </div>
 
                             <div class="truncate">
-                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧂</span> <span style="color: {{ config('water_colors.series.salinity', '#14B8A6') }}">Salinity (ppt)</span></div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧂</span> <span style="color: var(--wq-series-salinity)">Salinity (ppt)</span></div>
                                 <div class="font-semibold {{ $entry->salValueClass }}">{{ $entry->salinity }}</div>
                             </div>
 
                             <div class="truncate">
-                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>💧</span> <span style="color: {{ config('water_colors.series.do', '#2563EB') }}">Dissolved Oxygen (mg/L)</span></div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>💧</span> <span style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</span></div>
                                 <div class="font-semibold {{ $entry->doValueClass }}">{{ $entry->dissolved_oxygen }}</div>
                             </div>
 
                             <div class="truncate">
-                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧪</span> <span style="color: {{ config('water_colors.series.ph', '#8B5CF6') }}">pH Level</span></div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧪</span> <span style="color: var(--wq-series-ph)">pH Level</span></div>
                                 <div class="font-semibold {{ $entry->phValueClass }}">{{ $entry->ph_level }}</div>
                             </div>
                         </div>

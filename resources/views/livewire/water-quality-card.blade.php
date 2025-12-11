@@ -106,7 +106,7 @@
             <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
                 @if(!empty($temperatureSparklinePath))
                     <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $temperatureSparklinePath }}" fill="none" stroke="{{ $sparklineColors['temperature'] ?? '#ef4444' }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                        <polyline points="{{ $temperatureSparklinePath }}" fill="none" stroke="var(--wq-series-temperature)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
@@ -138,7 +138,7 @@
             <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
                 @if(!empty($salinitySparklinePath))
                     <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $salinitySparklinePath }}" fill="none" stroke="{{ $sparklineColors['salinity'] ?? '#14b8a6' }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                        <polyline points="{{ $salinitySparklinePath }}" fill="none" stroke="var(--wq-series-salinity)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
@@ -170,7 +170,7 @@
             <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
                 @if(!empty($doSparklinePath))
                     <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $doSparklinePath }}" fill="none" stroke="{{ $sparklineColors['dissolved_oxygen'] ?? '#2563eb' }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                        <polyline points="{{ $doSparklinePath }}" fill="none" stroke="var(--wq-series-do)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
@@ -202,7 +202,7 @@
             <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
                 @if(!empty($phSparklinePath))
                     <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $phSparklinePath }}" fill="none" stroke="{{ $sparklineColors['ph_level'] ?? '#8b5cf6' }}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                        <polyline points="{{ $phSparklinePath }}" fill="none" stroke="var(--wq-series-ph)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
