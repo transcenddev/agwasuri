@@ -75,9 +75,10 @@ class WaterQualityChart extends Component
 
         $payload = [
             'recorded_at' => isset($w['recorded_at']) ? Carbon::parse($w['recorded_at'])->toIsoString() : now()->toIsoString(),
+            // canonical order: temperature, salinity, dissolved_oxygen, ph_level
             'temperature' => array_key_exists('temperature', $w) ? (is_null($w['temperature']) ? null : (float) $w['temperature']) : null,
-            'dissolved_oxygen' => array_key_exists('dissolved_oxygen', $w) ? (is_null($w['dissolved_oxygen']) ? null : (float) $w['dissolved_oxygen']) : null,
             'salinity' => array_key_exists('salinity', $w) ? (is_null($w['salinity']) ? null : (float) $w['salinity']) : null,
+            'dissolved_oxygen' => array_key_exists('dissolved_oxygen', $w) ? (is_null($w['dissolved_oxygen']) ? null : (float) $w['dissolved_oxygen']) : null,
             'ph_level' => array_key_exists('ph_level', $w) ? (is_null($w['ph_level']) ? null : (float) $w['ph_level']) : null,
         ];
 
@@ -164,24 +165,28 @@ class WaterQualityChart extends Component
             'y' => $r->ph_level !== null ? (float) $r->ph_level : null,
         ])->all();
 
+        // Source canonical series colors from new config file; use sensible fallbacks
+        $seriesColors = config('water_colors.series', []);
+        // Ensure colors and series are constructed in the canonical order:
+        // Temperature, Salinity, Dissolved Oxygen, pH
         $colors = [
-            'Temperature' => '#ef4444', // red-ish
-            'Dissolved Oxygen' => '#2563eb', // blue
-            'Salinity' => '#06b6d4', // teal
-            'pH' => '#a78bfa', // purple
+            'Temperature' => $seriesColors['temperature'] ?? '#EF4444',
+            'Salinity' => $seriesColors['salinity'] ?? '#14B8A6',
+            'Dissolved Oxygen' => $seriesColors['do'] ?? '#2563EB',
+            'pH' => $seriesColors['ph'] ?? '#8B5CF6',
         ];
 
         $series = [
             'Temperature' => $temperatureSeries,
-            'Dissolved Oxygen' => $doSeries,
             'Salinity' => $salinitySeries,
+            'Dissolved Oxygen' => $doSeries,
             'pH' => $phSeries,
         ];
 
         $visible = [
             'Temperature' => true,
-            'Dissolved Oxygen' => true,
             'Salinity' => true,
+            'Dissolved Oxygen' => true,
             'pH' => true,
         ];
 
@@ -195,6 +200,8 @@ class WaterQualityChart extends Component
 
         // Expose configured thresholds so client-side can draw annotations
         $this->chartData['thresholds'] = config('water_quality.thresholds', []);
+        // expose status color palette to the client so annotations and badges can use the same colors
+        $this->chartData['status_colors'] = config('water_quality.status_colors', []);
 
         $this->legendData = collect($colors)->map(function($color, $name) use ($visible) {
             return [
@@ -277,6 +284,43 @@ class WaterQualityChart extends Component
         // Markers
         $this->lineChartModelArray['jsonConfig']['markers'] = $this->lineChartModelArray['jsonConfig']['markers'] ?? ['size' => 3];
 
+        // Mobile / readability defaults: hide inline data labels and prefer tooltips
+        $this->lineChartModelArray['jsonConfig']['dataLabels'] = $this->lineChartModelArray['jsonConfig']['dataLabels'] ?? ['enabled' => false];
+
+        // Tooltips: shared across series for a given x (tap to inspect all series values)
+        $this->lineChartModelArray['jsonConfig']['tooltip'] = $this->lineChartModelArray['jsonConfig']['tooltip'] ?? [
+            'enabled' => true,
+            'shared' => true,
+            'intersect' => false,
+            // Use a readable x-axis display; front-end will format if needed
+            'x' => ['show' => true]
+        ];
+
+        // Legend: place at the bottom for compact mobile layouts
+        $this->lineChartModelArray['jsonConfig']['legend'] = $this->lineChartModelArray['jsonConfig']['legend'] ?? [
+            'position' => 'bottom',
+            'horizontalAlign' => 'center',
+            'fontSize' => '12px',
+            'offsetY' => 0,
+        ];
+
+        // Ensure chart toolbar is hidden for simpler mobile presentation
+        $this->lineChartModelArray['jsonConfig']['chart']['toolbar'] = $this->lineChartModelArray['jsonConfig']['chart']['toolbar'] ?? ['show' => false];
+
+        // Responsive adjustments to reduce clutter on small screens
+        $this->lineChartModelArray['jsonConfig']['responsive'] = $this->lineChartModelArray['jsonConfig']['responsive'] ?? [
+            [
+                'breakpoint' => 640,
+                'options' => [
+                    'chart' => [ 'height' => 360 ],
+                    'legend' => [ 'position' => 'bottom', 'horizontalAlign' => 'center' ],
+                    'stroke' => [ 'width' => [2.2, 1.2, 1.2, 1.2] ],
+                    'markers' => [ 'size' => 2 ],
+                    'xaxis' => [ 'labels' => ['rotate' => -45] ],
+                ],
+            ],
+        ];
+
         // Mirror x-axis density and label rotation into jsonConfig.xaxis for vendor merging
         if (! isset($this->lineChartModelArray['jsonConfig']['xaxis']) || ! is_array($this->lineChartModelArray['jsonConfig']['xaxis'])) {
             $this->lineChartModelArray['jsonConfig']['xaxis'] = [];
@@ -292,7 +336,8 @@ class WaterQualityChart extends Component
             $this->lineChartModelArray['meta'] = [];
         }
         $this->lineChartModelArray['meta']['series_names'] = $this->lineChartModelArray['meta']['series_names'] ?? array_keys($series);
-        $this->lineChartModelArray['meta']['series_keys'] = $this->lineChartModelArray['meta']['series_keys'] ?? ['temperature','dissolved_oxygen','salinity','ph_level'];
+        // canonical series_keys order used by client-side mapping
+        $this->lineChartModelArray['meta']['series_keys'] = $this->lineChartModelArray['meta']['series_keys'] ?? ['temperature','salinity','dissolved_oxygen','ph_level'];
     }
 
     /**

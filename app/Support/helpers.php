@@ -76,3 +76,130 @@ if (! function_exists('classifyWaterParam')) {
         return ['label' => 'UNKNOWN', 'note' => 'No matching range', 'min' => null, 'max' => null];
     }
 }
+
+if (! function_exists('map_classification_to_status')) {
+    /**
+     * Map a classification label (e.g. GOOD, BAD, HARMFUL, Low, Moderate, High)
+     * to a normalized status key used by UI (`good`, `warning`, `harmful`, `unknown`).
+     */
+    function map_classification_to_status(string $label): string
+    {
+        $label = trim(strtoupper($label));
+
+        return match ($label) {
+            'GOOD' => 'good',
+            'OPTIMAL' => 'good',
+            'TYPICAL' => 'good',
+            'BAD' => 'warning',
+            'LOW' => 'warning',
+            'MODERATE' => 'warning',
+            'HARMFUL' => 'harmful',
+            'HIGH' => 'harmful',
+            default => 'unknown',
+        };
+    }
+}
+
+if (! function_exists('status_color')) {
+    /**
+     * Return a hex color for a status key from config. Falls back to gray.
+     * Accepts either the normalized key or a classification label.
+     */
+    function status_color(string $statusOrLabel): string
+    {
+        $key = strtolower($statusOrLabel);
+
+        // If a raw label was provided, map it first
+        if (! in_array($key, ['good','warning','harmful','unknown'], true)) {
+            $key = map_classification_to_status($statusOrLabel);
+        }
+
+        $colors = config('water_quality.status_colors', []);
+
+        return $colors[$key] ?? $colors['unknown'] ?? '#6B7280';
+    }
+}
+
+if (! function_exists('hex_to_rgba')) {
+    /**
+     * Convert a hex color string to an rgba(...) string. Accepts 3 or 6 char hex, with or without '#'.
+     */
+    function hex_to_rgba(string $hex, float $alpha = 1.0): string
+    {
+        $hex = trim($hex);
+        if (str_starts_with($hex, '#')) {
+            $hex = substr($hex, 1);
+        }
+
+        if (strlen($hex) === 3) {
+            $r = hexdec(str_repeat($hex[0], 2));
+            $g = hexdec(str_repeat($hex[1], 2));
+            $b = hexdec(str_repeat($hex[2], 2));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+
+        $alpha = max(0, min(1, $alpha));
+
+        return sprintf('rgba(%d,%d,%d,%.3f)', $r, $g, $b, $alpha);
+    }
+}
+
+if (! function_exists('water_quality_param_keys')) {
+    /**
+     * Return canonical ordered parameter keys used throughout the app.
+     * Order: Temperature, Salinity, Dissolved Oxygen, pH Level
+     *
+     * @return array<int,string>
+     */
+    function water_quality_param_keys(): array
+    {
+        return ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level'];
+    }
+}
+
+if (! function_exists('water_quality_param_labels')) {
+    /**
+     * Return a mapping of parameter key -> display label (exact wording required).
+     *
+     * @return array<string,string>
+     */
+    function water_quality_param_labels(): array
+    {
+        return [
+            'temperature' => 'Temperature (°C)',
+            'salinity' => 'Salinity (ppt)',
+            'dissolved_oxygen' => 'Dissolved Oxygen (mg/L)',
+            'ph_level' => 'pH Level',
+        ];
+    }
+}
+
+if (! function_exists('water_quality_colors_ordered')) {
+    /**
+     * Return ordered array of hex colors matching the canonical param keys.
+     * Useful for chart color arrays where order matters.
+     *
+     * @return array<string>
+     */
+    function water_quality_colors_ordered(): array
+    {
+        $cfg = config('water_colors.series', []);
+        $keys = water_quality_param_keys();
+        $out = [];
+        foreach ($keys as $k) {
+            // map keys used by config: 'temperature','salinity','do','ph'
+            if ($k === 'dissolved_oxygen') {
+                $color = $cfg['do'] ?? null;
+            } else {
+                $cfgKey = $k === 'ph_level' ? 'ph' : $k;
+                $color = $cfg[$cfgKey] ?? null;
+            }
+            $out[] = $color ?? '#6B7280';
+        }
+
+        return $out;
+    }
+}

@@ -232,10 +232,11 @@ class ClassifyFish extends Component
                 return;
             }
 
+            // canonical order: temperature, salinity, dissolved_oxygen, ph_level
             $this->waterQualityData = [
                 'temperature' => round((float)$averageData->temperature, 2),
-                'dissolved_oxygen' => round((float)$averageData->dissolved_oxygen, 2),
                 'salinity' => round((float)$averageData->salinity, 2),
+                'dissolved_oxygen' => round((float)$averageData->dissolved_oxygen, 2),
                 'ph_level' => round((float)$averageData->ph_level, 2),
             ];
 
@@ -291,8 +292,8 @@ class ClassifyFish extends Component
 
         $this->explanations['predictions'] = "Based on the average water quality measurements for the selected user{$dateRangeText}:
             Temperature: {$this->waterQualityData['temperature']}°C,
-            Dissolved Oxygen: {$this->waterQualityData['dissolved_oxygen']} mg/L,
             Salinity: {$this->waterQualityData['salinity']} ppt,
+            Dissolved Oxygen: {$this->waterQualityData['dissolved_oxygen']} mg/L,
             pH: {$this->waterQualityData['ph_level']}.";
 
         if (!empty($this->predictionResults)) {

@@ -94,10 +94,11 @@ class WaterQualityDataController extends Controller
             }
         })->filter()->all();
 
+        // Return series in canonical order: temperature, salinity, dissolved_oxygen, ph_level
         $series = [
             'temperature' => $rows->map(fn($r) => $r->temperature)->all(),
-            'dissolved_oxygen' => $rows->map(fn($r) => $r->dissolved_oxygen)->all(),
             'salinity' => $rows->map(fn($r) => $r->salinity)->all(),
+            'dissolved_oxygen' => $rows->map(fn($r) => $r->dissolved_oxygen)->all(),
             'ph_level' => $rows->map(fn($r) => $r->ph_level)->all(),
         ];
 

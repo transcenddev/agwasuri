@@ -27,14 +27,14 @@ class WaterQualityChartService
     public function buildSeries(Collection $rows): array
     {
         $temperatureSeries = $rows->map(fn($r) => $r->temperature !== null ? (float) $r->temperature : null)->all();
-        $doSeries = $rows->map(fn($r) => $r->dissolved_oxygen !== null ? (float) $r->dissolved_oxygen : null)->all();
         $salinitySeries = $rows->map(fn($r) => $r->salinity !== null ? (float) $r->salinity : null)->all();
+        $doSeries = $rows->map(fn($r) => $r->dissolved_oxygen !== null ? (float) $r->dissolved_oxygen : null)->all();
         $phSeries = $rows->map(fn($r) => $r->ph_level !== null ? (float) $r->ph_level : null)->all();
 
         return [
             'Temperature' => $temperatureSeries,
-            'Dissolved Oxygen' => $doSeries,
             'Salinity' => $salinitySeries,
+            'Dissolved Oxygen' => $doSeries,
             'pH' => $phSeries,
         ];
     }
@@ -82,7 +82,7 @@ class WaterQualityChartService
             ],
             // helper metadata for the Blade/JS
             'meta' => [
-                'series_keys' => ['temperature', 'dissolved_oxygen', 'salinity', 'ph_level'],
+                'series_keys' => ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level'],
                 'series_names' => array_keys($series),
             ],
             // also include jsonConfig placeholder for wrapper merging
