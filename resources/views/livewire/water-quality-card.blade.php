@@ -86,7 +86,21 @@
         <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($tempStatus) }}">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature (°C)
                 @if(!is_null($this->temperatureDelta))
-                    <div class="mt-1 text-xs {{ $this->trendClass($this->temperatureDelta) }}">{{ $this->formatDelta('temperature', $this->temperatureDelta) }}</div>
+                    <div class="mt-1 text-xs">
+                        <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->temperatureDelta) }}">
+                            @if($this->temperatureDelta > 0)
+                                {{-- up arrow --}}
+                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
+                            @elseif($this->temperatureDelta < 0)
+                                {{-- down arrow --}}
+                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
+                            @else
+                                {{-- neutral dot --}}
+                                <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                            @endif
+                            <span>{{ $this->formatDelta('temperature', $this->temperatureDelta) }}</span>
+                        </span>
+                    </div>
                 @endif
             </dt>
 
@@ -118,7 +132,18 @@
         <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($salStatus) }}">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity (ppt)
                 @if(!is_null($this->salinityDelta))
-                    <div class="mt-1 text-xs {{ $this->trendClass($this->salinityDelta) }}">{{ $this->formatDelta('salinity', $this->salinityDelta) }}</div>
+                    <div class="mt-1 text-xs">
+                        <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->salinityDelta) }}">
+                            @if($this->salinityDelta > 0)
+                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
+                            @elseif($this->salinityDelta < 0)
+                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
+                            @else
+                                <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                            @endif
+                            <span>{{ $this->formatDelta('salinity', $this->salinityDelta) }}</span>
+                        </span>
+                    </div>
                 @endif
             </dt>
 
@@ -150,7 +175,18 @@
         <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($doStatus) }}">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen (mg/L)
                 @if(!is_null($this->dissolvedOxygenDelta))
-                    <div class="mt-1 text-xs {{ $this->trendClass($this->dissolvedOxygenDelta) }}">{{ $this->formatDelta('dissolved_oxygen', $this->dissolvedOxygenDelta) }}</div>
+                    <div class="mt-1 text-xs">
+                        <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->dissolvedOxygenDelta) }}">
+                            @if($this->dissolvedOxygenDelta > 0)
+                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
+                            @elseif($this->dissolvedOxygenDelta < 0)
+                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
+                            @else
+                                <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                            @endif
+                            <span>{{ $this->formatDelta('dissolved_oxygen', $this->dissolvedOxygenDelta) }}</span>
+                        </span>
+                    </div>
                 @endif
             </dt>
 
@@ -182,7 +218,18 @@
         <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($phStatus) }}">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level
                 @if(!is_null($this->phLevelDelta))
-                    <div class="mt-1 text-xs {{ $this->trendClass($this->phLevelDelta) }}">{{ $this->formatDelta('ph_level', $this->phLevelDelta) }}</div>
+                    <div class="mt-1 text-xs">
+                        <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->phLevelDelta) }}">
+                            @if($this->phLevelDelta > 0)
+                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
+                            @elseif($this->phLevelDelta < 0)
+                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
+                            @else
+                                <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                            @endif
+                            <span>{{ $this->formatDelta('ph_level', $this->phLevelDelta) }}</span>
+                        </span>
+                    </div>
                 @endif
             </dt>
 

@@ -65,8 +65,8 @@
         @php $hasRows = $water_quality_data->count() >= 1; @endphp
 
         @if($hasRows)
-            <!-- Desktop table -->
-            <div class="hidden md:block">
+            <!-- Desktop table (shown from large screens and up) -->
+            <div class="hidden lg:block">
                 <div class="rounded-md overflow-hidden border border-gray-100 shadow-sm">
                     <div class="w-full overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-0">
@@ -106,8 +106,8 @@
                 </div>
             </div>
 
-            <!-- Mobile stacked list -->
-            <div class="block md:hidden space-y-3">
+            <!-- Mobile stacked list (visible up to tablet sizes) -->
+            <div class="block lg:hidden space-y-3">
                 @foreach ($water_quality_data as $entry)
                     @php
                         $statusClass = $entry->statusBorderClass ? ($entry->statusBorderClass . ' bg-white') : 'border-l-4 border-gray-200 bg-white';
