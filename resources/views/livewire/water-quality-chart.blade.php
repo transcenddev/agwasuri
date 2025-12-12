@@ -4,9 +4,7 @@
         {{-- Single root element for Livewire + compact header --}}
         <div class="w-full">
             <div class="px-4 py-2 flex items-center justify-between"> {{-- header --}}
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-500 block md:hidden">Tap a point to view values</span>
-                </div>
+                <div class="flex items-center gap-2">&nbsp;</div>
             </div>
 
             {{-- Chart Area: render via the lightweight wrapper that consumes the serializable model array --}}
@@ -16,7 +14,7 @@
                         $__chartId = $lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-0';
                         $__debugApiKey = config('app.debug') ? optional(\App\Models\User::find(request()->get('user') ?? session('selected_user', auth()->id())))->api_key : null;
                         $__seriesNames = $lineChartModelArray['meta']['series_names'] ?? array_keys($chartData['series'] ?? []);
-                        $__seriesKeys = $lineChartModelArray['meta']['series_keys'] ?? ["temperature", "salinity", "dissolved_oxygen", "ph_level"];
+                        $__seriesKeys = $lineChartModelArray['meta']['series_keys'] ?? ["temperature", "dissolved_oxygen", "salinity", "ph_level"];
                         // Ensure a sensible, accessible default palette and stroke settings
                         $__defaultColors = [
                             '#E53935', // Temperature (warm red)
@@ -1307,7 +1305,7 @@
                             if (!res.ok) return;
                             const json = await res.json();
 
-                            // json expected: { labels: [...], series: { temperature: [...], salinity: [...], dissolved_oxygen: [...], ph_level: [...] } }
+                            // json expected: { labels: [...], series: { temperature: [...], dissolved_oxygen: [...], salinity: [...], ph_level: [...] } }
                             const labels = json.labels || [];
                             const seriesObj = json.series || {};
                             const keys = JSON.parse(root.getAttribute('data-series-keys') || '[]');
