@@ -67,7 +67,12 @@
         <div class="p-3 space-y-2 border-t border-gray-200 dark:border-gray-800">
             {{-- Theme toggle --}}
             <div class="px-3">
-                <livewire:dark-mode-toggle variant="green" />
+                <div class="flex items-center justify-between" title="Toggle light / dark theme" aria-label="Theme">
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Theme</div>
+                    <div class="ml-2">
+                        <livewire:dark-mode-toggle variant="green" />
+                    </div>
+                </div>
             </div>
 
             {{-- User info label --}}
@@ -132,6 +137,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
+        </div>
+
+        {{-- Mobile theme toggle (parity with desktop) --}}
+        <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-800 lg:hidden">
+            <div class="flex items-center justify-between" title="Toggle light / dark theme" aria-label="Theme">
+                <div class="text-sm text-gray-600 dark:text-gray-300">Theme</div>
+                <div>
+                    <livewire:dark-mode-toggle variant="green" />
+                </div>
+            </div>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-1">
