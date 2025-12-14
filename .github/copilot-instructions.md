@@ -10,7 +10,7 @@ framework: laravel-11
 frontend: livewire
 dev-start: npm run dev-start
 tests: php artisan test
-last-updated: 2025-11-15
+last-updated: 2025-12-14
 ```
 
 ## Quick Commands
@@ -163,7 +163,7 @@ If anything above is unclear, tell me which files or behaviors you want expanded
 
 ---
 
-Last updated: 2025-11-15
+Last updated: 2025-12-14
 
 See design guidance and UX documentation in `docs/WEB_DESIGN.md` for UI/UX, sitemap, visual tokens, and handoff checklists.
 
@@ -186,9 +186,9 @@ The project aims to reduce fish mortality and financial losses by providing fish
 
 ### Core Team
 
-- Reymar V. Mirante: Web Design & Development, UI/UX Design, 3D Modeling, IoT Prototype Casing
-- Jazrel P. Mendoza: IoT Prototype Casing, Survey and Interviews, Data Collection, Statistical Analysis
-- John Mark A. Pachico: IoT Integration and Calibration, Artificial Intelligence, Data Analytics, Web Development
+-   Reymar V. Mirante: Web Design & Development, UI/UX Design, 3D Modeling, IoT Prototype Casing
+-   Jazrel P. Mendoza: IoT Prototype Casing, Survey and Interviews, Data Collection, Statistical Analysis
+-   John Mark A. Pachico: IoT Integration and Calibration, Artificial Intelligence, Data Analytics, Web Development
 
 ### Problem Statement
 
@@ -229,8 +229,16 @@ Fishpond operators currently lack reliable, data-driven tools for monitoring wat
 -   Data-driven, predictive decision-making replacing trial-and-error methods
 -   Adoption of green technologies through solar power integration
 
-### Current Status and Next Steps
+## Current Status and Next Steps
 
-Agwasuri is at the thesis proposal stage with a working prototype meeting international standards. Future work includes comprehensive field testing, integration of additional water quality parameters, and scaling the platform for broader application in Philippine aquaculture.
+Agwasuri has completed the thesis evaluation (software and hardware) and finished hardware testing in fishponds at Ternate. The prototype has been validated in real-world conditions and produced field data supporting the system's reliability and utility.
+
+Next steps:
+
+-   Finalize analysis of field-test data and incorporate findings into the thesis write-up and documentation.
+-   Tune and retrain the ML model using collected field data; record `last_trained_at` in `model_metadata` after retraining.
+-   Add incremental improvements: additional sensor parameters, robustness fixes, and low-power optimization for hardware.
+-   Prepare a pilot rollout plan: user training materials, deployment checklist, and maintenance schedule for partner fishponds.
+-   Publish results (thesis and technical report), and explore partnerships/funding for wider pilot and commercialization.
 
 This expanded context enriches Copilot's understanding and better supports generating relevant code, documentation, or guidance related to your thesis. Use it as background context only and do not expose private data.

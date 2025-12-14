@@ -71,11 +71,11 @@
         {{-- Navigation is fixed; render it above the content wrapper so header height CSS var can be used globally --}}
         <livewire:layout.navigation />
 
-        {{-- Top bar: pond selector, last-updated and connection status --}}
-        @include('components.topbar')
-
         {{-- Wrap the slot with the shared x-container so every page receives the header offset --}}
         <x-container class="site-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {{-- Top bar: pond selector, last-updated and connection status --}}
+            @include('components.topbar')
+
             <main>
                 {{ $slot }}
             </main>
