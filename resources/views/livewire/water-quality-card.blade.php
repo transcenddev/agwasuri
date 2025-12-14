@@ -1,28 +1,5 @@
 <div>
-    {{-- Connection status indicator --}}
-    <div class="flex items-center justify-end gap-4 text-sm text-gray-600 mb-3">
-        <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-500">Last updated: {{ $lastUpdated ? \Illuminate\Support\Carbon::parse($lastUpdated)->format('M d, Y H:i:s') : 'Never' }}</span>
-        </div>
-
-        <div class="flex items-center gap-2">
-            @if($connectionStatus === 'connected')
-                <div class="relative w-3 h-3 flex items-center justify-center" aria-hidden="true">
-                    <span class="absolute inset-0 m-auto inline-flex h-3 w-3 rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-400"></span>
-                </div>
-                <span class="font-medium text-emerald-600">Connected</span>
-                <span class="sr-only"> Sensor online</span>
-            @else
-                <div class="relative w-3 h-3 flex items-center justify-center" aria-hidden="true">
-                    <span class="absolute inset-0 m-auto inline-flex h-3 w-3 rounded-full bg-rose-400 opacity-75 animate-ping"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-400"></span>
-                </div>
-                <span class="font-medium text-rose-600">Disconnected</span>
-                <span class="sr-only"> Sensor offline</span>
-            @endif
-        </div>
-    </div>
+    {{-- Connection status moved to topbar; avoid duplicate indicator here --}}
 
     {{-- Overall status pill (aggregated) --}}
     @php
@@ -84,29 +61,27 @@
 
         {{-- Temperature (°C) --}}
         <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($tempStatus) }}">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature (°C)
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature (°C)</dt>
+
+            <dd class="flex flex-col items-center gap-1">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($tempStatus) }}">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
+                    <span class="text-sm text-gray-600">{{ $this->unitFor('temperature') }}</span>
+                </div>
                 @if(!is_null($this->temperatureDelta))
-                    <div class="mt-1 text-xs">
+                    <div class="text-xs text-gray-500">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->temperatureDelta) }}">
                             @if($this->temperatureDelta > 0)
-                                {{-- up arrow --}}
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
                             @elseif($this->temperatureDelta < 0)
-                                {{-- down arrow --}}
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
                             @else
-                                {{-- neutral dot --}}
                                 <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
                             @endif
                             <span>{{ $this->formatDelta('temperature', $this->temperatureDelta) }}</span>
                         </span>
                     </div>
                 @endif
-            </dt>
-
-            <dd class="flex items-baseline gap-2">
-                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($tempStatus) }}">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
-                <span class="text-sm text-gray-600">{{ $this->unitFor('temperature') }}</span>
             </dd>
             
             @if(!empty($temperatureClassification['label']))
@@ -130,9 +105,15 @@
 
         {{-- Salinity (ppt) --}}
         <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($salStatus) }}">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity (ppt)
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity (ppt)</dt>
+
+            <dd class="flex flex-col items-center gap-1">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($salStatus) }}">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
+                    <span class="text-sm text-gray-600">{{ $this->unitFor('salinity') }}</span>
+                </div>
                 @if(!is_null($this->salinityDelta))
-                    <div class="mt-1 text-xs">
+                    <div class="text-xs text-gray-500">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->salinityDelta) }}">
                             @if($this->salinityDelta > 0)
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
@@ -145,11 +126,6 @@
                         </span>
                     </div>
                 @endif
-            </dt>
-
-            <dd class="flex items-baseline gap-2">
-                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($salStatus) }}">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
-                <span class="text-sm text-gray-600">{{ $this->unitFor('salinity') }}</span>
             </dd>
             
             @if(!empty($salinityClassification['label']))
@@ -173,9 +149,15 @@
 
         {{-- Dissolved Oxygen (mg/L) --}}
         <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($doStatus) }}">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen (mg/L)
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen (mg/L)</dt>
+
+            <dd class="flex flex-col items-center gap-1">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($doStatus) }}">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
+                    <span class="text-sm text-gray-600">{{ $this->unitFor('dissolved_oxygen') }}</span>
+                </div>
                 @if(!is_null($this->dissolvedOxygenDelta))
-                    <div class="mt-1 text-xs">
+                    <div class="text-xs text-gray-500">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->dissolvedOxygenDelta) }}">
                             @if($this->dissolvedOxygenDelta > 0)
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
@@ -188,11 +170,6 @@
                         </span>
                     </div>
                 @endif
-            </dt>
-
-            <dd class="flex items-baseline gap-2">
-                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($doStatus) }}">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
-                <span class="text-sm text-gray-600">{{ $this->unitFor('dissolved_oxygen') }}</span>
             </dd>
             
             @if(!empty($dissolvedOxygenClassification['label']))
@@ -216,9 +193,15 @@
 
         {{-- pH Level --}}
         <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($phStatus) }}">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level</dt>
+
+            <dd class="flex flex-col items-center gap-1">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($phStatus) }}">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
+                    <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
+                </div>
                 @if(!is_null($this->phLevelDelta))
-                    <div class="mt-1 text-xs">
+                    <div class="text-xs text-gray-500">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->phLevelDelta) }}">
                             @if($this->phLevelDelta > 0)
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
@@ -231,11 +214,6 @@
                         </span>
                     </div>
                 @endif
-            </dt>
-
-            <dd class="flex items-baseline gap-2">
-                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($phStatus) }}">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
-                <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
             </dd>
             
             @if(!empty($phClassification['label']))
