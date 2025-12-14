@@ -37,18 +37,7 @@
             </div>
         </div>
 
-        {{-- Middle: last-updated (relative) --}}
-        <div class="flex-1 text-center">
-            <div id="topbar-last-updated" class="text-sm text-gray-500">Last updated: <span id="topbar-last-updated-text">—</span></div>
-        </div>
-
-        {{-- Right: connection status --}}
-        <div class="flex items-center gap-2">
-            <div id="topbar-conn" role="status" aria-live="polite" class="flex items-center gap-2 text-sm text-gray-600">
-                <span id="topbar-conn-dot" class="w-2 h-2 rounded-full bg-gray-300" aria-hidden="true"></span>
-                <span id="topbar-conn-label">Unknown</span>
-            </div>
-        </div>
+        {{-- Middle and connection status removed per design --}}
     </div>
 
     <script>
