@@ -73,12 +73,19 @@
 
         {{-- Wrap the slot with the shared x-container so every page receives the header offset --}}
         <x-container class="site-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {{-- Top bar: pond selector, last-updated and connection status --}}
-            @include('components.topbar')
+            <div class="flex items-start gap-6">
+                {{-- Sidebar (persistent on lg+) --}}
+                @include('components.sidebar')
 
-            <main>
-                {{ $slot }}
-            </main>
+                <div class="flex-1">
+                    {{-- Top bar: pond selector, last-updated and connection status --}}
+                    @include('components.topbar')
+
+                    <main>
+                        {{ $slot }}
+                    </main>
+                </div>
+            </div>
         </x-container>
     </body>
         <!-- Livewire bridge: keep localStorage and document class in sync when Livewire toggles theme -->
