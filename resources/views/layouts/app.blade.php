@@ -76,8 +76,11 @@
             @include('components.sidebar')
         </div>
 
-        {{-- Main content with fixed left offset for sidebar --}}
-        <div class="lg:ml-64 transition-all duration-200" style="margin-top: var(--header-height, 64px);">
+        {{-- Bottom Navigation (mobile/tablet only) --}}
+        @include('components.bottom-nav')
+
+        {{-- Main content with fixed left offset for sidebar (16 = 4rem collapsed width) --}}
+        <div class="lg:ml-16 transition-all duration-200" style="margin-top: var(--header-height);">
             <x-container class="site-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {{-- Top bar: pond selector, last-updated and connection status --}}
                 @include('components.topbar')
