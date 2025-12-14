@@ -63,41 +63,36 @@
             @endif
         </nav>
 
-        {{-- Theme toggle & Profile --}}
+        {{-- Theme toggle & Account --}}
         <div class="p-3 space-y-2 border-t border-gray-200 dark:border-gray-800">
             {{-- Theme toggle --}}
-                <div class="px-3">
-                    <livewire:dark-mode-toggle variant="green" />
-                </div>
+            <div class="px-3">
+                <livewire:dark-mode-toggle variant="green" />
+            </div>
 
-            {{-- Profile dropdown --}}
-            <div x-data="{ profileOpen: false }" class="relative">
-                <button @click="profileOpen = !profileOpen" 
-                        class="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+            {{-- User info label --}}
+            <div class="px-3 pt-2">
+                <div class="flex items-center gap-2 mb-2">
                     <div class="w-5 h-5 flex-shrink-0 rounded-full bg-cvsu-100 dark:bg-cvsu-900 flex items-center justify-center">
                         <span class="text-xs font-medium text-cvsu-700 dark:text-cvsu-400">{{ substr(Auth::user()->name, 0, 1) }}</span>
                     </div>
-                    <span class="text-sm flex-1 text-left truncate">{{ Auth::user()->name }}</span>
-                    <svg class="w-4 h-4 flex-shrink-0" :class="profileOpen && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
-                
-                <div x-show="profileOpen" 
-                     @click.away="profileOpen = false"
-                     x-transition:enter="transition ease-out duration-100"
-                     x-transition:enter-start="opacity-0 scale-95"
-                     x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-75"
-                     x-transition:leave-start="opacity-100 scale-100"
-                     x-transition:leave-end="opacity-0 scale-95"
-                     class="absolute bottom-full left-3 right-3 mb-2 bg-white dark:bg-slate-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1"
-                     style="display: none;">
-                    <a href="{{ route('profile') }}" wire:navigate class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
-                        Profile
-                    </a>
-                    @livewire('logout-link')
+                    <span class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ Auth::user()->name }}</span>
                 </div>
+            </div>
+
+            {{-- Profile link --}}
+            <a href="{{ route('profile') }}" 
+               wire:navigate
+               class="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors {{ request()->routeIs('profile') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-sm">Profile</span>
+            </a>
+
+            {{-- Logout link --}}
+            <div class="px-3">
+                @livewire('logout-link')
             </div>
         </div>
     </div>
