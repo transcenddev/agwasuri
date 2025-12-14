@@ -1,4 +1,4 @@
-<div class="p-3 sm:p-4" x-data="{ open: false, menu: false }">
+<div x-data="{ open: false, menu: false }">
     @php
         // Prepare species image once and reuse
         $base = trim(preg_replace('/\(.+\)/', '', $species));
