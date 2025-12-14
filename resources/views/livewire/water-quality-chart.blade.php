@@ -39,7 +39,7 @@
                         }
                     @endphp
 
-                    <div id="water-quality-chart-root" wire:ignore class="w-full p-4 max-w-content-xl mx-auto"
+                    <div id="water-quality-chart-root" wire:ignore class="w-full p-4 max-w-content-xl mx-auto h-64 md:h-80 lg:h-[420px] max-h-[480px] overflow-hidden"
                         data-chart-id="{{ $__chartId }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
@@ -1343,6 +1343,35 @@
     </script>
 
             <!-- debug/test UI removed -->
+
+            <script>
+                // Auto-adjust ApexCharts height to fit parent between 360 and 480px
+                (function(){
+                    const root = document.getElementById('water-quality-chart-root');
+                    if (!root) return;
+                    const chartId = root.getAttribute('data-chart-id');
+                    function computeAndApply(){
+                        try {
+                            const parent = root.parentElement || root;
+                            const avail = parent.clientHeight || root.clientHeight || 420;
+                            // leave some breathing room for paddings/legend
+                            const offset = 32;
+                            let target = Math.round(avail - offset);
+                            if (target < 360) target = 360;
+                            if (target > 480) target = 480;
+                            if (window.ApexCharts && typeof window.ApexCharts.exec === 'function') {
+                                try { window.ApexCharts.exec(chartId, 'updateOptions', { chart: { height: target } }, false, true); } catch (_){}
+                                try { window.dispatchEvent(new Event('resize')); } catch(_){}
+                            }
+                        } catch (e) { /* ignore */ }
+                    }
+                    const debounce = (fn, t=200) => { let id; return () => { clearTimeout(id); id = setTimeout(fn, t); }; };
+                    window.addEventListener('resize', debounce(computeAndApply, 250));
+                    document.addEventListener('DOMContentLoaded', () => setTimeout(computeAndApply, 600));
+                    // Try once immediately and again shortly after
+                    try { computeAndApply(); setTimeout(computeAndApply, 900); } catch(e){}
+                })();
+            </script>
 
             <!-- Screen-reader live region for reset announcements -->
             <span id="chart-reset-live" class="sr-only" aria-live="polite" aria-atomic="true"></span>
