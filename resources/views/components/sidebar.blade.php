@@ -6,7 +6,7 @@
         {{-- Logo section --}}
         <div class="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-800">
             <div class="w-10 h-10 flex-shrink-0">
-                <img src="{{ asset('images/agwasuri-eye.svg') }}" alt="AgwaSuri logo" class="w-10 h-10 object-contain" />
+                <img src="{{ asset('assets/agwasuri-logo.svg') }}" alt="AgwaSuri logo" class="w-10 h-10 object-contain" />
             </div>
             <div>
                 <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-2xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-opacity">
