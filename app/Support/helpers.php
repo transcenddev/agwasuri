@@ -149,8 +149,8 @@ if (! function_exists('hex_to_rgba')) {
 
 if (! function_exists('water_quality_param_keys')) {
     /**
-     * Return canonical ordered parameter keys used throughout the app.
-     * Order: Temperature, Salinity, Dissolved Oxygen, pH Level
+    * Return canonical ordered parameter keys used throughout the app.
+    * Order: Temperature, Salinity, Dissolved Oxygen, pH
      *
      * @return array<int,string>
      */
@@ -172,7 +172,7 @@ if (! function_exists('water_quality_param_labels')) {
             'temperature' => 'Temperature (°C)',
             'salinity' => 'Salinity (ppt)',
             'dissolved_oxygen' => 'Dissolved Oxygen (mg/L)',
-            'ph_level' => 'pH Level',
+            'ph_level' => 'pH',
         ];
     }
 }

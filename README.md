@@ -195,9 +195,9 @@ Notes:
 
 The project centralizes UI status styling in the `status_map` config entry so views and Livewire components render consistent badges, value coloring and row borders.
 
-- **Location:** [config/water_quality.php](config/water_quality.php)
-- **Canonical keys:** `GOOD`, `BAD`, `HARMFUL`
-- **Each entry contains:** `badge` (badge classes), `value` (value text classes), `border` (row border classes)
+-   **Location:** [config/water_quality.php](config/water_quality.php)
+-   **Canonical keys:** `GOOD`, `BAD`, `HARMFUL`
+-   **Each entry contains:** `badge` (badge classes), `value` (value text classes), `border` (row border classes)
 
 Example (simplified):
 

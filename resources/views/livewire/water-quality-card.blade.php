@@ -191,9 +191,9 @@
             </div>
         </div>
 
-        {{-- pH Level --}}
+        {{-- pH --}}
         <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($phStatus) }}">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level</dt>
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH</dt>
 
             <dd class="flex flex-col items-center gap-1">
                 <div class="flex items-baseline gap-2">

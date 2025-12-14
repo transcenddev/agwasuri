@@ -77,7 +77,7 @@
                                     <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-temperature)">Temperature (°C)</th>
                                     <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-salinity)">Salinity (ppt)</th>
                                     <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-ph)">pH Level</th>
+                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-ph)">pH</th>
                                 </tr>
                             </thead>
 
@@ -142,7 +142,7 @@
                             </div>
 
                             <div class="truncate">
-                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧪</span> <span style="color: var(--wq-series-ph)">pH Level</span></div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧪</span> <span style="color: var(--wq-series-ph)">pH</span></div>
                                 <div class="font-semibold {{ $entry->phValueClass }}">{{ $entry->ph_level }}</div>
                             </div>
                         </div>
