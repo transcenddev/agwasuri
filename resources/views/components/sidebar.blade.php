@@ -49,7 +49,7 @@
             </a>
 
             @if(auth()->user()->isAdmin())
-                <div class="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
+                <div class="pt-3 mt-3">
                     <div class="px-3 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden group-hover:block">Admin</div>
                     
                     <a href="{{ route('account_management') }}" 
@@ -66,14 +66,14 @@
         </nav>
 
         {{-- Theme toggle & Account --}}
-        <div class="p-3 space-y-2 border-t border-gray-200 dark:border-gray-800">
-            {{-- Theme toggle --}}
-            <div class="flex items-center gap-3 px-3 py-2 justify-center group-hover:justify-between" title="Toggle light / dark theme" aria-label="Theme">
-                <div class="text-xs text-gray-500 dark:text-gray-400 hidden group-hover:block">Theme</div>
-                <div>
-                    <livewire:dark-mode-toggle variant="green" />
-                </div>
-            </div>
+        <div class="p-3 space-y-2">
+                {{-- Theme toggle --}}
+                <a href="#" role="button" title="Toggle light / dark theme" aria-label="Theme" class="flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 justify-center group-hover:justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800">
+                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                        <livewire:dark-mode-toggle variant="green" />
+                    </div>
+                    <span class="text-sm hidden group-hover:block">Theme</span>
+                </a>
 
             {{-- Profile link --}}
             <a href="{{ route('profile') }}" 
@@ -129,13 +129,13 @@
         </div>
 
         {{-- Mobile theme toggle (parity with desktop) --}}
-        <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-800 lg:hidden">
-            <div class="flex items-center justify-between" title="Toggle light / dark theme" aria-label="Theme">
-                <div class="text-sm text-gray-600 dark:text-gray-300">Theme</div>
-                <div>
+        <div class="px-4 py-2 lg:hidden">
+            <a href="#" role="button" class="flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800" title="Toggle light / dark theme" aria-label="Theme">
+                <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
                     <livewire:dark-mode-toggle variant="green" />
                 </div>
-            </div>
+                <div class="text-sm text-gray-600 dark:text-gray-300">Theme</div>
+            </a>
         </div>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-1">
