@@ -30,62 +30,17 @@ $logout = function (Logout $logout) {
                 </a>
             </div>
 
-            <!-- Right Side: Dark Mode Toggle + User Dropdown (show only on large screens) -->
-            <div class="hidden lg:flex lg:items-center lg:space-x-4 h-full">
-                <!-- Dark Mode Toggle -->
-                <livewire:dark-mode-toggle variant="green" />
-                
-                <!-- User Dropdown -->
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button
-                            class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-700 dark:text-gray-100 transition duration-150 ease-in-out bg-transparent border border-transparent rounded-md hover:text-cvsu dark:hover:text-cvsu-400 focus:outline-none">
-                            <div x-data='@json(["name" => (auth()->user()?->name ?? "User")])' x-text="name"
-                                x-on:profile-updated.window="name = $event.detail.name" aria-live="polite">User</div>
-
-                            {{-- <div x-data="{{ json_encode(['name' => trim((auth()->user()->first_name ?? '') . ' ' . (auth()->user()->last_name ?? '')) ?: 'User']) }}" x-text="name"
-                                x-on:profile-updated.window="name = $event.detail.name"></div> --}}
-
-
-                            <div class="ms-1">
-                                <svg class="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            Profile
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <button wire:click="logout" class="w-full text-start">
-                            <x-dropdown-link>
-                                Log Out
-                            </x-dropdown-link>
-                        </button>
-                    </x-slot>
-                </x-dropdown>
-            </div>
-
-            <!-- Hamburger + mobile theme toggle (visible on tablet and mobile) -->
-            <div class="flex items-center gap-2 -me-2 lg:hidden">
+            <!-- Mobile hamburger only (desktop controls moved to sidebar) -->
+            <div class="lg:hidden flex items-center gap-2 -me-2">
                 <div class="me-1">
                     <livewire:dark-mode-toggle variant="green" />
                 </div>
-                <button @click="open = ! open"
+                <button @click="$dispatch('toggle-mobile-sidebar')"
                     class="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500">
                     <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
+                        <path class="inline-flex"
                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 7h16M4 17h16" />
-                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
-                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>

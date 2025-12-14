@@ -71,18 +71,13 @@
         {{-- Navigation is fixed; render it above the content wrapper so header height CSS var can be used globally --}}
         <livewire:layout.navigation />
 
-        {{-- Sidebar (persistent on desktop, drawer on mobile) --}}
-        <div x-data="{ open: sidebarOpen, mini: localStorage.getItem('sidebar-mini') === '1' }" x-init="$watch('sidebarOpen', val => open = val)">
+        {{-- Sidebar (fixed on desktop, drawer on mobile) --}}
+        <div x-data="{ open: sidebarOpen }" x-init="$watch('sidebarOpen', val => open = val)">
             @include('components.sidebar')
         </div>
 
-        {{-- Main content with left offset on desktop when sidebar visible --}}
-        <div class="transition-all duration-200" 
-             :class="{
-                 'lg:ml-64': !$root.querySelector('[x-data]').__x.$data.mini,
-                 'lg:ml-16': $root.querySelector('[x-data]').__x.$data.mini
-             }"
-             style="margin-top: var(--header-height);">
+        {{-- Main content with fixed left offset for sidebar --}}
+        <div class="lg:ml-64 transition-all duration-200" style="margin-top: var(--header-height);">
             <x-container class="site-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {{-- Top bar: pond selector, last-updated and connection status --}}
                 @include('components.topbar')

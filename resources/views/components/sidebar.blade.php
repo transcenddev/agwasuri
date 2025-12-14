@@ -1,22 +1,19 @@
-<aside x-data="{ open: false, mini: localStorage.getItem('sidebar-mini') === '1', hovered: false, _hoverTimeout: null }" 
-    @keydown.window.prevent.ctrl.b="mini = !mini; localStorage.setItem('sidebar-mini', mini ? '1' : '0')"
-    class="sidebar-container">
+<aside x-data="{ open: false }" class="sidebar-container">
     
-    {{-- Desktop: persistent sidebar --}}
-        <div :class="(mini && !hovered) ? 'w-16' : 'w-64'" 
-            @mouseenter="if(mini){ clearTimeout(_hoverTimeout); hovered = true; }"
-            @mouseleave="if(mini){ _hoverTimeout = setTimeout(()=>{ hovered = false }, 120) }"
-            class="hidden lg:flex flex-col fixed left-0 top-[var(--header-height)] h-[calc(100vh-var(--header-height))] bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-200 z-30">
+    {{-- Desktop: fixed sidebar --}}
+    <div class="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-gray-800 z-30">
         
-        {{-- Mini toggle button --}}
-        <div class="flex items-center justify-end p-3 border-b border-gray-100 dark:border-gray-800">
-            <button @click="mini = !mini; localStorage.setItem('sidebar-mini', mini ? '1' : '0')" 
-                    class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-                    :aria-label="mini ? 'Expand sidebar' : 'Collapse sidebar'">
-                <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        {{-- Logo section --}}
+        <div class="flex items-center gap-3 p-4 border-b border-gray-200 dark:border-gray-800">
+            <div class="w-10 h-10 bg-gradient-to-br from-cvsu-500 to-cvsu-700 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
                 </svg>
-            </button>
+            </div>
+            <div>
+                <div class="text-lg font-serif font-semibold text-cvsu-700 dark:text-cvsu-400">AgwaSuri</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Water Quality Monitor</div>
+            </div>
         </div>
 
         {{-- Navigation links --}}
@@ -27,7 +24,7 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
-                <span x-show="!mini" class="text-sm">Dashboard</span>
+                <span class="text-sm">Dashboard</span>
             </a>
 
             <a href="{{ route('optimal-fish') }}" 
@@ -36,7 +33,7 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"/>
                 </svg>
-                <span x-show="!mini" class="text-sm">Optimal Fish</span>
+                <span class="text-sm">Optimal Fish</span>
             </a>
 
             <a href="{{ route('historical-data', ['user' => request('user')]) }}" 
@@ -45,12 +42,12 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <span x-show="!mini" class="text-sm">History</span>
+                <span class="text-sm">History</span>
             </a>
 
             @if(auth()->user()->isAdmin())
                 <div class="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
-                    <div x-show="!mini" class="px-3 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Admin</div>
+                    <div class="px-3 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Admin</div>
                     
                     <a href="{{ route('account_management') }}" 
                        wire:navigate
@@ -58,16 +55,59 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
-                        <span x-show="!mini" class="text-sm">Accounts</span>
+                        <span class="text-sm">Accounts</span>
                     </a>
                 </div>
             @endif
         </nav>
 
-        {{-- Keyboard hint (bottom) --}}
-        <div x-show="!mini" class="p-3 border-t border-gray-100 dark:border-gray-800">
-            <div class="text-xs text-gray-500 dark:text-gray-400">
-                <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-800 rounded text-xs">Ctrl+B</kbd> to toggle
+        {{-- Theme toggle & Profile --}}
+        <div class="p-3 space-y-2 border-t border-gray-200 dark:border-gray-800">
+            {{-- Theme toggle --}}
+            <button @click="darkMode = !darkMode" 
+                    class="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+                <svg x-show="!darkMode" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+                <svg x-show="darkMode" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <span class="text-sm">{{ 'Theme' }}</span>
+            </button>
+
+            {{-- Profile dropdown --}}
+            <div x-data="{ profileOpen: false }" class="relative">
+                <button @click="profileOpen = !profileOpen" 
+                        class="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+                    <div class="w-5 h-5 flex-shrink-0 rounded-full bg-cvsu-100 dark:bg-cvsu-900 flex items-center justify-center">
+                        <span class="text-xs font-medium text-cvsu-700 dark:text-cvsu-400">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                    </div>
+                    <span class="text-sm flex-1 text-left truncate">{{ Auth::user()->name }}</span>
+                    <svg class="w-4 h-4 flex-shrink-0" :class="profileOpen && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                
+                <div x-show="profileOpen" 
+                     @click.away="profileOpen = false"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute bottom-full left-3 right-3 mb-2 bg-white dark:bg-slate-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1"
+                     style="display: none;">
+                    <a href="{{ route('profile') }}" wire:navigate class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        Profile
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            Logout
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
