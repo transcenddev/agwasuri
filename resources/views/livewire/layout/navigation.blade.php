@@ -14,32 +14,20 @@ $logout = function (Logout $logout) {
     <!-- Primary Navigation Menu -->
     <div class="px-6 py-0 mx-auto max-w-7xl">
         <div class="flex justify-between items-center h-16">
-            <div class="flex items-center space-x-8 h-full">
+            <div class="flex items-center gap-3 h-full">
+                <!-- Mobile hamburger (for sidebar drawer) -->
+                <button @click="$dispatch('toggle-mobile-sidebar')" 
+                        class="lg:hidden p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                        aria-label="Toggle navigation">
+                    <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+
                 <!-- Logo -->
                 <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-2xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-opacity">
                     <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span>
                 </a>
-
-                <!-- Navigation Links (show only on large screens; use hamburger on tablet/mobile) -->
-                <div class="hidden lg:flex lg:items-center lg:space-x-2 h-full">
-                    <x-nav-link :href="route('dashboard', ['user' => request('user')])" :active="request()->routeIs('dashboard')" wire:navigate>
-                        Dashboard
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('optimal-fish')" :active="request()->routeIs('optimal-fish')" wire:navigate>
-                        Optimal Fish
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('historical-data', ['user' => request('user')])" :active="request()->routeIs('historical-data')" wire:navigate>
-                        History
-                    </x-nav-link>
-
-                    @if (auth()->user()->isAdmin())
-                        <x-nav-link :href="route('account_management')" :active="request()->routeIs('account_management')" wire:navigate>
-                            Accounts
-                        </x-nav-link>
-                    @endif
-                </div>
             </div>
 
             <!-- Right Side: Dark Mode Toggle + User Dropdown (show only on large screens) -->
@@ -104,52 +92,7 @@ $logout = function (Logout $logout) {
         </div>
     </div>
 
-        <!-- Responsive Navigation Menu: Apple-style fullscreen panel for mobile/tablet -->
-        <div x-show="open" x-cloak x-transition.duration.300ms class="lg:hidden">
-            <div class="fixed inset-0 z-50 flex">
-                <!-- Backdrop -->
-                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="open = false" aria-hidden="true"></div>
 
-                <!-- Panel (full-screen on mobile & tablet) -->
-                <nav x-trap="open" class="relative z-10 w-full h-full bg-white dark:bg-black overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="mobile-nav-title">
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                        <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-xl font-serif tracking-normal"> <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span></a>
-                        <div class="flex items-center gap-3">
-                            {{-- Theme toggle inside the mobile panel header (matches desktop toggle) --}}
-                            <div class="me-1">
-                                <livewire:dark-mode-toggle variant="green" />
-                            </div>
-                            <button @click="open = false" aria-label="Close navigation" class="p-2 text-gray-600 hover:bg-gray-100 rounded-md focus:outline-none">
-                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6M6 6l12 12"/></svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="p-6">
-                        <ul id="mobile-nav-list" class="space-y-1">
-                            <li><a id="mobile-link-dashboard" href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="block px-3 py-3 text-lg font-medium text-gray-900 rounded-md hover:bg-gray-50">Dashboard</a></li>
-                            <li><a id="mobile-link-optimal" href="{{ route('optimal-fish') }}" wire:navigate class="block px-3 py-3 text-lg text-gray-900 rounded-md hover:bg-gray-50">Optimal Fish</a></li>
-                            <li><a id="mobile-link-history" href="{{ route('historical-data', ['user' => request('user')]) }}" wire:navigate class="block px-3 py-3 text-lg text-gray-900 rounded-md hover:bg-gray-50">History</a></li>
-                            @if (auth()->user()->isAdmin())
-                                <li><a id="mobile-link-accounts" href="{{ route('account_management') }}" wire:navigate class="block px-3 py-3 text-lg text-gray-900 rounded-md hover:bg-gray-50">Accounts</a></li>
-                            @endif
-                        </ul>
-                    </div>
-
-                    <div class="mt-auto border-t border-gray-100 dark:border-gray-800 px-6 py-4">
-                        <div class="mb-3">
-                            <div class="text-base font-medium text-gray-900" x-data='@json(["name" => (auth()->user()?->name ?? "User")])' x-text="name" x-on:profile-updated.window="name = $event.detail.name">User</div>
-                            <div class="text-sm text-gray-500">{{ auth()->user()->email }}</div>
-                        </div>
-                        <div class="space-y-1">
-                            <a href="{{ route('profile') }}" wire:navigate class="block px-3 py-2 rounded-md hover:bg-gray-50">Profile</a>
-                                <!-- Use Livewire logout to match desktop behavior (no named logout route required) -->
-                                <button wire:click="logout" class="w-full text-left px-3 py-2 rounded-md text-red-600 hover:bg-gray-50">Log Out</button>
-                        </div>
-                    </div>
-                </nav>
-            </div>
-        </div>
 </nav>
 
 <script>

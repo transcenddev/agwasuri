@@ -67,26 +67,31 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireChartsScripts
     </head>
-    <body class="font-sans antialiased min-h-screen">
+    <body class="font-sans antialiased min-h-screen" x-data="{ sidebarOpen: false }" @toggle-mobile-sidebar.window="sidebarOpen = !sidebarOpen">
         {{-- Navigation is fixed; render it above the content wrapper so header height CSS var can be used globally --}}
         <livewire:layout.navigation />
 
-        {{-- Wrap the slot with the shared x-container so every page receives the header offset --}}
-        <x-container class="site-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-start gap-6">
-                {{-- Sidebar (persistent on lg+) --}}
-                @include('components.sidebar')
+        {{-- Sidebar (persistent on desktop, drawer on mobile) --}}
+        <div x-data="{ open: sidebarOpen, mini: localStorage.getItem('sidebar-mini') === '1' }" x-init="$watch('sidebarOpen', val => open = val)">
+            @include('components.sidebar')
+        </div>
 
-                <div class="flex-1">
-                    {{-- Top bar: pond selector, last-updated and connection status --}}
-                    @include('components.topbar')
+        {{-- Main content with left offset on desktop when sidebar visible --}}
+        <div class="transition-all duration-200" 
+             :class="{
+                 'lg:ml-64': !$root.querySelector('[x-data]').__x.$data.mini,
+                 'lg:ml-16': $root.querySelector('[x-data]').__x.$data.mini
+             }"
+             style="margin-top: var(--header-height);">
+            <x-container class="site-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {{-- Top bar: pond selector, last-updated and connection status --}}
+                @include('components.topbar')
 
-                    <main>
-                        {{ $slot }}
-                    </main>
-                </div>
-            </div>
-        </x-container>
+                <main>
+                    {{ $slot }}
+                </main>
+            </x-container>
+        </div>
     </body>
         <!-- Livewire bridge: keep localStorage and document class in sync when Livewire toggles theme -->
         <script>
