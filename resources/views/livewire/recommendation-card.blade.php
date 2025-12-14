@@ -8,21 +8,21 @@
             <div class="mt-2 text-sm text-gray-600 block sm:hidden">{{ Str::limit($reason, 80) }}</div>
 
             <div class="mt-2 text-sm text-gray-700 font-medium whitespace-normal break-words">{{ $action }}</div>
-        </div>
 
-        <div class="sm:col-span-1 flex flex-col items-end gap-2">
-            <div class="text-sm text-gray-500">Confidence</div>
-            <div class="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium mt-1" style="background: rgba(27,101,27,0.08); color: #1B651B;">
-                {{ $confidence }}
-            </div>
-
-            <div class="mt-3 w-full sm:w-auto flex gap-2">
+            <div class="mt-3 w-full sm:w-auto flex flex-col sm:flex-row gap-2">
                 <button wire:click="markAsDone" type="button" class="inline-flex items-center px-3 py-1 text-sm bg-cvsu text-white rounded hover:bg-cvsu-700 w-full sm:w-auto" {{ $done ? 'disabled' : '' }}>
                     {{ $done ? 'Done' : 'Mark as done' }}
                 </button>
                 <button wire:click="remindLater" type="button" class="inline-flex items-center px-3 py-1 text-sm border rounded text-gray-700 w-full sm:w-auto" {{ $reminded ? 'disabled' : '' }}>
                     {{ $reminded ? 'Reminded' : 'Remind later' }}
                 </button>
+            </div>
+        </div>
+
+        <div class="sm:col-span-1 flex flex-col items-end gap-2">
+            <div class="text-sm text-gray-500">Confidence</div>
+            <div class="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium mt-1" style="background: rgba(27,101,27,0.08); color: #1B651B;">
+                {{ $confidence }}
             </div>
         </div>
     </div>
