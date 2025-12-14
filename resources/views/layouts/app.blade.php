@@ -43,6 +43,26 @@
             }
         </style>
 
+        <style>
+            /* Hide ApexCharts annotation/datalabel elements inserted by vendor code */
+            .apexcharts-annotations,
+            .apexcharts-annotation,
+            .apexcharts-annotations-group,
+            .apexcharts-point-annotations,
+            .apexcharts-point-annotation,
+            .apexcharts-point-annotation-label,
+            .apexcharts-point-annotations-custom-svg,
+            .apexcharts-datalabels,
+            .apexcharts-datalabel,
+            .apexcharts-series-annotations,
+            .apexcharts-xaxis-annotations,
+            .apexcharts-yaxis-annotations,
+            .apexcharts-xaxis-annotation-label,
+            .apexcharts-yaxis-annotation-label {
+                display: none !important;
+            }
+        </style>
+
         @livewireStyles
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireChartsScripts
@@ -50,6 +70,9 @@
     <body class="font-sans antialiased min-h-screen">
         {{-- Navigation is fixed; render it above the content wrapper so header height CSS var can be used globally --}}
         <livewire:layout.navigation />
+
+        {{-- Top bar: pond selector, last-updated and connection status --}}
+        @include('components.topbar')
 
         {{-- Wrap the slot with the shared x-container so every page receives the header offset --}}
         <x-container class="site-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

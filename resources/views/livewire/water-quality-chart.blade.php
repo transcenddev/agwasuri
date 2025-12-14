@@ -310,7 +310,10 @@
                     const immutableDefaults = {
                         stroke: { show: true, curve: 'smooth', width: 2, lineCap: 'round' },
                         markers: { size: 0 },
-                        xaxis: { type: 'datetime' }
+                        xaxis: { type: 'datetime' },
+                        dataLabels: { enabled: false },
+                        // Ensure vendor annotations/labels are cleared so only legend/tooltips remain
+                        annotations: { yaxis: [], points: [], xaxis: [] }
                     };
 
                     // Shallow merge - caller opts override defaults where specified
@@ -579,6 +582,63 @@
                             }
                         }
                     );
+                    // Force-disable any data labels or vendor annotations that may have
+                    // been added by bundled chart code so only legend/tooltips remain.
+                    try {
+                        safeUpdateOptions(cid, { dataLabels: { enabled: false }, annotations: { yaxis: [], points: [], xaxis: [] } }, true);
+                    } catch (e) {}
+                    // DOM-cleanup fallback: remove any leftover annotation/datalabel nodes
+                    try {
+                        function removeAnnotationNodes(targetCid){
+                            try {
+                                const container = document.getElementById(targetCid);
+                                if (!container) return;
+                                // Remove common ApexCharts annotation/datalabel groups
+                                const selectors = [
+                                    '.apexcharts-annotations',
+                                    '.apexcharts-annotations-group',
+                                    '.apexcharts-datalabels',
+                                    '.apexcharts-datalabel',
+                                    '.apexcharts-annotation',
+                                    '.apexcharts-series-annotations',
+                                    '.apexcharts-point-annotations',
+                                    '.apexcharts-point-annotation',
+                                    '.apexcharts-point-annotation-label',
+                                    '.apexcharts-point-annotations-custom-svg',
+                                    '.apexcharts-xaxis-annotations',
+                                    '.apexcharts-yaxis-annotations',
+                                    '.apexcharts-xaxis-annotation-label',
+                                    '.apexcharts-yaxis-annotation-label',
+                                ];
+
+                                // Remove explicit selectors
+                                selectors.forEach(sel => {
+                                    try {
+                                        const nodes = Array.from(container.querySelectorAll(sel));
+                                        nodes.forEach(n => { if (n && n.parentNode) n.parentNode.removeChild(n); });
+                                    } catch(e){}
+                                });
+
+                                // Broad fallback: remove any child nodes that have class names
+                                // containing 'annotation' or 'datalabel' (catch vendor naming variations)
+                                try {
+                                    const broad = Array.from(container.querySelectorAll('*')).filter(el => {
+                                        try {
+                                            const cls = el.className || '';
+                                            if (typeof cls !== 'string') return false;
+                                            const lower = cls.toLowerCase();
+                                            return lower.indexOf('annotation') !== -1 || lower.indexOf('datalabel') !== -1 || lower.indexOf('point-annotation') !== -1;
+                                        } catch(e){ return false; }
+                                    });
+                                    broad.forEach(n => { try { if (n && n.parentNode) n.parentNode.removeChild(n); } catch(e){} });
+                                } catch(e){}
+                            } catch(e){}
+                        }
+                        try { removeAnnotationNodes(cid); } catch(e){}
+                        // Try again shortly after in case vendor re-inserts nodes
+                        setTimeout(() => { try { removeAnnotationNodes(cid); } catch(e){} }, 500);
+                        setTimeout(() => { try { removeAnnotationNodes(cid); } catch(e){} }, 1200);
+                    } catch (e) {}
                     try {
                         // If our client state uses numeric timestamps, ensure chart xaxis is datetime
                         const state = window.__waterQualitySeriesState && window.__waterQualitySeriesState[chartId];
