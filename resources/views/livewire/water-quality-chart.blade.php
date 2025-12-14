@@ -3,40 +3,7 @@
     @if(!empty($lineChartModelArray))
         {{-- Single root element for Livewire + compact header --}}
         <div class="w-full">
-            {{-- Interactive Chart Legend --}}
-            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                <div class="flex flex-wrap items-center gap-4">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Toggle Series:</span>
-                    <label class="inline-flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-2 py-1 rounded transition">
-                        <input type="checkbox" checked class="form-checkbox h-4 w-4 text-red-600 rounded" data-series="temperature">
-                        <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <span class="w-3 h-3 rounded-full bg-red-600"></span>
-                            Temperature
-                        </span>
-                    </label>
-                    <label class="inline-flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-2 py-1 rounded transition">
-                        <input type="checkbox" checked class="form-checkbox h-4 w-4 text-cyan-600 rounded" data-series="salinity">
-                        <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <span class="w-3 h-3 rounded-full bg-cyan-600"></span>
-                            Salinity
-                        </span>
-                    </label>
-                    <label class="inline-flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-2 py-1 rounded transition">
-                        <input type="checkbox" checked class="form-checkbox h-4 w-4 text-blue-600 rounded" data-series="dissolved_oxygen">
-                        <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <span class="w-3 h-3 rounded-full bg-blue-600"></span>
-                            Dissolved Oxygen
-                        </span>
-                    </label>
-                    <label class="inline-flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 px-2 py-1 rounded transition">
-                        <input type="checkbox" checked class="form-checkbox h-4 w-4 text-purple-600 rounded" data-series="ph_level">
-                        <span class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <span class="w-3 h-3 rounded-full bg-purple-600"></span>
-                            pH
-                        </span>
-                    </label>
-                </div>
-            </div>
+            {{-- Legend intentionally removed for simplified UI (series toggling handled elsewhere) --}}
 
             {{-- Chart Area: render via the lightweight wrapper that consumes the serializable model array --}}
             <div class="w-full">
