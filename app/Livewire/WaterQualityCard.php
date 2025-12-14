@@ -260,7 +260,7 @@ class WaterQualityCard extends Component
     public function overallClassesForStatus(string $status): string
     {
         return match(strtolower($status)) {
-            'healthy' => 'bg-green-50 text-green-800',
+            'healthy' => 'bg-cvsu-50 text-cvsu-800',
             'warning' => 'bg-yellow-50 text-yellow-800',
             'critical' => 'bg-rose-50 text-rose-700',
             'disconnected' => 'bg-amber-50 text-amber-800',
