@@ -10,7 +10,7 @@ $logout = function (Logout $logout) {
 
 ?>
 
-<nav x-data="{ open: false }" style="--header-height:64px; --nav-icon: var(--cvsu-500);" class="{{ request()->routeIs('dashboard') ? 'lg:hidden ' : '' }}fixed top-0 left-0 right-0 z-50 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
+<nav x-data="{ open: false }" style="--header-height:64px; --nav-icon: var(--cvsu-500);" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800">
     <!-- Primary Navigation Menu -->
     <div class="px-6 py-0 mx-auto max-w-7xl">
         <div class="flex justify-between items-center h-16">
