@@ -1,13 +1,21 @@
 <div class="w-full py-2 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700 relative z-999 px-4 sm:px-6 lg:px-8">
+    @php
+        $isAdmin = auth()->check() && (
+            (isset(auth()->user()->role) && auth()->user()->role === 'admin') ||
+            (isset(auth()->user()->role_id) && auth()->user()->role_id === 1)
+        );
+    @endphp
     <div class="flex items-center justify-between gap-4">
         {{-- Left: pond selector / search (use Livewire omnisearch) --}}
-        <div class="flex items-center gap-3 w-full lg:w-1/3">
-            <label for="pond-select" class="sr-only">Search user or fishpond</label>
-            <livewire:user-filter />
-        </div>
+        @if($isAdmin)
+            <div class="flex items-center gap-3 w-full lg:w-1/3">
+                <label for="pond-select" class="sr-only">Search user or fishpond</label>
+                <livewire:user-filter />
+            </div>
+        @endif
 
         {{-- Compact range presets (hidden on small screens) --}}
-        <div id="topbar-range" class="hidden md:flex items-center gap-2 ms-4">
+        <div id="topbar-range" class="hidden md:flex items-center gap-2 {{ $isAdmin ? 'ms-4' : '' }}">
             <button type="button" data-range="1h" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">1h</button>
             <button type="button" data-range="24h" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">24h</button>
             <button type="button" data-range="7d" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">7d</button>
