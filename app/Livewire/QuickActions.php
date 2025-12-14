@@ -7,6 +7,7 @@ use Livewire\Component;
 class QuickActions extends Component
 {
     public $userId;
+    public $ready = false;
 
     public function mount($userId = null)
     {
@@ -15,7 +16,7 @@ class QuickActions extends Component
 
     public function render()
     {
-        return view('livewire.quick-actions');
+        return view('livewire.quick-actions', ['ready' => $this->ready]);
     }
 
     public function exportCsv()
@@ -31,6 +32,17 @@ class QuickActions extends Component
     }
 
     public function trainModel()
+    {
+        // safety: require confirmation via client side before proceeding
+        $this->dispatchBrowserEvent('confirm-train', ['userId' => $this->userId]);
+    }
+
+    public function load()
+    {
+        $this->ready = true;
+    }
+
+    public function trainModelConfirmed()
     {
         $this->dispatchBrowserEvent('notify', ['type' => 'info', 'message' => 'Training requested']);
         $this->emit('train-model', $this->userId);

@@ -44,11 +44,15 @@
 
             <x-card class="col-span-12">
                 <x-slot name="header">
-                    <x-card-header>
-                        <x-slot name="title">Measurements</x-slot>
-                    </x-card-header>
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm font-medium text-gray-700">Recent Measurements</div>
+                        <a href="{{ route('historical-data') }}" class="text-xs text-cvsu hover:underline">View full history →</a>
+                    </div>
                 </x-slot>
-                <livewire:water-quality-data-table :userId="$activeUserId" wire:key="wq-table-{{ $activeUserId }}" />
+
+                <div class="mt-2">
+                    <livewire:measurements-preview :userId="$activeUserId" wire:key="wq-preview-{{ $activeUserId }}" />
+                </div>
             </x-card>
     </x-container>
 </x-app-layout>

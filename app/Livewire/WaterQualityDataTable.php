@@ -114,6 +114,7 @@ class WaterQualityDataTable extends Component
 
         // Annotate each row with a computed status using the shared classifier.
         $collection = $water_quality_data->getCollection()->transform(function ($entry) {
+            // Use classifier helper to get parameter labels, then map to unified statuses
             try {
                 $tempLabel = strtoupper(classifyWaterParam('temperature', $entry->temperature)['label'] ?? 'UNKNOWN');
             } catch (\Throwable $e) { $tempLabel = 'UNKNOWN'; }
@@ -127,52 +128,56 @@ class WaterQualityDataTable extends Component
                 $salLabel = strtoupper(classifyWaterParam('salinity', $entry->salinity)['label'] ?? 'UNKNOWN');
             } catch (\Throwable $e) { $salLabel = 'UNKNOWN'; }
 
-            // Consider these labels as OK (non-critical)
-            $okish = ['GOOD', 'LOW', 'MODERATE', 'OK', 'OPTIMAL'];
-
-            $temp_ok = in_array($tempLabel, $okish, true);
-            $ph_ok = in_array($phLabel, $okish, true);
-            $do_ok = in_array($doLabel, $okish, true);
-            $sal_ok = in_array($salLabel, $okish, true);
-
-            $ok_count = ($temp_ok ? 1 : 0) + ($ph_ok ? 1 : 0) + ($do_ok ? 1 : 0) + ($sal_ok ? 1 : 0);
-
-            if ($ok_count === 4) {
-                $statusBorderClass = 'border-l-4 border-green-500';
-                $badgeClass = 'text-green-700 bg-green-100';
-                $statusLabel = 'Optimal';
-            } elseif ($ok_count === 0) {
-                $statusBorderClass = 'border-l-4 border-red-500';
-                $badgeClass = 'text-red-700 bg-red-100';
-                $statusLabel = 'Critical';
-            } else {
-                $statusBorderClass = 'border-l-4 border-yellow-400';
-                $badgeClass = 'text-yellow-700 bg-yellow-100';
-                $statusLabel = 'Warning';
-            }
-
-            // Map individual parameter labels to a text color class for values.
-            $mapLabelToClass = function (?string $label) use ($okish) {
+            // Map classifier labels to simplified ui statuses: GOOD / BAD / HARMFUL
+            $toUiStatus = function (?string $label) {
                 $lab = strtoupper((string) $label);
-                if ($lab === 'UNKNOWN' || $lab === '') {
-                    return 'text-gray-600';
-                }
-                if (in_array($lab, $okish, true)) {
-                    return 'text-green-600';
-                }
-                if ($lab === 'CRITICAL') {
-                    return 'text-red-600';
-                }
-                // Default to warning color for other non-ok states
-                return 'text-yellow-600';
+                $goodish = ['GOOD', 'LOW', 'MODERATE', 'OK', 'OPTIMAL'];
+                if ($lab === 'UNKNOWN' || $lab === '') return 'BAD';
+                if (in_array($lab, $goodish, true)) return 'GOOD';
+                if ($lab === 'CRITICAL') return 'HARMFUL';
+                return 'BAD';
             };
 
-            $entry->tempValueClass = $mapLabelToClass($tempLabel);
-            $entry->phValueClass = $mapLabelToClass($phLabel);
-            $entry->doValueClass = $mapLabelToClass($doLabel);
-            $entry->salValueClass = $mapLabelToClass($salLabel);
+            $tUi = $toUiStatus($tempLabel);
+            $pUi = $toUiStatus($phLabel);
+            $dUi = $toUiStatus($doLabel);
+            $sUi = $toUiStatus($salLabel);
 
-            $entry->statusLabel = $statusLabel;
+            // Aggregate row status: any HARMFUL -> HARMFUL, else any BAD -> BAD, else GOOD
+            $rowStatuses = [$tUi, $pUi, $dUi, $sUi];
+            if (in_array('HARMFUL', $rowStatuses, true)) {
+                $uiStatus = 'HARMFUL';
+            } elseif (in_array('BAD', $rowStatuses, true)) {
+                $uiStatus = 'BAD';
+            } else {
+                $uiStatus = 'GOOD';
+            }
+
+            // Apply centralized UI classes from config if present
+            $statusMap = config('water_quality.status_map', []);
+            $mapEntry = $statusMap[$uiStatus] ?? null;
+            if ($mapEntry) {
+                $statusBorderClass = $mapEntry['border'] ?? ($uiStatus === 'HARMFUL' ? 'border-l-4 border-red-200' : ($uiStatus === 'BAD' ? 'border-l-4 border-amber-100' : 'border-l-4 border-green-100'));
+                $badgeClass = $mapEntry['badge'] ?? ($uiStatus === 'HARMFUL' ? 'text-red-700 bg-red-50' : ($uiStatus === 'BAD' ? 'text-amber-700 bg-amber-50' : 'text-green-700 bg-green-50'));
+            } else {
+                // fallback to existing palette
+                $statusBorderClass = $uiStatus === 'HARMFUL' ? 'border-l-4 border-red-500' : ($uiStatus === 'BAD' ? 'border-l-4 border-yellow-400' : 'border-l-4 border-green-500');
+                $badgeClass = $uiStatus === 'HARMFUL' ? 'text-red-700 bg-red-100' : ($uiStatus === 'BAD' ? 'text-yellow-700 bg-yellow-100' : 'text-green-700 bg-green-100');
+            }
+
+            // Map ui status to per-value classes (prefer more specific per-param logic elsewhere)
+            $uiToValueClass = function (?string $ui) {
+                if ($ui === 'GOOD') return 'text-green-700';
+                if ($ui === 'HARMFUL') return 'text-red-700 font-semibold';
+                return 'text-amber-600';
+            };
+
+            $entry->tempValueClass = $uiToValueClass($tUi);
+            $entry->phValueClass = $uiToValueClass($pUi);
+            $entry->doValueClass = $uiToValueClass($dUi);
+            $entry->salValueClass = $uiToValueClass($sUi);
+
+            $entry->statusLabel = $uiStatus;
             $entry->statusBadgeClass = $badgeClass;
             $entry->statusBorderClass = $statusBorderClass;
 

@@ -14,7 +14,7 @@ return [
     'ph' => [
         ['min' => null,  'max' => 5.0, 'label' => 'HARMFUL', 'note' => 'highly acidic'],
         ['min' => 5.0,   'max' => 6.4, 'label' => 'HARMFUL', 'note' => 'acidic / suboptimal'],
-        ['min' => 6.5,   'max' => 8.5, 'label' => 'GOOD',    'note' => 'optimal (DENR standard)'],
+        ['min' => 6.5,   'max' => 8.5, 'label' => 'GOOD',    'note' => 'optimal (DENR standard)' ],
         ['min' => 6.5,   'max' => 9.0, 'label' => 'GOOD',    'note' => 'acceptable range for production'],
         ['min' => 7.9,   'max' => 8.3, 'label' => 'GOOD',    'note' => 'typical Manila Bay range'],
         ['min' => 9.0,   'max' => null,'label' => 'HARMFUL', 'note' => 'highly alkaline'],
@@ -54,5 +54,23 @@ return [
         'temperature_c' => [25.0, 31.0],
         'ph' => [6.5, 8.5],
         'salinity_ppt' => [7.0, 25.0],
+    ],
+    // UI status -> CSS class mapping for badges, values and row borders
+    'status_map' => [
+        'GOOD' => [
+            'badge' => 'text-green-700 bg-green-50',
+            'value' => 'text-green-700',
+            'border' => 'border-l-4 border-green-100',
+        ],
+        'BAD' => [
+            'badge' => 'text-amber-700 bg-amber-50',
+            'value' => 'text-amber-600',
+            'border' => 'border-l-4 border-amber-100',
+        ],
+        'HARMFUL' => [
+            'badge' => 'text-red-700 bg-red-50',
+            'value' => 'text-red-700 font-semibold',
+            'border' => 'border-l-4 border-red-200',
+        ],
     ],
 ];

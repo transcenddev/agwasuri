@@ -10,9 +10,17 @@
         <x-card class="mt-4 border-t border-gray-100 pt-4 shadow-sm">
             <x-slot name="header">
                 <div class="flex items-center justify-between">
-                    <x-card-header>
-                        <x-slot name="title">Historical Data</x-slot>
-                    </x-card-header>
+                    <div class="flex items-center gap-4">
+                        <x-card-header>
+                            <x-slot name="title">Historical Data</x-slot>
+                        </x-card-header>
+                        <div class="flex items-center gap-3 text-xs text-gray-600">
+                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-600"></span> GOOD</div>
+                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> BAD</div>
+                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-600"></span> HARMFUL</div>
+                        </div>
+                        
+                    </div>
 
                     {{-- Export CSV removed temporarily --}}
                 </div>

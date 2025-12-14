@@ -191,6 +191,26 @@ Notes:
 -   Ensure `.env.testing` is configured or your testing DB is available.
 -   Some feature tests that rely on real-time broadcasts may require `php artisan reverb:start`.
 
+### UI status classes
+
+The project centralizes UI status styling in the `status_map` config entry so views and Livewire components render consistent badges, value coloring and row borders.
+
+- **Location:** [config/water_quality.php](config/water_quality.php)
+- **Canonical keys:** `GOOD`, `BAD`, `HARMFUL`
+- **Each entry contains:** `badge` (badge classes), `value` (value text classes), `border` (row border classes)
+
+Example (simplified):
+
+```php
+'status_map' => [
+    'GOOD' => ['badge' => 'text-green-700 bg-green-50', 'value' => 'text-green-700', 'border' => 'border-l-4 border-green-100'],
+    'BAD' => ['badge' => 'text-amber-700 bg-amber-50', ...],
+    'HARMFUL' => ['badge' => 'text-red-700 bg-red-50', ...],
+]
+```
+
+When updating palette or accessibility contrast, update `status_map` and sweep Livewire components to keep UI consistent.
+
 ## Contributing
 
 Contributions are welcome. Please follow these guidelines:
