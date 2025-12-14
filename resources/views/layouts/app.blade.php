@@ -52,7 +52,7 @@
         <livewire:layout.navigation />
 
         {{-- Wrap the slot with the shared x-container so every page receives the header offset --}}
-        <x-container class="site-body">
+        <x-container class="site-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <main>
                 {{ $slot }}
             </main>
