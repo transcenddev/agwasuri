@@ -1,7 +1,7 @@
 {{-- Main container --}}
 <div>
-    {{-- Wrapper to constrain the width of the grid below to 50% on large screens and up --}}
-    <div class="lg:w-1/2">
+    {{-- Wrapper: make full-width by default so embedding in topbar fills available space --}}
+    <div class="w-full">
         <div class="grid grid-cols-1 gap-x-4 gap-y-2 mb-1 md:grid-cols-2">
 
             {{-- Omnisearch (user or pond) --}}

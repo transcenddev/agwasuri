@@ -1,17 +1,9 @@
-<div class="w-full py-2 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700 relative z-10 px-4 sm:px-6 lg:px-8">
+<div class="w-full py-2 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700 relative z-999 px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between gap-4">
-        {{-- Left: pond selector --}}
-        <div class="flex items-center gap-3">
-            <label for="pond-select" class="sr-only">Select pond</label>
-            @php
-                $users = \App\Models\User::orderBy('user_id')->limit(50)->get();
-                $sel = request()->get('user') ?? session('selected_user', auth()->id());
-            @endphp
-            <select id="pond-select" class="rounded-md border-gray-200 bg-white text-sm px-3 py-2 shadow-sm" aria-label="Select pond">
-                @foreach($users as $u)
-                    <option value="{{ $u->user_id }}" {{ $u->user_id == $sel ? 'selected' : '' }}>{{ $u->name ?? 'User ' . $u->user_id }}</option>
-                @endforeach
-            </select>
+        {{-- Left: pond selector / search (use Livewire omnisearch) --}}
+        <div class="flex items-center gap-3 w-full lg:w-1/3">
+            <label for="pond-select" class="sr-only">Search user or fishpond</label>
+            <livewire:user-filter />
         </div>
 
         {{-- Middle: last-updated (relative) --}}
