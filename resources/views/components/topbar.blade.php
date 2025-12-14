@@ -1,4 +1,4 @@
-<div class="w-full py-2 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700 relative z-999 px-4 sm:px-6 lg:px-8">
+<div class="w-full py-2 bg-white dark:bg-slate-900 relative z-999 px-4 sm:px-6 lg:px-8">
     @php
         $isAdmin = auth()->check() && (
             (isset(auth()->user()->role) && auth()->user()->role === 'admin') ||
