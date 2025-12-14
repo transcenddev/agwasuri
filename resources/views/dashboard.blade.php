@@ -38,16 +38,9 @@
                     <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-trends-{{ $activeUserId }}" />
             </x-card>
 
-            <x-card class="col-span-12 lg:col-span-4">
-                <x-slot name="header">
-                    <x-card-header>
-                        <x-slot name="title">Recommendation</x-slot>
-                    </x-card-header>
-                </x-slot>
-
-                {{-- Recommendation component (compact) --}}
-                <livewire:recommendation-card :userId="$activeUserId" wire:key="rec-card-{{ $activeUserId }}" />
-            </x-card>
+            <div class="col-span-12 lg:col-span-4">
+                @include('components.right-panel')
+            </div>
 
             <x-card class="col-span-12">
                 <x-slot name="header">
