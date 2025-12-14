@@ -5,26 +5,7 @@
             $activeUserId = request('user') ?? session('selected_user', Auth::id());
         @endphp
 
-        {{-- Top Filters — show user selector for admins and date filter for all views --}}
-            <x-card class="mb-6 hero-light overflow-visible shadow-sm">
-            <x-slot name="header">
-                <div class="w-full">
-                    {{-- header left area is intentionally blank; filters live in the body --}}
-                </div>
-            </x-slot>
-
-            <div class="flex flex-col md:flex-row items-center justify-center md:items-center md:space-x-6 space-y-3 md:space-y-0">
-                @if(Auth::check() && auth()->user()->isAdmin())
-                    <div class="w-full">
-                        <livewire:user-filter />
-                    </div>
-                @endif
-
-                <div class="w-full md:w-auto flex-shrink-0">
-                    <livewire:date-filter :user-id="$activeUserId" />
-                </div>
-            </div>
-        </x-card>
+        {{-- Global filters moved to topbar; local filter card removed to avoid duplication --}}
 
         <x-card class="mt-4 border-t border-gray-100 pt-4 shadow-sm">
             <x-slot name="header">

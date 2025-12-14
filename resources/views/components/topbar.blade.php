@@ -6,6 +6,29 @@
             <livewire:user-filter />
         </div>
 
+        {{-- Compact range presets (hidden on small screens) --}}
+        <div id="topbar-range" class="hidden md:flex items-center gap-2 ms-4">
+            <button type="button" data-range="1h" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">1h</button>
+            <button type="button" data-range="24h" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">24h</button>
+            <button type="button" data-range="7d" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">7d</button>
+            <button type="button" data-range="30d" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">30d</button>
+            <div x-data="{ open:false }" class="relative">
+                <button @click.prevent="open = !open" type="button" class="inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">Custom ▾</button>
+                <div x-show="open" @click.outside="open=false" x-cloak class="absolute z-50 mt-2 w-64 bg-white rounded-md shadow-lg p-3">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs text-gray-600">Start Date</label>
+                        <input type="date" id="topbar-custom-start" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
+                        <label class="text-xs text-gray-600">End Date</label>
+                        <input type="date" id="topbar-custom-end" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
+                        <div class="flex items-center gap-2 mt-2">
+                            <button type="button" id="topbar-custom-apply" class="inline-flex items-center px-3 py-1.5 rounded-md bg-cvsu text-white text-sm">Apply</button>
+                            <button type="button" @click.prevent="open=false" class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-200 text-sm">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Middle: last-updated (relative) --}}
         <div class="flex-1 text-center">
             <div id="topbar-last-updated" class="text-sm text-gray-500">Last updated: <span id="topbar-last-updated-text">—</span></div>
@@ -78,6 +101,45 @@
 
             // update relative display every 30s
             setInterval(() => { if (lastTs && lastEl) lastEl.textContent = fmtRelative(lastTs); }, 30000);
+
+            // Range preset buttons in topbar: dispatch date-range-updated with [start, end]
+            function isoNow(){ return new Date().toISOString(); }
+            function isoNowMinus(ms){ return new Date(Date.now() - ms).toISOString(); }
+
+            // Attach handlers once DOM ready
+            document.addEventListener('DOMContentLoaded', function(){
+                try {
+                    document.querySelectorAll('.topbar-range-btn').forEach(function(btn){
+                        btn.addEventListener('click', function(){
+                            const r = btn.getAttribute('data-range');
+                            let start = null, end = isoNow();
+                            if (r === '1h') start = isoNowMinus(1000*60*60);
+                            else if (r === '24h') start = isoNowMinus(1000*60*60*24);
+                            else if (r === '7d') start = isoNowMinus(1000*60*60*24*7);
+                            else if (r === '30d') start = isoNowMinus(1000*60*60*24*30);
+                            window.dispatchEvent(new CustomEvent('date-range-updated', { detail: [ start, end ] }));
+                        });
+                    });
+
+                    const apply = document.getElementById('topbar-custom-apply');
+                    if (apply) {
+                        apply.addEventListener('click', function(){
+                            const s = document.getElementById('topbar-custom-start').value;
+                            const e = document.getElementById('topbar-custom-end').value;
+                            if (!s || !e) {
+                                alert('Please pick both start and end dates');
+                                return;
+                            }
+                            // send YYYY-MM-DD strings; server expands to day bounds
+                            window.dispatchEvent(new CustomEvent('date-range-updated', { detail: [ s, e ] }));
+                            // close any open dropdown by blurring
+                            try { document.activeElement.blur(); } catch(e){}
+                        });
+                    }
+                } catch (e) {
+                    // swallow
+                }
+            });
         })();
     </script>
 </div>
