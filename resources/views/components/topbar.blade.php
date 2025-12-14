@@ -6,15 +6,25 @@
         );
     @endphp
     <div class="flex items-center justify-between gap-4">
-        {{-- Left: pond selector / search (use Livewire omnisearch) --}}
-        @if($isAdmin)
-            <div class="flex items-center gap-3 w-full lg:w-1/3">
-                <label for="pond-select" class="sr-only">Search user or fishpond</label>
-                <livewire:user-filter />
+        {{-- Left: title and (admin) pond selector / search --}}
+        <div class="flex items-center gap-4">
+            <div class="flex flex-col">
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
+                <p class="text-sm text-gray-500">Water Quality Records</p>
             </div>
-        @endif
 
-        {{-- Compact range presets (hidden on small screens) --}}
+            @if($isAdmin)
+                <div class="flex items-center gap-3">
+                    <label for="pond-select" class="sr-only">Search user or fishpond</label>
+                    <livewire:user-filter />
+                </div>
+            @endif
+        </div>
+
+        {{-- Spacer (center) - intentionally empty to push range to right --}}
+        <div class="flex-1"></div>
+
+        {{-- Compact range presets (hidden on small screens) - moved to the right. No inner changes. --}}
         <div id="topbar-range" class="hidden md:flex items-center gap-2 {{ $isAdmin ? 'ms-4' : '' }}">
             <button type="button" data-range="1h" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">1h</button>
             <button type="button" data-range="24h" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">24h</button>
