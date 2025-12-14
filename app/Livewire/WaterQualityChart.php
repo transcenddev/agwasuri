@@ -124,12 +124,21 @@ class WaterQualityChart extends Component
         $query = WaterQualityData::where('user_id', $this->userId);
 
         if ($this->startDate && $this->endDate) {
-            $query->whereBetween('recorded_at', [
-                Carbon::parse($this->startDate)->startOfDay(),
-                Carbon::parse($this->endDate)->endOfDay(),
-            ]);
+            // Accept both date-only (YYYY-MM-DD) and ISO datetime strings.
+            $start = Carbon::parse($this->startDate);
+            $end = Carbon::parse($this->endDate);
+            // If inputs look like date-only strings (length <= 10), expand to full day
+            if (strlen($this->startDate) <= 10) { $start = $start->startOfDay(); }
+            if (strlen($this->endDate) <= 10) { $end = $end->endOfDay(); }
+            $query->whereBetween('recorded_at', [$start, $end]);
         } elseif ($this->startDate) {
-            $query->whereDate('recorded_at', $this->startDate);
+            // If startDate contains time component, use >= comparison; otherwise use whereDate
+            if (strlen($this->startDate) > 10) {
+                $start = Carbon::parse($this->startDate);
+                $query->where('recorded_at', '>=', $start);
+            } else {
+                $query->whereDate('recorded_at', $this->startDate);
+            }
         }
 
         // fetch a reasonable number of points for the chart (most recent first)
