@@ -19,27 +19,30 @@
 
         {{-- Navigation links --}}
         <nav class="flex-1 overflow-y-auto p-3 space-y-1" role="navigation" aria-label="Main navigation">
-            <a href="{{ route('dashboard', ['user' => request('user')]) }}" 
-               wire:navigate
-               class="group flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                <a href="{{ route('dashboard', ['user' => request('user')]) }}" 
+                    wire:navigate
+                    class="group relative flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('dashboard') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                     <span aria-hidden="true" class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-md bg-cvsu-600 transform transition-transform duration-200 {{ request()->routeIs('dashboard') ? 'translate-x-0' : '-translate-x-3 group-hover:translate-x-0' }}"></span>
                 <svg class="w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
                 <span class="text-sm">Dashboard</span>
             </a>
 
-            <a href="{{ route('optimal-fish') }}" 
-               wire:navigate
-               class="group flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('optimal-fish') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                <a href="{{ route('optimal-fish') }}" 
+                    wire:navigate
+                    class="group relative flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('optimal-fish') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                     <span aria-hidden="true" class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-md bg-cvsu-600 transform transition-transform duration-200 {{ request()->routeIs('optimal-fish') ? 'translate-x-0' : '-translate-x-3 group-hover:translate-x-0' }}"></span>
                 <svg class="w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"/>
                 </svg>
                 <span class="text-sm">Optimal Fish</span>
             </a>
 
-            <a href="{{ route('historical-data', ['user' => request('user')]) }}" 
-               wire:navigate
-               class="group flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('historical-data') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                <a href="{{ route('historical-data', ['user' => request('user')]) }}" 
+                    wire:navigate
+                    class="group relative flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('historical-data') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                     <span aria-hidden="true" class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-md bg-cvsu-600 transform transition-transform duration-200 {{ request()->routeIs('historical-data') ? 'translate-x-0' : '-translate-x-3 group-hover:translate-x-0' }}"></span>
                 <svg class="w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
@@ -50,9 +53,10 @@
                 <div class="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
                     <div class="px-3 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Admin</div>
                     
-                    <a href="{{ route('account_management') }}" 
-                       wire:navigate
-                       class="group flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('account_management') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                          <a href="{{ route('account_management') }}" 
+                              wire:navigate
+                              class="group relative flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('account_management') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                                <span aria-hidden="true" class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-md bg-cvsu-600 transform transition-transform duration-200 {{ request()->routeIs('account_management') ? 'translate-x-0' : '-translate-x-3 group-hover:translate-x-0' }}"></span>
                         <svg class="w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
@@ -75,9 +79,10 @@
             </div>
 
             {{-- Profile link --}}
-            <a href="{{ route('profile') }}" 
-               wire:navigate
-               class="group flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('profile') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                <a href="{{ route('profile') }}" 
+                    wire:navigate
+                    class="group relative flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 {{ request()->routeIs('profile') ? 'bg-cvsu-50 dark:bg-cvsu-900/20 text-cvsu-700 dark:text-cvsu-400 font-medium border-l-2 border-cvsu-600' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800' }}">
+                     <span aria-hidden="true" class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-md bg-cvsu-600 transform transition-transform duration-200 {{ request()->routeIs('profile') ? 'translate-x-0' : '-translate-x-3 group-hover:translate-x-0' }}"></span>
                 <svg class="w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
