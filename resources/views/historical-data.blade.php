@@ -1,6 +1,6 @@
 @section('title', 'Historical Data')
 <x-app-layout>
-    <x-container class="pt-20 py-12">
+    <x-container class="py-6">
         @php
             $activeUserId = request('user') ?? session('selected_user', Auth::id());
         @endphp
