@@ -1,9 +1,9 @@
 <div class="w-full py-2 bg-white dark:bg-slate-900 relative z-999 px-4 sm:px-6 lg:px-8">
     @php
-        $isAdmin = auth()->check() && (
+        $isAdmin = auth()->check() && (method_exists(auth()->user(), 'isAdmin') ? auth()->user()->isAdmin() : (
             (isset(auth()->user()->role) && auth()->user()->role === 'admin') ||
             (isset(auth()->user()->role_id) && auth()->user()->role_id === 1)
-        );
+        ));
     @endphp
     <div class="flex items-center justify-between gap-4">
         {{-- Left: title and (admin) pond selector / search --}}
