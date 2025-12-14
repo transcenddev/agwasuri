@@ -30,9 +30,9 @@
             </div>
         </x-card>
 
-        <div class="grid grid-cols-1 gap-6">
+        <div class="grid grid-cols-12 gap-6">
 
-            <x-card>
+            <x-card class="col-span-12">
             <x-slot name="header">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
                     <div class="flex items-center gap-3">
@@ -44,7 +44,7 @@
             </x-slot>
 
             {{-- KPI cards: mobile-first 2x2 grid, desktop single row --}}
-            <div class="mt-4">
+            <div class="mt-2">
                 <livewire:water-quality-card :userId="$activeUserId" wire:key="wq-card-{{ $activeUserId }}" />
             </div>
 
@@ -57,18 +57,28 @@
             @endif
         </x-card>
 
-           <x-card>
-               <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-trends-{{ $activeUserId }}" />
-           </x-card>
+            <x-card class="col-span-12 lg:col-span-8">
+                <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-trends-{{ $activeUserId }}" />
+            </x-card>
 
-           <x-card>
-            <x-slot name="header">
-                <x-card-header>
-                    <x-slot name="title">Measurements</x-slot>
-                </x-card-header>
-            </x-slot>
-            {{-- <livewire:water-quality-data-table :userId="Auth::id()" /> --}}
-             <livewire:water-quality-data-table :userId="$activeUserId" wire:key="wq-table-{{ $activeUserId }}" />
-        </x-card>
+            <x-card class="col-span-12 lg:col-span-4">
+                <x-slot name="header">
+                    <x-card-header>
+                        <x-slot name="title">Recommendation</x-slot>
+                    </x-card-header>
+                </x-slot>
+
+                {{-- Recommendation component (compact) --}}
+                <livewire:recommendation-card :userId="$activeUserId" wire:key="rec-card-{{ $activeUserId }}" />
+            </x-card>
+
+            <x-card class="col-span-12">
+                <x-slot name="header">
+                    <x-card-header>
+                        <x-slot name="title">Measurements</x-slot>
+                    </x-card-header>
+                </x-slot>
+                <livewire:water-quality-data-table :userId="$activeUserId" wire:key="wq-table-{{ $activeUserId }}" />
+            </x-card>
     </x-container>
 </x-app-layout>
