@@ -11,7 +11,9 @@
                 </svg>
             </div>
             <div>
-                <div class="text-lg font-serif font-semibold text-cvsu-700 dark:text-cvsu-400">AgwaSuri</div>
+                <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-2xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-opacity">
+                    <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span>
+                </a>
                 <div class="text-xs text-gray-500 dark:text-gray-400">Water Quality Monitor</div>
             </div>
         </div>
