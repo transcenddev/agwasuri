@@ -1,10 +1,12 @@
-<aside x-data="{ open: false, mini: localStorage.getItem('sidebar-mini') === '1' }" 
-       @keydown.window.prevent.ctrl.b="mini = !mini; localStorage.setItem('sidebar-mini', mini ? '1' : '0')"
-       class="sidebar-container">
+<aside x-data="{ open: false, mini: localStorage.getItem('sidebar-mini') === '1', hovered: false, _hoverTimeout: null }" 
+    @keydown.window.prevent.ctrl.b="mini = !mini; localStorage.setItem('sidebar-mini', mini ? '1' : '0')"
+    class="sidebar-container">
     
     {{-- Desktop: persistent sidebar --}}
-    <div :class="mini ? 'w-16' : 'w-64'" 
-         class="hidden lg:flex flex-col fixed left-0 top-[var(--header-height)] h-[calc(100vh-var(--header-height))] bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-200 z-30">
+        <div :class="(mini && !hovered) ? 'w-16' : 'w-64'" 
+            @mouseenter="if(mini){ clearTimeout(_hoverTimeout); hovered = true; }"
+            @mouseleave="if(mini){ _hoverTimeout = setTimeout(()=>{ hovered = false }, 120) }"
+            class="hidden lg:flex flex-col fixed left-0 top-[var(--header-height)] h-[calc(100vh-var(--header-height))] bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-200 z-30">
         
         {{-- Mini toggle button --}}
         <div class="flex items-center justify-end p-3 border-b border-gray-100 dark:border-gray-800">
