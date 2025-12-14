@@ -20,20 +20,60 @@
         }
     @endphp
 
-    <div class="mb-3">
-        <div>
-            @if($statusKey !== 'disconnected')
-                <span class="{{ $badgeClasses }}">
-                    {{ $status }}
-                </span>
-                @if(!empty($reasonText))
-                    <div class="mt-1 text-xs text-gray-500 truncate max-w-[18rem] sm:max-w-none">{{ $reasonText }}</div>
-                @endif
-            @else
-                {{-- badge hidden when disconnected to avoid duplicate messaging (alert shown above) --}}
-            @endif
+    {{-- Contextual Alert Banner (replaces simple badge) --}}
+    @if($statusKey !== 'disconnected' && $statusKey === 'warning')
+        <div class="mb-4 rounded-lg bg-amber-50 border-l-4 border-amber-500 p-4">
+            <div class="flex items-start gap-3">
+                <svg class="h-6 w-6 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
+                </svg>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-amber-800">{{ $status }}</h3>
+                    <p class="mt-1 text-sm text-amber-700">{{ $reasonText }}</p>
+                    <div class="mt-3">
+                        <a href="{{ route('historical-data') }}" class="inline-flex items-center text-sm font-medium text-amber-800 hover:text-amber-900 underline">
+                            View Details
+                            <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    @elseif($statusKey !== 'disconnected' && $statusKey === 'critical')
+        <div class="mb-4 rounded-lg bg-red-50 border-l-4 border-red-500 p-4">
+            <div class="flex items-start gap-3">
+                <svg class="h-6 w-6 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
+                </svg>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-red-800">{{ $status }}</h3>
+                    <p class="mt-1 text-sm text-red-700">{{ $reasonText }}</p>
+                    <div class="mt-3">
+                        <a href="{{ route('historical-data') }}" class="inline-flex items-center text-sm font-medium text-red-800 hover:text-red-900 underline">
+                            View Details
+                            <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @elseif($statusKey !== 'disconnected' && $statusKey === 'healthy')
+        <div class="mb-4 rounded-lg bg-green-50 border-l-4 border-green-500 p-4">
+            <div class="flex items-start gap-3">
+                <svg class="h-6 w-6 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-green-800">{{ $status }}</h3>
+                    <p class="mt-1 text-sm text-green-700">{{ $reasonText }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
     {{-- When disconnected, show a more prominent alert with troubleshooting link --}}
     @if(strtolower($overallStatus ?? $this->overallStatus) === 'disconnected')
         <div class="mb-4">
@@ -51,7 +91,7 @@
         </div>
     @endif
     {{-- Mobile-first: 2 columns (2x2 grid) by default, expand to 4 columns on larger screens --}}
-    <dl class="grid grid-cols-2 gap-4 md:grid-cols-4">
+    <dl class="grid grid-cols-2 gap-6 md:grid-cols-4">
         @php
             $tempStatus = $this->statusFor('temperature', $this->temperature);
             $salStatus = $this->statusFor('salinity', $this->salinity);

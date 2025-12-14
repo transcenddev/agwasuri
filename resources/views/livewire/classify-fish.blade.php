@@ -145,56 +145,77 @@
             </div>
         </div>
     @else
-         {{-- Skeleton Loader - mirrors results grid to avoid layout shift --}}
+         {{-- Empty State - Encourages user to take action --}}
          <div wire:loading.remove wire:target="predictFishType, trainModel" class="mt-6">
-
-             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                 {{-- Left/Main column (analysis + predictions) --}}
-                 <div class="lg:col-span-2 space-y-6">
-                     {{-- Analysis Summary Skeleton --}}
-                     <div class="p-6 bg-white rounded-lg shadow-md">
-                         <h4 class="mb-3 text-xl font-semibold text-gray-800">Analysis Summary</h4>
-                         <div class="space-y-2 animate-pulse">
-                             <div class="w-full h-4 bg-gray-300 rounded"></div>
-                             <div class="w-11/12 h-4 bg-gray-300 rounded"></div>
-                             <div class="w-3/4 h-4 bg-gray-300 rounded"></div>
-                             <div class="w-1/2 h-4 bg-gray-300 rounded"></div>
-                         </div>
+             <div class="flex flex-col items-center justify-center py-16 px-4">
+                 <div class="max-w-md w-full text-center">
+                     {{-- Icon --}}
+                     <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-cvsu-100 dark:bg-cvsu-900/20 mb-6">
+                         <svg class="h-10 w-10 text-cvsu-600 dark:text-cvsu-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"/>
+                         </svg>
                      </div>
-
-                     {{-- Detailed Predictions Skeleton --}}
-                     <div class="bg-white p-6 rounded-lg shadow-md">
-                         <h4 class="mb-4 text-xl font-semibold text-gray-800">Detailed Predictions:</h4>
-                         <div class="space-y-4">
-                             @for ($i = 0; $i < 3; $i++)
-                                 <div class="animate-pulse">
-                                     <div class="flex items-center justify-between mb-2">
-                                         <div class="w-1/3 h-4 bg-gray-300 rounded"></div>
-                                         <div class="w-1/6 h-4 bg-gray-300 rounded"></div>
-                                     </div>
-                                     <div class="w-full h-4 bg-gray-300 rounded-full"></div>
+                     
+                     {{-- Heading --}}
+                     <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                         No Prediction Yet
+                     </h3>
+                     
+                     {{-- Description --}}
+                     <p class="text-sm text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+                         Get AI-powered fish species recommendations based on your current water quality parameters. 
+                         Click the button above to analyze your pond conditions and discover the most suitable fish species.
+                     </p>
+                     
+                     {{-- CTA Illustration --}}
+                     <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
+                         <div class="grid grid-cols-2 gap-4 text-left">
+                             <div class="flex items-start gap-3">
+                                 <svg class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                 </svg>
+                                 <div>
+                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Water Analysis</div>
+                                     <div class="text-xs text-gray-500 dark:text-gray-400">Real-time data</div>
                                  </div>
-                             @endfor
-                         </div>
-                     </div>
-                 </div>
-
-                 {{-- Right/Side column (metrics) --}}
-                 <div class="lg:col-span-1">
-                     <div class="bg-white rounded-lg shadow-md p-4 lg:sticky lg:top-24">
-                         <h4 class="mb-4 text-xl font-semibold text-gray-800">Model Performance Metrics:</h4>
-                         <div class="divide-y divide-gray-200">
-                             @for ($i = 0; $i < 4; $i++)
-                                 <div class="p-4">
-                                     <div class="flex items-center justify-between mb-1">
-                                         <span class="font-medium text-gray-700">Metric</span>
-                                         <div class="w-1/6 h-4 bg-gray-300 rounded animate-pulse"></div>
-                                     </div>
-                                     <div class="w-full h-3 mt-1 bg-gray-300 rounded animate-pulse"></div>
+                             </div>
+                             <div class="flex items-start gap-3">
+                                 <svg class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                 </svg>
+                                 <div>
+                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">AI Predictions</div>
+                                     <div class="text-xs text-gray-500 dark:text-gray-400">Species match</div>
                                  </div>
-                             @endfor
+                             </div>
+                             <div class="flex items-start gap-3">
+                                 <svg class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                 </svg>
+                                 <div>
+                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Confidence Score</div>
+                                     <div class="text-xs text-gray-500 dark:text-gray-400">Accuracy %%</div>
+                                 </div>
+                             </div>
+                             <div class="flex items-start gap-3">
+                                 <svg class="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                 </svg>
+                                 <div>
+                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Recommendations</div>
+                                     <div class="text-xs text-gray-500 dark:text-gray-400">Actionable tips</div>
+                                 </div>
+                             </div>
                          </div>
                      </div>
+                     
+                     {{-- Hint --}}
+                     <p class="text-xs text-gray-500 dark:text-gray-400">
+                         <svg class="inline h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                         </svg>
+                         Predictions are based on your average water quality over the selected date range
+                     </p>
                  </div>
              </div>
          </div>
