@@ -25,15 +25,6 @@
         <div class="max-w-2xl mx-auto">
             {{-- Centered Empty State Card --}}
             <div class="text-center py-16 px-4">
-                {{-- Trust Signal Badge --}}
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 shadow-sm" 
-                     style="background: rgba(27, 101, 27, 0.05); border: 1px solid rgba(27, 101, 27, 0.2);">
-                    <svg class="w-4 h-4" style="color: #1B651B;" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="text-xs font-semibold" style="color: #1B651B;">AI-Powered Recommendations</span>
-                </div>
-
                 {{-- Animated Fish Carousel --}}
                 <div class="mx-auto flex items-center justify-center w-72 h-72 mb-6 overflow-visible relative" id="fish-carousel" style="background: transparent;">
                     <img id="carousel-fish-img" src="{{ asset('assets/species/tilapia.png') }}" alt="Fish species" class="w-56 h-48 md:w-64 md:h-56 object-contain transition-all duration-500 opacity-0 mx-auto">
