@@ -128,18 +128,20 @@
                 @endif
             </dd>
             
-                @if(!empty($temperatureClassification['label']))
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
-                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full @if($tempStatus === 'good') bg-green-100 text-green-800 @elseif($tempStatus === 'warning') bg-yellow-100 text-yellow-800 @elseif($tempStatus === 'danger') bg-red-100 text-red-800 @else bg-gray-100 text-gray-600 @endif">
-                        {{ ucfirst($tempStatus) }}
+                    @php
+                        $tempBadge = ucfirst($tempStatus ?: 'unknown');
+                        $tempBadgeClass = $tempStatus === 'good' ? 'bg-green-100 text-green-800' : ($tempStatus === 'warning' ? 'bg-yellow-100 text-yellow-800' : ($tempStatus === 'danger' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'));
+                        $tempSparkClass = $tempStatus === 'good' ? 'text-green-500' : ($tempStatus === 'warning' ? 'text-yellow-500' : ($tempStatus === 'danger' ? 'text-red-500' : 'text-gray-400'));
+                    @endphp
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full {{ $tempBadgeClass }}">
+                        {{ $tempBadge }}
                     </span>
-                    {{-- simplified: only show badge (bilingual) and dot; remove duplicate label and technical notes --}}
                 </div>
-            @endif
             <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
                 @if(!empty($temperatureSparklinePath))
-                    <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $temperatureSparklinePath }}" fill="none" stroke="var(--wq-series-temperature)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                    <svg class="w-20 h-6 {{ $tempSparkClass ?? 'text-gray-400' }}" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="{{ $temperatureSparklinePath }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
@@ -172,18 +174,20 @@
                 @endif
             </dd>
             
-                @if(!empty($salinityClassification['label']))
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
-                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full @if($salStatus === 'good') bg-green-100 text-green-800 @elseif($salStatus === 'warning') bg-yellow-100 text-yellow-800 @elseif($salStatus === 'danger') bg-red-100 text-red-800 @else bg-gray-100 text-gray-600 @endif">
-                        {{ ucfirst($salStatus) }}
+                    @php
+                        $salBadge = ucfirst($salStatus ?: 'unknown');
+                        $salBadgeClass = $salStatus === 'good' ? 'bg-green-100 text-green-800' : ($salStatus === 'warning' ? 'bg-yellow-100 text-yellow-800' : ($salStatus === 'danger' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'));
+                        $salSparkClass = $salStatus === 'good' ? 'text-green-500' : ($salStatus === 'warning' ? 'text-yellow-500' : ($salStatus === 'danger' ? 'text-red-500' : 'text-gray-400'));
+                    @endphp
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full {{ $salBadgeClass }}">
+                        {{ $salBadge }}
                     </span>
-                    {{-- simplified: only show badge (bilingual) and dot; remove duplicate label and technical notes --}}
                 </div>
-            @endif
             <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500" x-show="!compact">
                 @if(!empty($salinitySparklinePath))
-                    <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $salinitySparklinePath }}" fill="none" stroke="var(--wq-series-salinity)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                    <svg class="w-20 h-6 {{ $salSparkClass ?? 'text-gray-400' }}" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="{{ $salinitySparklinePath }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
@@ -216,18 +220,20 @@
                 @endif
             </dd>
             
-                @if(!empty($dissolvedOxygenClassification['label']))
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
-                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full @if($doStatus === 'good') bg-green-100 text-green-800 @elseif($doStatus === 'warning') bg-yellow-100 text-yellow-800 @elseif($doStatus === 'danger') bg-red-100 text-red-800 @else bg-gray-100 text-gray-600 @endif">
-                        {{ ucfirst($doStatus) }}
+                    @php
+                        $doBadge = ucfirst($doStatus ?: 'unknown');
+                        $doBadgeClass = $doStatus === 'good' ? 'bg-green-100 text-green-800' : ($doStatus === 'warning' ? 'bg-yellow-100 text-yellow-800' : ($doStatus === 'danger' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'));
+                        $doSparkClass = $doStatus === 'good' ? 'text-green-500' : ($doStatus === 'warning' ? 'text-yellow-500' : ($doStatus === 'danger' ? 'text-red-500' : 'text-gray-400'));
+                    @endphp
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full {{ $doBadgeClass }}">
+                        {{ $doBadge }}
                     </span>
-                    {{-- simplified: only show badge (bilingual) and dot; remove duplicate label and technical notes --}}
                 </div>
-            @endif
             <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500" x-show="!compact">
                 @if(!empty($doSparklinePath))
-                    <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $doSparklinePath }}" fill="none" stroke="var(--wq-series-do)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                    <svg class="w-20 h-6 {{ $doSparkClass ?? 'text-gray-400' }}" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="{{ $doSparklinePath }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
@@ -260,18 +266,20 @@
                 @endif
             </dd>
             
-                @if(!empty($phClassification['label']))
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
-                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full @if($phStatus === 'good') bg-green-100 text-green-800 @elseif($phStatus === 'warning') bg-yellow-100 text-yellow-800 @elseif($phStatus === 'danger') bg-red-100 text-red-800 @else bg-gray-100 text-gray-600 @endif">
-                        {{ ucfirst($phStatus) }}
+                    @php
+                        $phBadge = ucfirst($phStatus ?: 'unknown');
+                        $phBadgeClass = $phStatus === 'good' ? 'bg-green-100 text-green-800' : ($phStatus === 'warning' ? 'bg-yellow-100 text-yellow-800' : ($phStatus === 'danger' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'));
+                        $phSparkClass = $phStatus === 'good' ? 'text-green-500' : ($phStatus === 'warning' ? 'text-yellow-500' : ($phStatus === 'danger' ? 'text-red-500' : 'text-gray-400'));
+                    @endphp
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full {{ $phBadgeClass }}">
+                        {{ $phBadge }}
                     </span>
-                    {{-- simplified: only show badge (bilingual) and dot; remove duplicate label and technical notes --}}
                 </div>
-            @endif
             <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500" x-show="!compact">
                 @if(!empty($phSparklinePath))
-                    <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $phSparklinePath }}" fill="none" stroke="var(--wq-series-ph)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                    <svg class="w-20 h-6 {{ $phSparkClass ?? 'text-gray-400' }}" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="{{ $phSparklinePath }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
