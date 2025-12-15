@@ -25,18 +25,21 @@
         <div class="max-w-2xl mx-auto">
             {{-- Centered Empty State Card --}}
             <div class="text-center py-16 px-4">
-                {{-- Animated Fish Carousel --}}
-                <div class="mx-auto flex items-center justify-center w-48 h-48 rounded-2xl bg-gradient-to-br from-green-50 to-blue-50 mb-6 overflow-hidden relative" id="fish-carousel">
+                {{-- Animated Fish Carousel with CVSU Gradient --}}
+                <div class="mx-auto flex items-center justify-center w-48 h-48 rounded-3xl shadow-xl mb-6 overflow-hidden relative" 
+                     id="fish-carousel"
+                     style="background: linear-gradient(135deg, rgba(27, 101, 27, 0.1) 0%, rgba(15, 73, 16, 0.15) 100%);">
                     <img id="carousel-fish-img" src="{{ asset('assets/species/tilapia.png') }}" alt="Fish species" class="w-40 h-32 object-contain transition-all duration-500 opacity-0">
-                    <div class="absolute bottom-2 text-xs font-semibold text-green-700" id="carousel-fish-name">Tilapia</div>
+                    <div class="absolute bottom-2 text-xs font-semibold" style="color: #1B651B;" id="carousel-fish-name">Tilapia</div>
                 </div>
 
-                {{-- Algorithm Badge --}}
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border-2 border-blue-200 rounded-full mb-4">
-                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                {{-- Algorithm Badge with CVSU Green --}}
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 shadow-md" 
+                     style="background: linear-gradient(135deg, rgba(27, 101, 27, 0.1) 0%, rgba(15, 73, 16, 0.1) 100%); border: 2px solid rgba(27, 101, 27, 0.3);">
+                    <svg class="w-4 h-4" style="color: #1B651B;" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/>
                     </svg>
-                    <span class="text-sm font-bold text-blue-800">Powered by Decision Tree Algorithm</span>
+                    <span class="text-sm font-bold" style="color: #1B651B;">Powered by Decision Tree Algorithm</span>
                 </div>
 
                 {{-- Heading --}}
@@ -50,32 +53,32 @@
                     Click the button above to analyze your pond conditions and discover the most suitable fish species.
                 </p>
 
-                {{-- Feature Grid (2x2) --}}
-                <div class="bg-gray-50 rounded-xl p-6 mb-8">
+                {{-- Feature Grid (2x2) with CVSU Green Accents --}}
+                <div class="bg-white rounded-3xl shadow-xl p-6 mb-8">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="flex items-start gap-3 text-left">
-                            <div class="flex-shrink-0 w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-xs mt-0.5">✓</div>
+                            <div class="flex-shrink-0 w-5 h-5 rounded-full text-white flex items-center justify-center text-xs mt-0.5" style="background: #1B651B;">✓</div>
                             <div>
                                 <div class="text-sm font-semibold text-gray-900">Water Analysis</div>
                                 <div class="text-xs text-gray-500">Real-time data</div>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 text-left">
-                            <div class="flex-shrink-0 w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-xs mt-0.5">✓</div>
+                            <div class="flex-shrink-0 w-5 h-5 rounded-full text-white flex items-center justify-center text-xs mt-0.5" style="background: #1B651B;">✓</div>
                             <div>
                                 <div class="text-sm font-semibold text-gray-900">AI Predictions</div>
                                 <div class="text-xs text-gray-500">Species match</div>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 text-left">
-                            <div class="flex-shrink-0 w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-xs mt-0.5">✓</div>
+                            <div class="flex-shrink-0 w-5 h-5 rounded-full text-white flex items-center justify-center text-xs mt-0.5" style="background: #1B651B;">✓</div>
                             <div>
                                 <div class="text-sm font-semibold text-gray-900">Confidence Score</div>
                                 <div class="text-xs text-gray-500">Accuracy %</div>
                             </div>
                         </div>
                         <div class="flex items-start gap-3 text-left">
-                            <div class="flex-shrink-0 w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center text-xs mt-0.5">✓</div>
+                            <div class="flex-shrink-0 w-5 h-5 rounded-full text-white flex items-center justify-center text-xs mt-0.5" style="background: #1B651B;">✓</div>
                             <div>
                                 <div class="text-sm font-semibold text-gray-900">Recommendations</div>
                                 <div class="text-xs text-gray-500">Actionable tips</div>
@@ -102,10 +105,10 @@
                     Predictions are based on your average water quality over the selected date range
                 </p>
 
-                {{-- Model Information Card --}}
-                <div class="mt-8 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 border border-blue-100">
+                {{-- Model Information Card with CVSU Branding --}}
+                <div class="mt-8 bg-white rounded-3xl shadow-xl p-6 border-l-4" style="border-color: #1B651B;">
                     <div class="flex items-start gap-3 mb-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-lg text-white flex items-center justify-center" style="background: #1B651B;">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
                                 <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
