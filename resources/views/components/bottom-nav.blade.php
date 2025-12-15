@@ -31,13 +31,13 @@
             <span class="text-xs font-medium">History</span>
         </a>
 
-        {{-- Profile / Menu --}}
-        <button @click="sidebarOpen = !sidebarOpen"
-                class="flex flex-col items-center justify-center gap-1 transition-colors text-gray-600 dark:text-gray-400">
+        {{-- Profile / Menu: open mobile sidebar (account management) --}}
+        <button onclick="window.dispatchEvent(new CustomEvent('toggle-mobile-sidebar')); window.dispatchEvent(new CustomEvent('toggle-sidebar'))"
+            class="flex flex-col items-center justify-center gap-1 transition-colors text-gray-600 dark:text-gray-400" aria-label="Account" title="Account">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
             </svg>
-            <span class="text-xs font-medium">More</span>
+            <span class="text-xs font-medium">Accounts</span>
         </button>
     </div>
 </nav>

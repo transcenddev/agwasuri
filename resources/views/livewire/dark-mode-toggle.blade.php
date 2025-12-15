@@ -85,9 +85,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
 
-        @if($showLabel)
-            <span class="ml-2 hidden md:inline text-sm font-medium text-gray-700 dark:text-gray-300">Theme</span>
-        @endif
+        <!-- Render label so parent (sidebar) can toggle visibility via Alpine's `expanded` state -->
+        <span class="text-sm whitespace-nowrap" x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Theme</span>
 
         <!-- Moon Icon (Dark Mode) -->
     <svg data-role="icon-moon" class="w-5 h-5 transition-all duration-300 opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -4,14 +4,14 @@
     @else
         <div>
             {{-- Card header legend --}}
-            <div class="flex items-center justify-between mb-2">
+            <!-- <div class="flex items-center justify-between mb-2">
                 <div></div>
                 <div class="flex items-center gap-3 text-xs text-gray-600">
                     <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-600"></span> GOOD</div>
                     <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> BAD</div>
                     <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-600"></span> HARMFUL</div>
                 </div>
-            </div>
+            </div> -->
 
             {{-- Desktop table (lg+) --}}
             <div class="hidden lg:block rounded-md overflow-hidden border border-gray-100 shadow-sm">

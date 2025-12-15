@@ -7,6 +7,8 @@
 
         {{-- Global filters moved to topbar; local filter card removed to avoid duplication --}}
 
+        {{-- Species gallery removed to declutter page; gallery available elsewhere if needed --}}
+
         <x-card class="mb-6">
             <x-slot name="header">
                 <x-card-header>

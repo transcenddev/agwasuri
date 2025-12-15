@@ -67,7 +67,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireChartsScripts
     </head>
-    <body class="font-sans antialiased min-h-screen" x-data="{ sidebarOpen: false }" @toggle-mobile-sidebar.window="sidebarOpen = !sidebarOpen">
+    <body class="font-sans antialiased min-h-screen" x-data="{ sidebarOpen: false, sidebarHovered: false, presentationMode: false }" @toggle-mobile-sidebar.window="sidebarOpen = !sidebarOpen" @toggle-compact-view.window="presentationMode = !presentationMode">
         {{-- Navigation is fixed; render it above the content wrapper so header height CSS var can be used globally --}}
         <livewire:layout.navigation />
 
@@ -79,9 +79,9 @@
         {{-- Bottom Navigation (mobile/tablet only) --}}
         @include('components.bottom-nav')
 
-        {{-- Main content with fixed left offset for sidebar (16 = 4rem collapsed width) --}}
-        <div class="lg:ml-16 transition-all duration-200" style="margin-top: var(--header-height);">
-            <x-container class="site-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {{-- Main content with fixed left offset for sidebar (16 = 4rem collapsed, 64 = 16rem expanded) --}}
+        <div :class="sidebarHovered ? 'lg:ml-64' : 'lg:ml-16'" class="transition-all duration-300" style="margin-top: var(--header-height);">
+            <x-container class="site-body w-full px-4 lg:px-8">
                 {{-- Top bar: pond selector, last-updated and connection status --}}
                 @include('components.topbar')
 

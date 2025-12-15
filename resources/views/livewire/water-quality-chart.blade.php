@@ -37,7 +37,7 @@
                         }
                     @endphp
 
-                    <div id="water-quality-chart-root" wire:ignore class="w-full p-4 max-w-content-xl mx-auto h-64 md:h-80 lg:h-[420px] max-h-[480px] overflow-visible pb-8"
+                    <div id="water-quality-chart-root" wire:ignore class="w-full p-4 max-w-content-xl mx-auto h-64 md:h-80 lg:h-[420px] max-h-[480px] overflow-hidden"
                         data-chart-id="{{ $__chartId }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
@@ -63,7 +63,7 @@
 
         <div class="w-full">
             <div class="relative">
-                <div class="w-full p-4 max-w-content-xl mx-auto pb-8">
+                <div class="w-full p-4 max-w-content-xl mx-auto">
                     <canvas id="waterChart-main" data-chart='@json($payload)'></canvas>
                 </div>
 

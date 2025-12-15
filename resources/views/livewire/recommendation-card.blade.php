@@ -1,4 +1,4 @@
-<div x-data="{ open: false, menu: false }">
+<div x-data="{ open: false, menu: false, compact: false, showDetails: false }" @toggle-compact-view.window="compact = !compact">
     @php
         // Prepare species image once and reuse
         $base = trim(preg_replace('/\(.+\)/', '', $species));
@@ -11,11 +11,11 @@
     @endphp
 
     {{-- Prominent species image above card content --}}
-    <div class="mb-3 flex justify-center">
+    <div class="flex justify-center transition-all duration-300" x-bind:class="compact ? 'mb-1' : 'mb-3'">
         @if($found)
-            <img src="{{ asset('assets/species/' . $found) }}" alt="{{ $species }}" class="w-28 h-20 object-fit"/>
+            <img src="{{ asset('assets/species/' . $found) }}" alt="{{ $species }}" class="object-contain rounded-lg transition-all duration-300" x-bind:class="compact ? 'w-16 h-16' : 'w-28 h-20'"/>
         @else
-            <svg width="112" height="80" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="rounded-md shadow-sm">
+            <svg viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="rounded-md transition-all duration-300" x-bind:class="compact ? 'w-16 h-16' : 'w-28 h-20'">
                 <defs>
                     <linearGradient id="g1" x1="0" x2="1">
                         <stop offset="0%" stop-color="#34D399" />
@@ -28,28 +28,40 @@
         @endif
     </div>
 
-    <div class="grid grid-cols-1 gap-3">
-        <div class="min-w-0 sm:col-span-2">
-            
-            <div class="mt-1 flex items-center gap-3">
-                <div>
-                    <div class="text-lg font-semibold text-cvsu-700 truncate" style="color: #1B651B;">{{ $species }}</div>
-                </div>
-            </div>
-
-            <div class="mt-2 text-sm text-gray-600 leading-relaxed break-words hidden sm:block">{{ $reason }}</div>
-            <div class="mt-2 text-sm text-gray-600 block sm:hidden">{{ Str::limit($reason, 80) }}</div>
-
-            <div class="mt-2 text-sm text-gray-700 font-medium whitespace-normal break-words">{{ $action }}</div>
-
-
-            
+    {{-- Species title with status badge --}}
+    <div class="text-center" x-bind:class="compact ? 'mb-1' : 'mb-2'">
+        <h3 class="font-bold text-cvsu-700 truncate transition-all duration-300" style="color: #1B651B;" x-bind:class="compact ? 'text-sm' : 'text-lg'">{{ $species }}</h3>
+        <div class="flex items-center justify-center gap-2 mt-1" x-show="!compact" x-transition>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                Recommended
+            </span>
         </div>
-
-        
     </div>
 
-    <div class="mt-3 sm:hidden">
+    {{-- Action summary - always visible --}}
+    <div class="transition-all duration-300" x-bind:class="compact ? 'mt-1' : 'mt-2'">
+        <p class="font-semibold text-center transition-all duration-300" x-bind:class="compact ? 'text-xs text-gray-700' : 'text-sm text-gray-900'">{{ $action }}</p>
+    </div>
+
+    {{-- Collapsible reason details --}}
+    <div x-show="!compact" x-transition class="mt-3">
+        <button @click="showDetails = !showDetails" class="w-full flex items-center justify-center gap-1 text-xs text-cvsu-700 hover:text-cvsu-800 focus:outline-none">
+            <svg class="w-4 h-4 transition-transform duration-200" :class="showDetails ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+            <span x-text="showDetails ? 'Hide details' : 'Why this species?'"></span>
+        </button>
+        
+        <div x-show="showDetails" x-collapse class="mt-2 p-3 bg-green-50 rounded-lg border border-green-100">
+            <p class="text-sm text-gray-700 leading-relaxed">{{ $reason }}</p>
+        </div>
+    </div>
+
+    {{-- Mobile collapsible (legacy) --}}
+    <div class="mt-3 sm:hidden" x-show="!compact">
         <button type="button" x-on:click="open = !open" class="text-sm text-cvsu-700 hover:underline focus:outline-none">
             <span x-text="open ? 'Hide details' : 'View details'"></span>
         </button>
@@ -57,7 +69,6 @@
         <div x-show="open" x-cloak class="mt-3 text-sm text-gray-600 leading-relaxed">
             <div class="font-medium">Reason</div>
             <div class="mt-1">{{ $reason }}</div>
-            <div class="mt-3 text-xs text-gray-400">This is a placeholder recommendation. Integration with the ClassifyFish service will provide dynamic results here.</div>
         </div>
     </div>
 </div>
