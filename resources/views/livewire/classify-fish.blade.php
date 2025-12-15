@@ -26,8 +26,8 @@
             {{-- Centered Empty State Card --}}
             <div class="text-center py-16 px-4">
                 {{-- Animated Fish Carousel --}}
-                <div class="mx-auto flex items-center justify-center w-72 h-72 mb-6 overflow-visible relative" id="fish-carousel" style="background: transparent;">
-                    <img id="carousel-fish-img" src="{{ asset('assets/species/tilapia.png') }}" alt="Fish species" class="w-56 h-48 md:w-64 md:h-56 object-contain transition-all duration-500 opacity-0 mx-auto">
+                <div class="mx-auto flex items-center justify-center w-96 h-96 mb-6 overflow-visible relative" id="fish-carousel" style="background: transparent;">
+                    <img id="carousel-fish-img" src="{{ asset('assets/species/tilapia.png') }}" alt="Fish species" class="w-80 h-72 md:w-96 md:h-80 object-contain transition-all duration-500 opacity-0 mx-auto">
                     {{-- species name intentionally removed for cleaner empty state --}}
                 </div>
 
@@ -234,10 +234,10 @@
                     @if($topImg)
                         <img src="{{ asset('assets/species/' . $topImg) }}" 
                              alt="{{ $topDisplay }}" 
-                             class="w-64 md:w-80 h-auto object-cover mx-auto" />
+                             class="w-80 md:w-96 h-auto object-cover mx-auto" />
                     @else
-                        <div class="w-64 md:w-80 h-64 md:h-80 bg-gray-100 flex items-center justify-center mx-auto">
-                            <svg class="w-24 h-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="w-80 md:w-96 h-80 md:h-96 bg-gray-100 flex items-center justify-center mx-auto">
+                            <svg class="w-32 h-32 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                             </svg>
                         </div>
