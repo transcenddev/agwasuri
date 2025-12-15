@@ -1,22 +1,13 @@
 @section('title', 'Optimal Fish')
 <x-app-layout>
     <x-container class="py-6">
-                                                                                                                @php
+        @php
             $activeUserId = request('user') ?? session('selected_user', Auth::id());
         @endphp
 
         {{-- Global filters moved to topbar; local filter card removed to avoid duplication --}}
-
         {{-- Species gallery removed to declutter page; gallery available elsewhere if needed --}}
 
-        <x-card class="mb-6">
-            <x-slot name="header">
-                <x-card-header>
-                    <x-slot name="title">Optimal Fish</x-slot>
-                </x-card-header>
-            </x-slot>
-
-            <livewire:classify-fish :userId="$activeUserId" />
-        </x-card>
+        <livewire:classify-fish :userId="$activeUserId" />
     </x-container>
 </x-app-layout>
