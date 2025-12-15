@@ -400,6 +400,49 @@ class WaterQualityCard extends Component
     }
 
     /**
+     * Return bilingual status label (Filipino / English) for a given status
+     */
+    public function bilingualStatusLabel(string $status): string
+    {
+        // Return bilingual label without emoji so rendering can use a consistent CSS dot.
+        return match(strtolower($status)) {
+            'good' => 'MABUTI / GOOD',
+            'warning' => 'BABALA / WARNING',
+            'danger' => 'MAPANGANIB / HARMFUL',
+            'unknown' => 'HINDI ALAM / UNKNOWN',
+            default => 'HINDI ALAM / UNKNOWN',
+        };
+    }
+
+    /**
+     * Return badge CSS classes for status pill styling
+     */
+    public function badgeClassForStatus(string $status): string
+    {
+        return match(strtolower($status)) {
+            'good' => 'bg-green-100 text-green-800',
+            'warning' => 'bg-yellow-100 text-yellow-800',
+            'danger' => 'bg-red-100 text-red-800',
+            'unknown' => 'bg-gray-100 text-gray-600',
+            default => 'bg-gray-100 text-gray-600',
+        };
+    }
+
+    /**
+     * Return a small dot color class for a status (used to render a simple circle)
+     */
+    public function dotClassForStatus(string $status): string
+    {
+        return match(strtolower($status)) {
+            'good' => 'bg-green-600',
+            'warning' => 'bg-yellow-600',
+            'danger' => 'bg-rose-600',
+            'unknown' => 'bg-gray-400',
+            default => 'bg-gray-400',
+        };
+    }
+
+    /**
      * Build a simple SVG polyline path (string) from an array of numeric values.
      * Returns an empty string when insufficient data is available.
      *
