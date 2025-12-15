@@ -12,7 +12,9 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
                         <x-card-header>
-                            <x-slot name="title">Historical Data</x-slot>
+                            <x-slot name="title">
+                                <h1 class="text-lg font-semibold text-gray-900">Historical Data</h1>
+                            </x-slot>
                         </x-card-header>
                         <div class="flex items-center gap-3 text-xs text-gray-600">
                             <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-600"></span> GOOD</div>
