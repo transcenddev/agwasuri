@@ -122,6 +122,15 @@ class WaterQualityDataTable extends Component
             $query->whereDate('recorded_at', $this->startDate);
         }
 
+        // Calculate summary statistics - clone query to avoid affecting pagination
+        $summaryQuery = clone $query;
+        $summaryStats = $summaryQuery->selectRaw('
+            AVG(temperature) as avg_temp,
+            AVG(salinity) as avg_salinity,
+            AVG(dissolved_oxygen) as avg_do,
+            AVG(ph_level) as avg_ph
+        ')->first();
+
         $water_quality_data = $query->latest('recorded_at')
             ->paginate(perPage: $this->paginate_num);
 
@@ -199,6 +208,6 @@ class WaterQualityDataTable extends Component
 
         $water_quality_data->setCollection($collection);
 
-        return \view('livewire.water-quality-data-table', compact('water_quality_data'));
+        return \view('livewire.water-quality-data-table', compact('water_quality_data', 'summaryStats'));
     }
 }

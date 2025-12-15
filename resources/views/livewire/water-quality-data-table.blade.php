@@ -1,4 +1,89 @@
 <div>
+    {{-- Summary Statistics Cards --}}
+    @if($summaryStats && $summaryStats->avg_temp !== null)
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {{-- Temperature Card --}}
+            @php
+                try {
+                    $tempStatus = classifyWaterParam('temperature', $summaryStats->avg_temp);
+                    $tempLabel = strtoupper($tempStatus['label'] ?? 'UNKNOWN');
+                    $tempColor = $tempLabel === 'GOOD' ? 'green' : ($tempLabel === 'CRITICAL' ? 'red' : 'amber');
+                } catch (\Throwable $e) {
+                    $tempLabel = 'UNKNOWN';
+                    $tempColor = 'gray';
+                }
+            @endphp
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-600 uppercase">Temperature</span>
+                    <span class="inline-block w-2 h-2 rounded-full bg-{{ $tempColor }}-500"></span>
+                </div>
+                <div class="text-2xl font-bold text-gray-900">{{ number_format($summaryStats->avg_temp, 1) }}°C</div>
+                <div class="text-xs text-gray-500 mt-1">Average | Optimal: 26-30°C</div>
+            </div>
+
+            {{-- Salinity Card --}}
+            @php
+                try {
+                    $salStatus = classifyWaterParam('salinity', $summaryStats->avg_salinity);
+                    $salLabel = strtoupper($salStatus['label'] ?? 'UNKNOWN');
+                    $salColor = $salLabel === 'GOOD' ? 'green' : ($salLabel === 'CRITICAL' ? 'red' : 'amber');
+                } catch (\Throwable $e) {
+                    $salLabel = 'UNKNOWN';
+                    $salColor = 'gray';
+                }
+            @endphp
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-600 uppercase">Salinity</span>
+                    <span class="inline-block w-2 h-2 rounded-full bg-{{ $salColor }}-500"></span>
+                </div>
+                <div class="text-2xl font-bold text-gray-900">{{ number_format($summaryStats->avg_salinity, 1) }} ppt</div>
+                <div class="text-xs text-gray-500 mt-1">Average | Optimal: 15-25 ppt</div>
+            </div>
+
+            {{-- Dissolved Oxygen Card --}}
+            @php
+                try {
+                    $doStatus = classifyWaterParam('do', $summaryStats->avg_do);
+                    $doLabel = strtoupper($doStatus['label'] ?? 'UNKNOWN');
+                    $doColor = $doLabel === 'GOOD' ? 'green' : ($doLabel === 'CRITICAL' ? 'red' : 'amber');
+                } catch (\Throwable $e) {
+                    $doLabel = 'UNKNOWN';
+                    $doColor = 'gray';
+                }
+            @endphp
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-600 uppercase">Dissolved Oxygen</span>
+                    <span class="inline-block w-2 h-2 rounded-full bg-{{ $doColor }}-500"></span>
+                </div>
+                <div class="text-2xl font-bold text-gray-900">{{ number_format($summaryStats->avg_do, 1) }} mg/L</div>
+                <div class="text-xs text-gray-500 mt-1">Average | Optimal: >5 mg/L</div>
+            </div>
+
+            {{-- pH Level Card --}}
+            @php
+                try {
+                    $phStatus = classifyWaterParam('ph', $summaryStats->avg_ph);
+                    $phLabel = strtoupper($phStatus['label'] ?? 'UNKNOWN');
+                    $phColor = $phLabel === 'GOOD' ? 'green' : ($phLabel === 'CRITICAL' ? 'red' : 'amber');
+                } catch (\Throwable $e) {
+                    $phLabel = 'UNKNOWN';
+                    $phColor = 'gray';
+                }
+            @endphp
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-600 uppercase">pH Level</span>
+                    <span class="inline-block w-2 h-2 rounded-full bg-{{ $phColor }}-500"></span>
+                </div>
+                <div class="text-2xl font-bold text-gray-900">{{ number_format($summaryStats->avg_ph, 1) }}</div>
+                <div class="text-xs text-gray-500 mt-1">Average | Optimal: 6.5-8.5</div>
+            </div>
+        </div>
+    @endif
+
     {{-- Subtitle: show which user and how many records with pagination info --}}
     @php
         $userName = null;
