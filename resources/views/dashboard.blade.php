@@ -59,19 +59,7 @@
                     <a href="{{ route('historical-data') }}" class="text-sm text-cvsu hover:underline font-medium">View All Measurements →</a>
                 </div>
             </x-card>
-        {{-- Floating Compact View Toggle (desktop only) --}}
-        <div x-data="{ isCompact: false }" @toggle-compact-view.window="isCompact = !isCompact" class="hidden lg:block">
-            <button
-                @click="$dispatch('toggle-compact-view')"
-                class="flex fixed bottom-6 right-6 z-50 items-center gap-2 px-5 py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105"
-                :class="isCompact ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'"
-                aria-label="Toggle compact view"
-                title="Toggle compact view"
-            >
-                <span x-show="!isCompact" x-transition>📸 Compact View</span>
-                <span x-show="isCompact" x-transition>📄 Full View</span>
-            </button>
-        </div>
+        {{-- Floating Compact View Toggle removed per UX decision --}}
 
     </x-container>
 </x-app-layout>
