@@ -86,7 +86,8 @@
 
                 {{-- Predict Button --}}
                 <button type="button" wire:click="predictFishType"
-                    class="inline-flex items-center gap-2 px-6 py-3 text-white transition rounded-lg text-base font-semibold {{ $canPredict ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed' }}"
+                    class="inline-flex items-center gap-2 px-6 py-3 text-white transition rounded-lg text-base font-semibold shadow-lg"
+                    style="{{ $canPredict ? 'background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);' : 'background: #9ca3af; cursor: not-allowed;' }}"
                     {{ !$canPredict ? 'disabled' : '' }}
                     wire:loading.attr="disabled" wire:target="predictFishType">
                     <span wire:loading.remove wire:target="predictFishType">🔍 Predict Fish Type</span>
@@ -123,7 +124,7 @@
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <span>Model Accuracy:</span>
-                                    <span class="font-semibold text-green-700">~87%</span>
+                                    <span class="font-semibold" style="color: #1B651B;">~87%</span>
                                 </div>
                                 @if($lastTrainedTimestamp && $lastTrainedTimestamp !== 'N/A')
                                 <div class="flex items-center justify-between">
@@ -157,7 +158,8 @@
         {{-- STATE 2: RESULTS STATE --}}
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <button type="button" wire:click="resetPrediction"
-                class="inline-flex items-center gap-2 px-4 py-2 border-2 border-green-600 text-green-600 hover:bg-green-50 transition rounded-lg text-sm font-semibold">
+                class="inline-flex items-center gap-2 px-4 py-2 text-white hover:opacity-90 transition rounded-lg text-sm font-semibold shadow-md"
+                style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);">
                 🔄 Predict Again
             </button>
 
@@ -190,15 +192,18 @@
                     @if($topImg)
                         <img src="{{ asset('assets/species/' . $topImg) }}" 
                              alt="{{ $topDisplay }}" 
-                             class="w-64 md:w-80 h-auto object-cover rounded-2xl mx-auto" />
+                             class="w-64 md:w-80 h-auto object-cover rounded-3xl mx-auto shadow-xl" />
                     @else
-                        <div class="w-64 md:w-80 h-64 md:h-80 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto">
+                        <div class="w-64 md:w-80 h-64 md:h-80 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
                             <span class="text-6xl">🐟</span>
                         </div>
                     @endif
                     
-                    <div class="absolute top-4 right-4 w-20 h-20 bg-green-600 text-white rounded-full flex flex-col items-center justify-center">
-                        <span class="text-xl font-bold">{{ number_format($confidence, 0) }}%</span>
+                    {{-- CVSU Green Gradient Confidence Badge --}}
+                    <div class="absolute top-4 right-4 w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-xl" 
+                         style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);">
+                        <span class="text-2xl font-black text-white">{{ number_format($confidence, 0) }}%</span>
+                        <span class="text-xs font-semibold text-white/90 uppercase tracking-wide">Match</span>
                     </div>
                 </div>
 
@@ -206,7 +211,8 @@
                     {{ $topPrediction['species_name'] }}
                 </h2>
 
-                <div class="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold text-sm">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm shadow-md" 
+                     style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%); color: white;">
                     ✅ PERPEKTO PARA SA {{ strtoupper($topDisplay) }} / PERFECT FOR {{ strtoupper($topDisplay) }}
                 </div>
             </div>
@@ -215,56 +221,68 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div class="lg:col-span-2 space-y-6">
                 @if(!empty($waterQualityData))
-                    <div class="bg-white rounded-xl p-6">
-                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <div class="bg-white rounded-3xl shadow-xl p-6">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800">
                             📊 Water Quality Analysis
                         </h3>
 
-                        @php $tempStatus = $this->getWaterQualityStatus('temperature', $waterQualityData['temperature']); @endphp
+                        @php 
+                            $tempStatus = $this->getWaterQualityStatus('temperature', $waterQualityData['temperature']); 
+                            $tempBadgeClass = $tempStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($tempStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
+                        @endphp
                         <div class="flex justify-between items-center py-3 border-b">
                             <div class="flex items-center gap-2">
                                 <span>🌡️</span>
                                 <span class="font-medium">Temperature:</span>
-                                <span class="text-gray-700">{{ number_format($waterQualityData['temperature'], 2) }}°C</span>
+                                <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['temperature'], 2) }}°C</span>
                             </div>
-                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-{{ $tempStatus['color'] }}-100 text-{{ $tempStatus['color'] }}-800 rounded-full text-xs font-semibold">
-                                {{ $tempStatus['emoji'] }} {{ $tempStatus['badgeTl'] }} / {{ $tempStatus['badge'] }}
+                            <span class="inline-flex items-center gap-1 px-3 py-1 {{ $tempBadgeClass }} rounded-full text-xs font-semibold">
+                                {{ $tempStatus['badgeTl'] }}
                             </span>
                         </div>
 
-                        @php $salinityStatus = $this->getWaterQualityStatus('salinity', $waterQualityData['salinity']); @endphp
+                        @php 
+                            $salinityStatus = $this->getWaterQualityStatus('salinity', $waterQualityData['salinity']); 
+                            $salBadgeClass = $salinityStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($salinityStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
+                        @endphp
                         <div class="flex justify-between items-center py-3 border-b">
                             <div class="flex items-center gap-2">
                                 <span>🧂</span>
                                 <span class="font-medium">Salinity:</span>
-                                <span class="text-gray-700">{{ number_format($waterQualityData['salinity'], 2) }} ppt</span>
+                                <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['salinity'], 2) }} ppt</span>
                             </div>
-                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-{{ $salinityStatus['color'] }}-100 text-{{ $salinityStatus['color'] }}-800 rounded-full text-xs font-semibold">
-                                {{ $salinityStatus['emoji'] }} {{ $salinityStatus['badgeTl'] }} / {{ $salinityStatus['badge'] }}
+                            <span class="inline-flex items-center gap-1 px-3 py-1 {{ $salBadgeClass }} rounded-full text-xs font-semibold">
+                                {{ $salinityStatus['badgeTl'] }}
                             </span>
                         </div>
 
-                        @php $doStatus = $this->getWaterQualityStatus('dissolved_oxygen', $waterQualityData['dissolved_oxygen']); @endphp
+                        @php 
+                            $doStatus = $this->getWaterQualityStatus('dissolved_oxygen', $waterQualityData['dissolved_oxygen']); 
+                            $doBadgeClass = $doStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($doStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
+                        @endphp
                         <div class="flex justify-between items-center py-3 border-b">
                             <div class="flex items-center gap-2">
                                 <span>💨</span>
                                 <span class="font-medium">Dissolved Oxygen:</span>
-                                <span class="text-gray-700">{{ number_format($waterQualityData['dissolved_oxygen'], 2) }} mg/L</span>
+                                <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['dissolved_oxygen'], 2) }} mg/L</span>
                             </div>
-                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-{{ $doStatus['color'] }}-100 text-{{ $doStatus['color'] }}-800 rounded-full text-xs font-semibold">
-                                {{ $doStatus['emoji'] }} {{ $doStatus['badgeTl'] }} / {{ $doStatus['badge'] }}
+                            <span class="inline-flex items-center gap-1 px-3 py-1 {{ $doBadgeClass }} rounded-full text-xs font-semibold">
+                                {{ $doStatus['badgeTl'] }}
                             </span>
                         </div>
 
-                        @php $phStatus = $this->getWaterQualityStatus('ph_level', $waterQualityData['ph_level']); @endphp
+                        @php 
+                            $phStatus = $this->getWaterQualityStatus('ph_level', $waterQualityData['ph_level']); 
+                            $phBadgeClass = $phStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($phStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
+                        @endphp
                         <div class="flex justify-between items-center py-3">
                             <div class="flex items-center gap-2">
                                 <span>⚗️</span>
                                 <span class="font-medium">pH Level:</span>
-                                <span class="text-gray-700">{{ number_format($waterQualityData['ph_level'], 2) }}</span>
+                                <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['ph_level'], 2) }}</span>
                             </div>
-                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-{{ $phStatus['color'] }}-100 text-{{ $phStatus['color'] }}-800 rounded-full text-xs font-semibold">
-                                {{ $phStatus['emoji'] }} {{ $phStatus['badgeTl'] }} / {{ $phStatus['badge'] }}
+                            <span class="inline-flex items-center gap-1 px-3 py-1 {{ $phBadgeClass }} rounded-full text-xs font-semibold">
+                                {{ $phStatus['badgeTl'] }}
                             </span>
                         </div>
 
@@ -279,8 +297,8 @@
                     </div>
                 @endif
 
-                <div class="bg-green-50 rounded-xl p-6">
-                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <div class="bg-white rounded-3xl shadow-xl p-6 border-l-4" style="border-color: #1B651B;">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2" style="color: #1B651B;">
                         📋 Mga Dapat Gawin / Recommended Actions
                     </h3>
                     
@@ -306,18 +324,18 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl p-6">
-                    <h3 class="text-xl font-bold mb-4">Detailed Predictions:</h3>
+                <div class="bg-white rounded-3xl shadow-xl p-6">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Detailed Predictions:</h3>
                     <div class="space-y-3">
                         @foreach($predictionResults as $prediction)
                             <div>
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="font-medium text-gray-700">{{ $prediction['species_name'] }}</span>
-                                    <span class="text-sm font-bold text-green-600">{{ number_format($prediction['confidence_percentage'], 2) }}%</span>
+                                    <span class="text-sm font-bold" style="color: #1B651B;">{{ number_format($prediction['confidence_percentage'], 2) }}%</span>
                                 </div>
                                 <div class="relative w-full h-6 bg-gray-200 rounded-full overflow-hidden">
-                                    <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center text-white text-xs font-bold transition-all duration-500" 
-                                         style="width: {{ $prediction['confidence_percentage'] }}%;">
+                                    <div class="absolute inset-0 flex items-center justify-center text-white text-xs font-bold transition-all duration-500" 
+                                         style="width: {{ $prediction['confidence_percentage'] }}%; background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);">
                                         <span class="px-2">{{ number_format($prediction['confidence_percentage'], 0) }}%</span>
                                     </div>
                                 </div>
@@ -329,48 +347,48 @@
 
             <div class="lg:col-span-1">
                 @if(!empty($modelMetrics))
-                    <div class="bg-white rounded-xl p-6 lg:sticky lg:top-24">
-                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <div class="bg-white rounded-3xl shadow-xl p-6 lg:sticky lg:top-24">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800">
                             🎯 Model Performance
                         </h3>
 
                         @if(isset($modelMetrics['accuracy']))
                             <div class="flex justify-between items-center py-3 border-b">
                                 <div>
-                                    <div class="text-sm text-gray-600">Accuracy</div>
+                                    <div class="text-sm text-gray-600 font-semibold">Accuracy</div>
                                     <div class="text-xs text-gray-500">Overall correctness</div>
                                 </div>
-                                <div class="text-lg font-bold text-green-600">{{ number_format($modelMetrics['accuracy'], 2) }}%</div>
+                                <div class="text-lg font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['accuracy'], 2) }}%</div>
                             </div>
                         @endif
 
                         @if(isset($modelMetrics['precision']))
                             <div class="flex justify-between items-center py-3 border-b">
                                 <div>
-                                    <div class="text-sm text-gray-600">Precision</div>
+                                    <div class="text-sm text-gray-600 font-semibold">Precision</div>
                                     <div class="text-xs text-gray-500">Positive prediction accuracy</div>
                                 </div>
-                                <div class="text-lg font-bold text-green-600">{{ number_format($modelMetrics['precision'], 2) }}%</div>
+                                <div class="text-lg font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['precision'], 2) }}%</div>
                             </div>
                         @endif
 
                         @if(isset($modelMetrics['recall']))
                             <div class="flex justify-between items-center py-3 border-b">
                                 <div>
-                                    <div class="text-sm text-gray-600">Recall</div>
+                                    <div class="text-sm text-gray-600 font-semibold">Recall</div>
                                     <div class="text-xs text-gray-500">Detection rate</div>
                                 </div>
-                                <div class="text-lg font-bold text-green-600">{{ number_format($modelMetrics['recall'], 2) }}%</div>
+                                <div class="text-lg font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['recall'], 2) }}%</div>
                             </div>
                         @endif
 
                         @if(isset($modelMetrics['f1_score']))
                             <div class="flex justify-between items-center py-3">
                                 <div>
-                                    <div class="text-sm text-gray-600">F1 Score</div>
+                                    <div class="text-sm text-gray-600 font-semibold">F1 Score</div>
                                     <div class="text-xs text-gray-500">Balanced performance</div>
                                 </div>
-                                <div class="text-lg font-bold text-green-600">{{ number_format($modelMetrics['f1_score'], 2) }}%</div>
+                                <div class="text-lg font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['f1_score'], 2) }}%</div>
                             </div>
                         @endif
                     </div>
