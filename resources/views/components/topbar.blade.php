@@ -25,23 +25,59 @@
         <div class="flex-1"></div>
 
         {{-- Compact range presets (hidden on small screens) - moved to the right. No inner changes. --}}
-        <div id="topbar-range" class="hidden md:flex items-center gap-2 {{ $isAdmin ? 'ms-4' : '' }}">
-            <button type="button" data-range="1h" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">1h</button>
-            <button type="button" data-range="24h" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">24h</button>
-            <button type="button" data-range="7d" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">7d</button>
-            <button type="button" data-range="30d" class="topbar-range-btn inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">30d</button>
-            <div x-data="{ open:false }" class="relative">
-                <button @click.prevent="open = !open" type="button" class="inline-flex items-center px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">Custom ▾</button>
-                <div x-show="open" @click.outside="open=false" x-cloak class="absolute z-50 mt-2 w-64 bg-white rounded-md shadow-lg p-3">
-                    <div class="flex flex-col gap-2">
-                        <label class="text-xs text-gray-600">Start Date</label>
-                        <input type="date" id="topbar-custom-start" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
-                        <label class="text-xs text-gray-600">End Date</label>
-                        <input type="date" id="topbar-custom-end" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
-                        <div class="flex items-center gap-2 mt-2">
-                            <button type="button" id="topbar-custom-apply" class="inline-flex items-center px-3 py-1.5 rounded-md bg-cvsu text-white text-sm">Apply</button>
-                            <button type="button" @click.prevent="open=false" class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-200 text-sm">Cancel</button>
-                        </div>
+        <div id="topbar-range" x-data="{ open:false, customOpen:false, label: '24h' }" @keydown.escape.window="open=false; customOpen=false" class="hidden md:flex items-center gap-2 {{ $isAdmin ? 'ms-4' : '' }}">
+            <!-- Separate Custom pill to the left of the dropdown -->
+            <div class="relative order-first">
+                <button @click="customOpen = !customOpen; open = false" type="button" class="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="dialog" :aria-expanded="customOpen" :aria-controls="'topbar-custom-pop'">
+                    Custom ▾
+                </button>
+                <div x-show="customOpen" x-trap="customOpen" @click.outside="customOpen=false" x-cloak id="topbar-custom-pop" role="dialog" aria-modal="true" class="absolute right-full mr-2 top-0 z-50 w-[18rem] bg-white rounded-md shadow-lg p-3">
+                    <label class="text-xs text-gray-600">Start Date</label>
+                    <input x-ref="customStart" type="date" id="topbar-custom-start" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
+                    <label class="text-xs text-gray-600 mt-2">End Date</label>
+                    <input type="date" id="topbar-custom-end" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
+                    <div class="flex items-center gap-2 mt-2">
+                        <button type="button" id="topbar-custom-apply" @click="customOpen=false;" class="inline-flex items-center px-3 py-1.5 rounded-md bg-cvsu text-white text-sm">Apply</button>
+                        <button type="button" @click.prevent="customOpen=false" class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-200 text-sm">Cancel</button>
+                    </div>
+                </div>
+                <script>
+                    (function(){
+                        // when the Custom popover opens, focus the start input for keyboard users
+                        document.addEventListener('click', function(e){
+                            try {
+                                const btn = e.target.closest('[aria-controls="topbar-custom-pop"]');
+                                if (!btn) return;
+                                // small timeout to wait for Alpine to set x-show
+                                setTimeout(function(){
+                                    const start = document.getElementById('topbar-custom-start');
+                                    if (start) start.focus();
+                                }, 50);
+                            } catch (err) {}
+                        });
+                    })();
+                </script>
+            </div>
+
+            <div class="relative">
+                <button @click="open = !open; customOpen=false" type="button" class="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="menu" :aria-expanded="open">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3M21 12A9 9 0 113 12a9 9 0 0118 0z" />
+                    </svg>
+                    <span id="topbar-range-display" class="text-xs" x-text="label">24h</span>
+                    <svg class="w-3 h-3 text-gray-500 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div x-show="open" @click.outside="open=false; customOpen=false" x-cloak class="absolute left-0 top-full z-50 mt-2 min-w-[18rem] bg-white rounded-md shadow-lg p-2">
+                    <div class="flex flex-col gap-1">
+                        <!-- presets only inside dropdown -->
+                        <div class="pt-1"></div>
+                        <button type="button" data-range="1h" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">1h</button>
+                        <button type="button" data-range="24h" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">24h</button>
+                        <button type="button" data-range="7d" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">7d</button>
+                        <button type="button" data-range="30d" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">30d</button>
                     </div>
                 </div>
             </div>
@@ -125,6 +161,11 @@
                             else if (r === '7d') start = isoNowMinus(1000*60*60*24*7);
                             else if (r === '30d') start = isoNowMinus(1000*60*60*24*30);
                             window.dispatchEvent(new CustomEvent('date-range-updated', { detail: [ start, end ] }));
+                            // update visible label in dropdown
+                            try {
+                                const disp = document.getElementById('topbar-range-display');
+                                if (disp) disp.textContent = r;
+                            } catch (e) {}
                         });
                     });
 
@@ -139,6 +180,11 @@
                             }
                             // send YYYY-MM-DD strings; server expands to day bounds
                             window.dispatchEvent(new CustomEvent('date-range-updated', { detail: [ s, e ] }));
+                            // update dropdown label to 'Custom'
+                            try {
+                                const disp = document.getElementById('topbar-range-display');
+                                if (disp) disp.textContent = 'Custom';
+                            } catch (e) {}
                             // close any open dropdown by blurring
                             try { document.activeElement.blur(); } catch(e){}
                         });
