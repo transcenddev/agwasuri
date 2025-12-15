@@ -1,4 +1,4 @@
-<div {{ $attributes->merge(['class' => 'bg-white dark:bg-slate-800 rounded-lg shadow-card ring-1 ring-slate-100 dark:ring-slate-700 overflow-hidden p-4 sm:p-4']) }}>
+<div {{ $attributes->merge(['class' => 'bg-[hsl(var(--card))] text-[hsl(var(--card-foreground))] rounded-[var(--radius)] shadow-md overflow-hidden p-4 sm:p-4']) }}>
     @if (isset($header))
         <div class="mb-3">
             {{ $header }}

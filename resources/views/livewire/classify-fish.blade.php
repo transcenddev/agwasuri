@@ -25,9 +25,18 @@
         <div class="max-w-2xl mx-auto">
             {{-- Centered Empty State Card --}}
             <div class="text-center py-16 px-4">
-                {{-- Fish Icon --}}
-                <div class="mx-auto flex items-center justify-center w-24 h-24 rounded-full bg-green-100 mb-6">
-                    <span class="text-5xl">🐟</span>
+                {{-- Animated Fish Carousel --}}
+                <div class="mx-auto flex items-center justify-center w-48 h-48 rounded-2xl bg-gradient-to-br from-green-50 to-blue-50 mb-6 overflow-hidden relative" id="fish-carousel">
+                    <img id="carousel-fish-img" src="{{ asset('assets/species/tilapia.png') }}" alt="Fish species" class="w-40 h-32 object-contain transition-all duration-500 opacity-0">
+                    <div class="absolute bottom-2 text-xs font-semibold text-green-700" id="carousel-fish-name">Tilapia</div>
+                </div>
+
+                {{-- Algorithm Badge --}}
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border-2 border-blue-200 rounded-full mb-4">
+                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/>
+                    </svg>
+                    <span class="text-sm font-bold text-blue-800">Powered by Decision Tree Algorithm</span>
                 </div>
 
                 {{-- Heading --}}
@@ -91,6 +100,41 @@
                     </svg>
                     Predictions are based on your average water quality over the selected date range
                 </p>
+
+                {{-- Model Information Card --}}
+                <div class="mt-8 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 border border-blue-100">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <h4 class="text-sm font-bold text-gray-900 mb-1">About the Model</h4>
+                            <div class="text-xs text-gray-600 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span>Algorithm:</span>
+                                    <span class="font-semibold text-gray-900">Decision Tree (CART)</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Parameters Used:</span>
+                                    <span class="font-semibold text-gray-900">4 (Temp, DO, Salinity, pH)</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Model Accuracy:</span>
+                                    <span class="font-semibold text-green-700">~87%</span>
+                                </div>
+                                @if($lastTrainedTimestamp && $lastTrainedTimestamp !== 'N/A')
+                                <div class="flex items-center justify-between">
+                                    <span>Last Trained:</span>
+                                    <span class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($lastTrainedTimestamp)->format('M d, Y') }}</span>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {{-- Train Button (Admin Only) for Empty State --}}
@@ -349,3 +393,56 @@
         </div>
     </div>
 </div>
+
+<script>
+// Animated Fish Carousel for Empty State
+(function() {
+    const species = [
+        { name: 'Tilapia', file: 'tilapia' },
+        { name: 'Bangus', file: 'bangus' },
+        { name: 'Maya-maya', file: 'maya-maya' },
+        { name: 'Lapu-lapu', file: 'lapu-lapu' },
+        { name: 'Hito', file: 'hito' }
+    ];
+    
+    let currentIndex = 0;
+    const carousel = document.getElementById('fish-carousel');
+    
+    if (!carousel) return; // Exit if carousel not present (prediction results shown)
+    
+    const img = document.getElementById('carousel-fish-img');
+    const nameLabel = document.getElementById('carousel-fish-name');
+    
+    function updateFish() {
+        // Fade out
+        img.style.opacity = '0';
+        
+        setTimeout(() => {
+            // Update image
+            const fish = species[currentIndex];
+            const extensions = ['png', 'jpg', 'jpeg', 'webp'];
+            
+            // Try to load the image with different extensions
+            const basePath = '{{ asset("assets/species") }}';
+            img.src = `${basePath}/${fish.file}.png`;
+            nameLabel.textContent = fish.name;
+            
+            // Fade in
+            setTimeout(() => {
+                img.style.opacity = '1';
+            }, 50);
+            
+            // Move to next fish
+            currentIndex = (currentIndex + 1) % species.length;
+        }, 300);
+    }
+    
+    // Initial display
+    setTimeout(() => {
+        img.style.opacity = '1';
+    }, 100);
+    
+    // Rotate every 3 seconds
+    setInterval(updateFish, 3000);
+})();
+</script>
