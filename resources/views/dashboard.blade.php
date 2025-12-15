@@ -23,40 +23,32 @@
                     <livewire:water-quality-card :userId="$activeUserId" wire:key="wq-card-{{ $activeUserId }}" />
                 </div>
 
-                {{-- Recommendation placeholder card (separate Livewire component)
-                     Hidden temporarily — re-enable by changing the condition below to true. --}}
-                @if(false)
-                    <div class="mt-4">
-                        <livewire:recommendation-card :userId="$activeUserId" wire:key="rec-card-{{ $activeUserId }}" />
-                    </div>
-                @endif
             </div>
 
-            <x-card class="col-span-12 lg:col-span-8" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'overflow-y-auto p-2' : ''">
-                    <div :class="compact ? 'h-64' : 'min-h-[350px]'" class="transition-all duration-300">
-                        <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-trends-{{ $activeUserId }}" />
-                    </div>
+            {{-- Main Content Row: Chart (55%) + Fish Recommendation (45%) --}}
+            <x-card class="col-span-12 lg:col-span-7 lg:min-h-[600px] p-3" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'overflow-y-auto p-2' : ''">
+                <livewire:water-quality-chart :userId="$activeUserId" wire:key="wq-trends-{{ $activeUserId }}" />
             </x-card>
 
-            <div class="col-span-12 lg:col-span-4" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'overflow-y-auto max-h-screen' : ''">
-                @include('components.right-panel')
+            {{-- Fish Recommendation Card --}}
+            <div class="col-span-12 lg:col-span-5 lg:min-h-[600px] lg:h-[600px] flex" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact">
+                <livewire:recommendation-card class="h-full" :userId="$activeUserId" wire:key="rec-card-{{ $activeUserId }}" />
             </div>
 
+            {{-- Recent Measurements - Full Width --}}
             <x-card class="col-span-12" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact">
                 <x-slot name="header">
-                    <div class="flex items-center justify-between" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact">
-                        <div class="font-medium text-gray-700 transition-all duration-300" x-bind:class="compact ? 'text-xs' : 'text-sm'">Recent Measurements</div>
-                        <a href="{{ route('historical-data') }}" class="text-xs text-cvsu hover:underline">View full history →</a>
+                    <div class="flex items-center justify-between">
+                        <div class="font-medium text-gray-700 text-sm">Recent Measurements</div>
+                        <a href="{{ route('historical-data') }}" class="text-xs text-cvsu hover:underline">View full →</a>
                     </div>
                 </x-slot>
 
-                <div class="mt-2" x-bind:class="compact ? 'max-h-48 overflow-hidden' : ''">
+                <div class="mt-2">
                     <livewire:measurements-preview :userId="$activeUserId" wire:key="wq-preview-{{ $activeUserId }}" />
                 </div>
-                <div x-show="compact" x-transition class="mt-2 text-center">
-                    <a href="{{ route('historical-data') }}" class="text-sm text-cvsu hover:underline font-medium">View All Measurements →</a>
-                </div>
             </x-card>
+
         {{-- Floating Compact View Toggle removed per UX decision --}}
 
     </x-container>
