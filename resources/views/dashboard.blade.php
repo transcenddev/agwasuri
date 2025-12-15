@@ -9,8 +9,7 @@
 
         <div class="grid grid-cols-12" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" :class="compact ? 'gap-3' : 'gap-6'">
 
-            <x-card class="col-span-12">
-            <x-slot name="header">
+            <div class="col-span-12">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact">
                     <div class="flex items-center gap-3">
                         {{-- Water Quality Summary header removed per UX preference --}}
@@ -18,21 +17,20 @@
                     </div>
                     {{-- Connection status moved into WaterQualityCard component --}}
                 </div>
-            </x-slot>
 
-            {{-- KPI cards: mobile-first 2x2 grid, desktop single row --}}
-            <div class="transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'mt-1' : 'mt-2'">
-                <livewire:water-quality-card :userId="$activeUserId" wire:key="wq-card-{{ $activeUserId }}" />
-            </div>
-
-            {{-- Recommendation placeholder card (separate Livewire component)
-                 Hidden temporarily — re-enable by changing the condition below to true. --}}
-            @if(false)
-                <div class="mt-4">
-                    <livewire:recommendation-card :userId="$activeUserId" wire:key="rec-card-{{ $activeUserId }}" />
+                {{-- KPI cards: mobile-first 2x2 grid, desktop single row --}}
+                <div class="transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'mt-1' : 'mt-2'">
+                    <livewire:water-quality-card :userId="$activeUserId" wire:key="wq-card-{{ $activeUserId }}" />
                 </div>
-            @endif
-        </x-card>
+
+                {{-- Recommendation placeholder card (separate Livewire component)
+                     Hidden temporarily — re-enable by changing the condition below to true. --}}
+                @if(false)
+                    <div class="mt-4">
+                        <livewire:recommendation-card :userId="$activeUserId" wire:key="rec-card-{{ $activeUserId }}" />
+                    </div>
+                @endif
+            </div>
 
             <x-card class="col-span-12 lg:col-span-8" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'overflow-y-auto p-2' : ''">
                     <div :class="compact ? 'h-64' : 'min-h-[350px]'" class="transition-all duration-300">
