@@ -9,12 +9,12 @@
     {{-- Otherwise show the filter UI --}}
     @else
         {{-- Main container for the filter group --}}
-        <div class="flex flex-col md:flex-row md:items-start md:flex-wrap gap-3 md:gap-x-6">
+        <div class="flex flex-col gap-3 md:flex-row md:items-end">
 
             {{-- Conditionally show inputs OR "No Data" message *for the current user context* --}}
             @if($minAllowedDate !== null)
                 {{-- Start Date Group --}}
-                <div class="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-1/3">
+                <div class="flex flex-col w-full gap-2 md:w-auto md:flex-1">
                     <label for="startDate" class="text-sm font-medium text-gray-700">Start Date</label>
                     <input type="date" id="startDate"
                            wire:model.defer="startDate"
@@ -26,7 +26,7 @@
                 </div>
 
                 {{-- End Date Group --}}
-                <div class="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-1/3">
+                <div class="flex flex-col w-full gap-2 md:w-auto md:flex-1">
                     <label for="endDate" class="text-sm font-medium text-gray-700">End Date</label>
                     <input type="date" id="endDate"
                            wire:model.defer="endDate"
@@ -38,17 +38,17 @@
                 </div>
 
                 {{-- Action buttons (Apply / Clear) --}}
-                <div class="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-1/3">
+                <div class="flex flex-row items-center w-full gap-2 md:w-auto md:ml-auto">
                         <button type="button"
                             wire:click="applyFilters"
                             @if($currentUserId === null) disabled @endif
-                            class="w-full md:w-auto inline-flex items-center px-4 py-2 text-white bg-cvsu rounded-xl hover:bg-cvsu-700 disabled:opacity-50 transition justify-center">
+                            class="inline-flex items-center justify-center w-full px-4 py-2 text-white transition md:w-auto bg-cvsu rounded-xl hover:bg-cvsu-700 disabled:opacity-50">
                         Apply
                     </button>
 
                     <button type="button"
                             wire:click="clearFilters"
-                            class="w-full md:w-auto inline-flex items-center px-3 py-2 text-gray-700 bg-gray-100 rounded-xl border border-gray-200 hover:bg-gray-200 transition dark:bg-transparent dark:text-white dark:border-white/20 hover:dark:bg-white/5 justify-center">
+                            class="inline-flex items-center justify-center w-full px-3 py-2 text-gray-700 transition bg-gray-100 border border-gray-200 md:w-auto rounded-xl hover:bg-gray-200 dark:bg-transparent dark:text-white dark:border-white/20 hover:dark:bg-white/5">
                         Clear
                     </button>
                 </div>

@@ -127,50 +127,70 @@ class WaterQualityDataTable extends Component
                 $salLabel = strtoupper(classifyWaterParam('salinity', $entry->salinity)['label'] ?? 'UNKNOWN');
             } catch (\Throwable $e) { $salLabel = 'UNKNOWN'; }
 
-            // Consider these labels as OK (non-critical)
-            $okish = ['GOOD', 'LOW', 'MODERATE', 'OK', 'OPTIMAL'];
+            // Determine overall row status based on new classification system
+            // Priority: harm > bad > good > best
+            $labels = [$tempLabel, $phLabel, $doLabel, $salLabel];
 
-            $temp_ok = in_array($tempLabel, $okish, true);
-            $ph_ok = in_array($phLabel, $okish, true);
-            $do_ok = in_array($doLabel, $okish, true);
-            $sal_ok = in_array($salLabel, $okish, true);
+            $hasHarm = in_array('HARM', $labels, true);
+            $hasBad = in_array('BAD', $labels, true);
+            $hasGood = in_array('GOOD', $labels, true);
+            $allBest = collect($labels)->filter(fn($l) => $l !== 'UNKNOWN')->every(fn($l) => $l === 'BEST');
 
-            $ok_count = ($temp_ok ? 1 : 0) + ($ph_ok ? 1 : 0) + ($do_ok ? 1 : 0) + ($sal_ok ? 1 : 0);
-
-            if ($ok_count === 4) {
+            if ($hasHarm) {
+                $statusBorderClass = 'border-l-4 border-rose-500';
+                $badgeClass = 'text-rose-700 bg-rose-100';
+                $statusLabel = 'HARM';
+            } elseif ($hasBad) {
+                $statusBorderClass = 'border-l-4 border-yellow-500';
+                $badgeClass = 'text-yellow-700 bg-yellow-100';
+                $statusLabel = 'BAD';
+            } elseif ($hasGood) {
+                $statusBorderClass = 'border-l-4 border-blue-500';
+                $badgeClass = 'text-blue-700 bg-blue-100';
+                $statusLabel = 'GOOD';
+            } elseif ($allBest) {
                 $statusBorderClass = 'border-l-4 border-green-500';
                 $badgeClass = 'text-green-700 bg-green-100';
-                $statusLabel = 'Optimal';
-            } elseif ($ok_count === 0) {
-                $statusBorderClass = 'border-l-4 border-red-500';
-                $badgeClass = 'text-red-700 bg-red-100';
-                $statusLabel = 'Critical';
+                $statusLabel = 'BEST';
             } else {
-                $statusBorderClass = 'border-l-4 border-yellow-400';
-                $badgeClass = 'text-yellow-700 bg-yellow-100';
-                $statusLabel = 'Warning';
+                $statusBorderClass = 'border-l-4 border-gray-400';
+                $badgeClass = 'text-gray-700 bg-gray-100';
+                $statusLabel = 'Unknown';
             }
 
             // Map individual parameter labels to a text color class for values.
-            $mapLabelToClass = function (?string $label) use ($okish) {
+            $mapLabelToClass = function (?string $label) {
                 $lab = strtoupper((string) $label);
                 if ($lab === 'UNKNOWN' || $lab === '') {
                     return 'text-gray-600';
                 }
-                if (in_array($lab, $okish, true)) {
-                    return 'text-green-600';
-                }
-                if ($lab === 'CRITICAL') {
-                    return 'text-red-600';
-                }
-                // Default to warning color for other non-ok states
-                return 'text-yellow-600';
+                return match($lab) {
+                    'BEST' => 'text-green-600',
+                    'GOOD' => 'text-blue-600',
+                    'BAD' => 'text-yellow-600',
+                    'HARM' => 'text-rose-600',
+                    default => 'text-gray-600',
+                };
             };
 
             $entry->tempValueClass = $mapLabelToClass($tempLabel);
             $entry->phValueClass = $mapLabelToClass($phLabel);
             $entry->doValueClass = $mapLabelToClass($doLabel);
             $entry->salValueClass = $mapLabelToClass($salLabel);
+
+            // Format values with labels for display: "30.62 (BEST)"
+            $entry->tempFormatted = $entry->temperature !== null
+                ? number_format($entry->temperature, 2) . ' (' . $tempLabel . ')'
+                : '-';
+            $entry->salFormatted = $entry->salinity !== null
+                ? number_format($entry->salinity, 2) . ' (' . $salLabel . ')'
+                : '-';
+            $entry->doFormatted = $entry->dissolved_oxygen !== null
+                ? number_format($entry->dissolved_oxygen, 2) . ' (' . $doLabel . ')'
+                : '-';
+            $entry->phFormatted = $entry->ph_level !== null
+                ? number_format($entry->ph_level, 2) . ' (' . $phLabel . ')'
+                : '-';
 
             $entry->statusLabel = $statusLabel;
             $entry->statusBadgeClass = $badgeClass;

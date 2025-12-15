@@ -22,6 +22,22 @@ state([
     'total_fishpond_area' => fn() => auth()->user()->total_fishpond_area,
     'species_cultured_string' => fn() => implode(', ', auth()->user()->species_cultured ?? []),
     'water_type' => fn() => auth()->user()->water_type,
+    'farm_type' => fn() => auth()->user()->farm_type,
+    'culture_system' => fn() => auth()->user()->culture_system,
+    'culture_method' => fn() => auth()->user()->culture_method,
+    'activities_during_pond_preperation' => fn() => auth()->user()->activities_during_pond_preperation,
+    'liming' => fn() => auth()->user()->liming,
+    'fertilizer' => fn() => auth()->user()->fertilizer,
+    'disinfectant' => fn() => auth()->user()->disinfectant,
+    'source_of_fingerlings_larvae' => fn() => auth()->user()->source_of_fingerlings_larvae,
+    'stocking_density' => fn() => auth()->user()->stocking_density,
+    'culture_period' => fn() => auth()->user()->culture_period,
+    'harvest_method' => fn() => auth()->user()->harvest_method,
+    'total_production_per_cropping' => fn() => auth()->user()->total_production_per_cropping,
+    'feeds' => fn() => auth()->user()->feeds,
+    'amount_per_day' => fn() => auth()->user()->amount_per_day,
+    'frequency' => fn() => auth()->user()->frequency,
+    'product_destination' => fn() => auth()->user()->product_destination,
 ]);
 
 $updateProfileInformation = function () {
@@ -48,6 +64,22 @@ $updateProfileInformation = function () {
         'province' => ['nullable', 'string', 'max:255'],
         'total_fishpond_area' => ['nullable', 'numeric', 'min:0'],
         'species_cultured_string' => ['nullable', 'string'],
+        'farm_type' => ['nullable', 'string', 'max:255'],
+        'culture_system' => ['nullable', 'string', 'max:255'],
+        'culture_method' => ['nullable', 'string', 'max:255'],
+        'activities_during_pond_preperation' => ['nullable', 'string', 'max:255'],
+        'liming' => ['nullable', 'string', 'max:255'],
+        'fertilizer' => ['nullable', 'string', 'max:255'],
+        'disinfectant' => ['nullable', 'string', 'max:255'],
+        'source_of_fingerlings_larvae' => ['nullable', 'string', 'max:255'],
+        'stocking_density' => ['nullable', 'string', 'max:255'],
+        'culture_period' => ['nullable', 'string', 'max:255'],
+        'harvest_method' => ['nullable', 'string', 'max:255'],
+        'total_production_per_cropping' => ['nullable', 'string', 'max:255'],
+        'feeds' => ['nullable', 'string', 'max:255'],
+        'amount_per_day' => ['nullable', 'string', 'max:255'],
+        'frequency' => ['nullable', 'string', 'max:255'],
+        'product_destination' => ['nullable', 'string', 'max:255'],
     ];
 
     // Accept empty/null values or a valid string; keep validation permissive for tests.
@@ -261,6 +293,124 @@ $sendVerification = function () {
             </div>
 
         </div> {{-- End Grid Container --}}
+
+        {{-- Additional Fishpond Details Section --}}
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <h3 class="text-md font-medium text-gray-900 mb-4">{{ __('Additional Fishpond Details') }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- Farm Type --}}
+                <div>
+                    <x-input-label for="farm_type" :value="__('Farm Type')" />
+                    <x-text-input wire:model="farm_type" id="farm_type" name="farm_type" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('farm_type')" />
+                </div>
+
+                {{-- Culture System --}}
+                <div>
+                    <x-input-label for="culture_system" :value="__('Culture System')" />
+                    <x-text-input wire:model="culture_system" id="culture_system" name="culture_system" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('culture_system')" />
+                </div>
+
+                {{-- Culture Method --}}
+                <div>
+                    <x-input-label for="culture_method" :value="__('Culture Method')" />
+                    <x-text-input wire:model="culture_method" id="culture_method" name="culture_method" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('culture_method')" />
+                </div>
+
+                {{-- Activities During Pond Preparation --}}
+                <div>
+                    <x-input-label for="activities_during_pond_preperation" :value="__('Activities During Pond Preparation')" />
+                    <x-text-input wire:model="activities_during_pond_preperation" id="activities_during_pond_preperation" name="activities_during_pond_preperation" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('activities_during_pond_preperation')" />
+                </div>
+
+                {{-- Liming --}}
+                <div>
+                    <x-input-label for="liming" :value="__('Liming')" />
+                    <x-text-input wire:model="liming" id="liming" name="liming" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('liming')" />
+                </div>
+
+                {{-- Fertilizer --}}
+                <div>
+                    <x-input-label for="fertilizer" :value="__('Fertilizer')" />
+                    <x-text-input wire:model="fertilizer" id="fertilizer" name="fertilizer" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('fertilizer')" />
+                </div>
+
+                {{-- Disinfectant --}}
+                <div>
+                    <x-input-label for="disinfectant" :value="__('Disinfectant')" />
+                    <x-text-input wire:model="disinfectant" id="disinfectant" name="disinfectant" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('disinfectant')" />
+                </div>
+
+                {{-- Source of Fingerlings/Larvae --}}
+                <div>
+                    <x-input-label for="source_of_fingerlings_larvae" :value="__('Source of Fingerlings/Larvae')" />
+                    <x-text-input wire:model="source_of_fingerlings_larvae" id="source_of_fingerlings_larvae" name="source_of_fingerlings_larvae" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('source_of_fingerlings_larvae')" />
+                </div>
+
+                {{-- Stocking Density --}}
+                <div>
+                    <x-input-label for="stocking_density" :value="__('Stocking Density')" />
+                    <x-text-input wire:model="stocking_density" id="stocking_density" name="stocking_density" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('stocking_density')" />
+                </div>
+
+                {{-- Culture Period --}}
+                <div>
+                    <x-input-label for="culture_period" :value="__('Culture Period')" />
+                    <x-text-input wire:model="culture_period" id="culture_period" name="culture_period" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('culture_period')" />
+                </div>
+
+                {{-- Harvest Method --}}
+                <div>
+                    <x-input-label for="harvest_method" :value="__('Harvest Method')" />
+                    <x-text-input wire:model="harvest_method" id="harvest_method" name="harvest_method" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('harvest_method')" />
+                </div>
+
+                {{-- Total Production Per Cropping --}}
+                <div>
+                    <x-input-label for="total_production_per_cropping" :value="__('Total Production Per Cropping')" />
+                    <x-text-input wire:model="total_production_per_cropping" id="total_production_per_cropping" name="total_production_per_cropping" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('total_production_per_cropping')" />
+                </div>
+
+                {{-- Feeds --}}
+                <div>
+                    <x-input-label for="feeds" :value="__('Feeds')" />
+                    <x-text-input wire:model="feeds" id="feeds" name="feeds" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('feeds')" />
+                </div>
+
+                {{-- Amount Per Day --}}
+                <div>
+                    <x-input-label for="amount_per_day" :value="__('Amount Per Day')" />
+                    <x-text-input wire:model="amount_per_day" id="amount_per_day" name="amount_per_day" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('amount_per_day')" />
+                </div>
+
+                {{-- Frequency --}}
+                <div>
+                    <x-input-label for="frequency" :value="__('Frequency')" />
+                    <x-text-input wire:model="frequency" id="frequency" name="frequency" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('frequency')" />
+                </div>
+
+                {{-- Product Destination --}}
+                <div>
+                    <x-input-label for="product_destination" :value="__('Product Destination')" />
+                    <x-text-input wire:model="product_destination" id="product_destination" name="product_destination" type="text" class="mt-1 block w-full" autocomplete="off" />
+                    <x-input-error class="mt-2" :messages="$errors->get('product_destination')" />
+                </div>
+            </div>
+        </div>
 
 
         {{-- Save Button and Message (Outside the grid) --}}

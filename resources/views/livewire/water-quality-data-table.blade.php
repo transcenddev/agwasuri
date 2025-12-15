@@ -36,7 +36,7 @@
                     $endText = $endDate;
                 }
             @endphp
-            <div class="text-sm text-gray-500 mt-1">Showing data
+            <div class="mt-1 text-sm text-gray-500">Showing data
                 @if($startText && $endText)
                     from {{ $startText }} to {{ $endText }}
                 @elseif($startText)
@@ -67,17 +67,16 @@
         @if($hasRows)
             <!-- Desktop table (shown from large screens and up) -->
             <div class="hidden lg:block">
-                <div class="rounded-md overflow-hidden border border-gray-100 shadow-sm">
+                <div class="overflow-hidden border border-gray-100 rounded-md shadow-sm">
                     <div class="w-full overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-0">
+                        <table class="w-full min-w-0 text-left border-collapse">
                             <thead>
                                 <tr>
-                                    <th class="px-6 py-3 text-sm font-medium text-gray-700 text-left w-56 sticky top-0 bg-white z-10 border-b border-gray-100">Recorded At</th>
-                                    <th class="px-4 py-3 text-sm font-medium text-gray-700 text-center sticky top-0 bg-white z-10 border-b border-gray-100">Status</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-temperature)">Temperature (°C)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-salinity)">Salinity (ppt)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</th>
-                                    <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-ph)">pH Level</th>
+                                    <th class="sticky top-0 z-10 w-56 px-6 py-3 text-sm font-medium text-left text-gray-700 bg-white border-b border-gray-100">Recorded At</th>
+                                    <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-temperature)">Temperature (°C)</th>
+                                    <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-salinity)">Salinity (ppt)</th>
+                                    <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</th>
+                                    <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-ph)">pH Level</th>
                                 </tr>
                             </thead>
 
@@ -91,13 +90,10 @@
 
                                     <tr class="bg-white odd:bg-white even:bg-gray-50 hover:bg-gray-100">
                                         <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700 {{ $statusBorderClass }}">{{ $entry->recorded_at }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-700 text-center">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}">{{ $statusLabel }}</span>
-                                        </td>
-                                        <td class="px-6 py-3 text-sm text-right {{ $entry->tempValueClass }}">{{ $entry->temperature }}</td>
-                                        <td class="px-6 py-3 text-sm text-right {{ $entry->salValueClass }}">{{ $entry->salinity }}</td>
-                                        <td class="px-6 py-3 text-sm text-right {{ $entry->doValueClass }}">{{ $entry->dissolved_oxygen }}</td>
-                                        <td class="px-6 py-3 text-sm text-right {{ $entry->phValueClass }}">{{ $entry->ph_level }}</td>
+                                        <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->temperature !== null ? number_format($entry->temperature, 2) : '-' }} <span class="{{ $entry->tempValueClass }}">{{ preg_match('/\((.+?)\)/', $entry->tempFormatted, $m) ? '('.$m[1].')' : '' }}</span></td>
+                                        <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->salinity !== null ? number_format($entry->salinity, 2) : '-' }} <span class="{{ $entry->salValueClass }}">{{ preg_match('/\((.+?)\)/', $entry->salFormatted, $m) ? '('.$m[1].')' : '' }}</span></td>
+                                        <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->dissolved_oxygen !== null ? number_format($entry->dissolved_oxygen, 2) : '-' }} <span class="{{ $entry->doValueClass }}">{{ preg_match('/\((.+?)\)/', $entry->doFormatted, $m) ? '('.$m[1].')' : '' }}</span></td>
+                                        <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->ph_level !== null ? number_format($entry->ph_level, 2) : '-' }} <span class="{{ $entry->phValueClass }}">{{ preg_match('/\((.+?)\)/', $entry->phFormatted, $m) ? '('.$m[1].')' : '' }}</span></td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -107,7 +103,7 @@
             </div>
 
             <!-- Mobile stacked list (visible up to tablet sizes) -->
-            <div class="block lg:hidden space-y-3">
+            <div class="block space-y-3 lg:hidden">
                 @foreach ($water_quality_data as $entry)
                     @php
                         $statusClass = $entry->statusBorderClass ? ($entry->statusBorderClass . ' bg-white') : 'border-l-4 border-gray-200 bg-white';
@@ -125,25 +121,25 @@
                             <div class="text-sm text-gray-500 md:hidden">&nbsp;</div>
                         </div>
 
-                        <div class="mt-2 grid grid-cols-2 gap-3 text-sm text-gray-700">
+                        <div class="grid grid-cols-2 gap-3 mt-2 text-sm text-gray-700">
                             <div class="truncate">
-                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🌡️</span> <span style="color: var(--wq-series-temperature)">Temperature (°C)</span></div>
-                                <div class="font-semibold {{ $entry->tempValueClass }}">{{ $entry->temperature }}</div>
+                                <div class="flex items-center gap-2 text-xs text-gray-500"> <span>🌡️</span> <span style="color: var(--wq-series-temperature)">Temperature (°C)</span></div>
+                                <div class="font-semibold text-gray-700">{{ $entry->temperature !== null ? number_format($entry->temperature, 2) : '-' }} <span class="{{ $entry->tempValueClass }}">{{ preg_match('/\((.+?)\)/', $entry->tempFormatted, $m) ? '('.$m[1].')' : '' }}</span></div>
                             </div>
 
                             <div class="truncate">
-                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧂</span> <span style="color: var(--wq-series-salinity)">Salinity (ppt)</span></div>
-                                <div class="font-semibold {{ $entry->salValueClass }}">{{ $entry->salinity }}</div>
+                                <div class="flex items-center gap-2 text-xs text-gray-500"> <span>🧂</span> <span style="color: var(--wq-series-salinity)">Salinity (ppt)</span></div>
+                                <div class="font-semibold text-gray-700">{{ $entry->salinity !== null ? number_format($entry->salinity, 2) : '-' }} <span class="{{ $entry->salValueClass }}">{{ preg_match('/\((.+?)\)/', $entry->salFormatted, $m) ? '('.$m[1].')' : '' }}</span></div>
                             </div>
 
                             <div class="truncate">
-                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>💧</span> <span style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</span></div>
-                                <div class="font-semibold {{ $entry->doValueClass }}">{{ $entry->dissolved_oxygen }}</div>
+                                <div class="flex items-center gap-2 text-xs text-gray-500"> <span>💧</span> <span style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</span></div>
+                                <div class="font-semibold text-gray-700">{{ $entry->dissolved_oxygen !== null ? number_format($entry->dissolved_oxygen, 2) : '-' }} <span class="{{ $entry->doValueClass }}">{{ preg_match('/\((.+?)\)/', $entry->doFormatted, $m) ? '('.$m[1].')' : '' }}</span></div>
                             </div>
 
                             <div class="truncate">
-                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧪</span> <span style="color: var(--wq-series-ph)">pH Level</span></div>
-                                <div class="font-semibold {{ $entry->phValueClass }}">{{ $entry->ph_level }}</div>
+                                <div class="flex items-center gap-2 text-xs text-gray-500"> <span>🧪</span> <span style="color: var(--wq-series-ph)">pH Level</span></div>
+                                <div class="font-semibold text-gray-700">{{ $entry->ph_level !== null ? number_format($entry->ph_level, 2) : '-' }} <span class="{{ $entry->phValueClass }}">{{ preg_match('/\((.+?)\)/', $entry->phFormatted, $m) ? '('.$m[1].')' : '' }}</span></div>
                             </div>
                         </div>
                     </div>

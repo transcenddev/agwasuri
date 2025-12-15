@@ -178,49 +178,7 @@
                     return rows;
                 }
 
-                // lastSeen stores ms timestamp of the last dispatched point (or null)
-                let lastSeen = null;
-                try {
-                    const existing = window.__waterQualitySeriesState && window.__waterQualitySeriesState[chartId];
-                    if (existing && existing.series && existing.series[0] && existing.series[0].data && existing.series[0].data.length) {
-                        const lp = existing.series[0].data.slice(-1)[0];
-                        lastSeen = (typeof lp.x === 'number') ? lp.x : (lp.x ? Date.parse(lp.x) : null);
-                    }
-                } catch (e) { lastSeen = null; }
-
-                setInterval(async () => {
-                    try {
-                        if (!userId) return;
-                        const res = await fetch(`/api/water-quality/latest?user=${encodeURIComponent(userId)}&limit=10`, { credentials: 'same-origin' });
-                        if (!res.ok) return;
-                        const json = await res.json();
-                        const rows = rowsFromJson(json);
-                        if (!rows || !rows.length) return;
-
-                        // Normalize recorded_at to ms and filter rows newer than lastSeen
-                        const newRows = [];
-                        for (let i = 0; i < rows.length; i++) {
-                            const r = rows[i];
-                            const parsed = (typeof r.recorded_at === 'number') ? r.recorded_at : (r.recorded_at ? Date.parse(r.recorded_at) : null);
-                            if (parsed === null || Number.isNaN(parsed)) continue;
-                            if (lastSeen === null || parsed > lastSeen) {
-                                newRows.push(r);
-                            }
-                        }
-                        if (!newRows.length) return;
-
-                        // Dispatch events in chronological order
-                        newRows.sort((a,b) => Date.parse(a.recorded_at) - Date.parse(b.recorded_at));
-                        for (const r of newRows) {
-                            try {
-                                window.dispatchEvent(new CustomEvent('water-quality:point', { detail: r }));
-                            } catch (e) { /* ignore per-row errors */ }
-                            try { lastSeen = Date.parse(r.recorded_at); } catch (e) {}
-                        }
-                    } catch (e) {
-                        // ignore polling errors
-                    }
-                }, POLL_INTERVAL_MS);
+                // Polling removed - relying on Reverb real-time events only
             } catch (e) {
                 // ignore setup errors
             }
@@ -1290,55 +1248,7 @@
 
             window.addEventListener('load', tryFlush);
 
-            // Polling fallback: request last N points every 2s and force an updateSeries.
-            (function pollingFallback(){
-                try {
-                    const pollInterval = 2000; // ms
-                    const chartId = root.getAttribute('data-chart-id');
-                    const userId = root.getAttribute('data-user-id');
-                    const limit = 32;
-                    if (!userId) return;
-
-                    async function fetchAndUpdate(){
-                        try {
-                            const res = await fetch(`/api/water-quality/latest?user=${encodeURIComponent(userId)}&limit=${limit}`, { credentials: 'same-origin' });
-                            if (!res.ok) return;
-                            const json = await res.json();
-
-                            // json expected: { labels: [...], series: { temperature: [...], dissolved_oxygen: [...], salinity: [...], ph_level: [...] } }
-                            const labels = json.labels || [];
-                            const seriesObj = json.series || {};
-                            const keys = JSON.parse(root.getAttribute('data-series-keys') || '[]');
-
-                            const isDatetime = labels.length && typeof labels[0] === 'string' && labels[0].indexOf('T') !== -1;
-
-                            const rebuilt = keys.map((key, idx) => {
-                                const arr = seriesObj[key] || [];
-                                if (isDatetime) {
-                                    return { name: seriesNames[idx] || key, data: arr.map((v,i)=>{ const parsed = Date.parse(labels[i]); return { x: Number.isFinite(parsed) ? parsed : labels[i], y: v }; }) };
-                                }
-                                return { name: seriesNames[idx] || key, data: arr };
-                            });
-
-                            const cid = window.__waterQualityKnownChartId[chartId] || chartId || ('apexcharts' + chartId);
-                            if (window.ApexCharts && typeof window.ApexCharts.exec === 'function') {
-                                try {
-                                    window.ApexCharts.exec(cid, 'updateSeries', rebuilt);
-                                } catch (e) {
-                                    console.debug('waterChart: polling updateSeries failed', e);
-                                }
-                            }
-                        } catch (e) {
-                            // ignore polling errors
-                        }
-                    }
-
-                    // start after small delay so initial chart setup can complete
-                    setTimeout(() => { fetchAndUpdate(); setInterval(fetchAndUpdate, pollInterval); }, 5000);
-                } catch (e) {
-                    // ignore
-                }
-            })();
+            // Polling removed - relying solely on Reverb WebSocket real-time updates
         })();
     </script>
 

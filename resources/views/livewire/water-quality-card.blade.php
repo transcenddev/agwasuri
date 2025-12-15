@@ -29,9 +29,10 @@
         $status = $overallStatus ?? $this->overallStatus;
         $statusKey = strtolower($status ?? '');
         $reasons = [
-            'healthy' => 'All parameters within safe range',
-            'warning' => 'Dissolved oxygen below recommended level',
-            'critical' => 'Immediate action needed: DO critically low',
+            'best' => 'All parameters in optimal range',
+            'good' => 'Parameters within acceptable range',
+            'bad' => 'Some parameters need attention',
+            'harm' => 'Critical conditions - immediate action required',
         ];
         $reasonText = $reasons[$statusKey] ?? '';
         // Badge classes: base badge styling + status-specific classes
@@ -108,10 +109,19 @@
                 <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($tempStatus) }}">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
                 <span class="text-sm text-gray-600">{{ $this->unitFor('temperature') }}</span>
             </dd>
-            
+
             @if(!empty($temperatureClassification['label']))
                 <div class="mt-2 text-xs">
-                    <span class="font-medium {{ $temperatureClassification['color'] ?? 'text-gray-700' }}">{{ $temperatureClassification['label'] }}</span>
+                    @php
+                        $tempLabelColor = match(strtoupper($temperatureClassification['label'])) {
+                            'BEST' => 'text-green-600 font-semibold',
+                            'GOOD' => 'text-blue-600 font-semibold',
+                            'BAD' => 'text-amber-600 font-semibold',
+                            'HARM' => 'text-rose-600 font-semibold',
+                            default => 'text-gray-700'
+                        };
+                    @endphp
+                    <span class="font-medium {{ $tempLabelColor }}">{{ $temperatureClassification['label'] }}</span>
                     @if(!empty($temperatureClassification['note']))
                         <span class="ml-2 text-gray-500">{{ $temperatureClassification['note'] }}</span>
                     @endif
@@ -151,10 +161,19 @@
                 <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($salStatus) }}">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
                 <span class="text-sm text-gray-600">{{ $this->unitFor('salinity') }}</span>
             </dd>
-            
+
             @if(!empty($salinityClassification['label']))
                 <div class="mt-2 text-xs">
-                    <span class="font-medium {{ $salinityClassification['color'] ?? 'text-gray-700' }}">{{ $salinityClassification['label'] }}</span>
+                    @php
+                        $salLabelColor = match(strtoupper($salinityClassification['label'])) {
+                            'BEST' => 'text-green-600 font-semibold',
+                            'GOOD' => 'text-blue-600 font-semibold',
+                            'BAD' => 'text-amber-600 font-semibold',
+                            'HARM' => 'text-rose-600 font-semibold',
+                            default => 'text-gray-700'
+                        };
+                    @endphp
+                    <span class="font-medium {{ $salLabelColor }}">{{ $salinityClassification['label'] }}</span>
                     @if(!empty($salinityClassification['note']))
                         <span class="ml-2 text-gray-500">{{ $salinityClassification['note'] }}</span>
                     @endif
@@ -194,10 +213,19 @@
                 <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($doStatus) }}">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
                 <span class="text-sm text-gray-600">{{ $this->unitFor('dissolved_oxygen') }}</span>
             </dd>
-            
+
             @if(!empty($dissolvedOxygenClassification['label']))
                 <div class="mt-2 text-xs">
-                    <span class="font-medium {{ $dissolvedOxygenClassification['color'] ?? 'text-gray-700' }}">{{ $dissolvedOxygenClassification['label'] }}</span>
+                    @php
+                        $doLabelColor = match(strtoupper($dissolvedOxygenClassification['label'])) {
+                            'BEST' => 'text-green-600 font-semibold',
+                            'GOOD' => 'text-blue-600 font-semibold',
+                            'BAD' => 'text-amber-600 font-semibold',
+                            'HARM' => 'text-rose-600 font-semibold',
+                            default => 'text-gray-700'
+                        };
+                    @endphp
+                    <span class="font-medium {{ $doLabelColor }}">{{ $dissolvedOxygenClassification['label'] }}</span>
                     @if(!empty($dissolvedOxygenClassification['note']))
                         <span class="ml-2 text-gray-500">{{ $dissolvedOxygenClassification['note'] }}</span>
                     @endif
@@ -237,10 +265,19 @@
                 <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($phStatus) }}">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
                 <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
             </dd>
-            
+
             @if(!empty($phClassification['label']))
                 <div class="mt-2 text-xs">
-                    <span class="font-medium {{ $phClassification['color'] ?? 'text-gray-700' }}">{{ $phClassification['label'] }}</span>
+                    @php
+                        $phLabelColor = match(strtoupper($phClassification['label'])) {
+                            'BEST' => 'text-green-600 font-semibold',
+                            'GOOD' => 'text-blue-600 font-semibold',
+                            'BAD' => 'text-amber-600 font-semibold',
+                            'HARM' => 'text-rose-600 font-semibold',
+                            default => 'text-gray-700'
+                        };
+                    @endphp
+                    <span class="font-medium {{ $phLabelColor }}">{{ $phClassification['label'] }}</span>
                     @if(!empty($phClassification['note']))
                         <span class="ml-2 text-gray-500">{{ $phClassification['note'] }}</span>
                     @endif
