@@ -100,7 +100,7 @@
         @endphp
 
         {{-- Temperature (°C) --}}
-        <div class="flex flex-col items-center justify-center text-center rounded-2xl transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'" class="{{ $this->classesForStatus($tempStatus) }}">
+        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature (°C)</dt>
 
             <dd class="flex flex-col items-center gap-1">
@@ -147,7 +147,7 @@
         </div>
 
         {{-- Salinity (ppt) --}}
-        <div class="flex flex-col items-center justify-center text-center rounded-2xl transition-all duration-300 {{ $this->classesForStatus($salStatus) }}" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
+        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity (ppt)</dt>
 
             <dd class="flex flex-col items-center gap-1">
@@ -194,7 +194,7 @@
         </div>
 
         {{-- Dissolved Oxygen (mg/L) --}}
-        <div class="flex flex-col items-center justify-center text-center rounded-2xl transition-all duration-300 {{ $this->classesForStatus($doStatus) }}" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
+        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen (mg/L)</dt>
 
             <dd class="flex flex-col items-center gap-1">
@@ -241,7 +241,7 @@
         </div>
 
         {{-- pH --}}
-        <div class="flex flex-col items-center justify-center text-center rounded-2xl transition-all duration-300 {{ $this->classesForStatus($phStatus) }}" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
+        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH</dt>
 
             <dd class="flex flex-col items-center gap-1">
