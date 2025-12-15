@@ -180,7 +180,7 @@
         {{-- STATE 2: RESULTS STATE --}}
         
         {{-- Quick Action Bar --}}
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-6 p-4 bg-white rounded-3xl shadow-md">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
             <button type="button" wire:click="resetPrediction"
                 class="inline-flex items-center gap-2 px-5 py-2.5 text-white hover:opacity-90 transition rounded-full text-sm font-semibold shadow-sm"
                 style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);">
