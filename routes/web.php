@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\WaterQualityDataController;
 use App\Http\Controllers\ThemeController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 Route::view('/', 'welcome');
 
@@ -35,3 +37,11 @@ Route::post('store-water-quality-data', [WaterQualityDataController::class, 'sto
 Route::get('api/water-quality/latest', [WaterQualityDataController::class, 'latest']);
 
 require __DIR__.'/auth.php';
+
+// Simple logout route for non-scaffolded auth flows (used by sidebar/mobile forms)
+Route::post('/logout', function (Request $request) {
+    Auth::guard('web')->logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect('/');
+})->name('logout');
