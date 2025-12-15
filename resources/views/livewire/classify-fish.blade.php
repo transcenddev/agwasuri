@@ -26,11 +26,9 @@
             {{-- Centered Empty State Card --}}
             <div class="text-center py-16 px-4">
                 {{-- Animated Fish Carousel with CVSU Gradient --}}
-                <div class="mx-auto flex items-center justify-center w-48 h-48 rounded-3xl shadow-xl mb-6 overflow-hidden relative" 
-                     id="fish-carousel"
-                     style="background: linear-gradient(135deg, rgba(27, 101, 27, 0.1) 0%, rgba(15, 73, 16, 0.15) 100%);">
-                    <img id="carousel-fish-img" src="{{ asset('assets/species/tilapia.png') }}" alt="Fish species" class="w-40 h-32 object-contain transition-all duration-500 opacity-0">
-                    <div class="absolute bottom-2 text-xs font-semibold" style="color: #1B651B;" id="carousel-fish-name">Tilapia</div>
+                <div class="mx-auto flex items-center justify-center w-72 h-72 mb-6 overflow-visible relative" id="fish-carousel" style="background: transparent;">
+                    <img id="carousel-fish-img" src="{{ asset('assets/species/tilapia.png') }}" alt="Fish species" class="w-56 h-48 md:w-64 md:h-56 object-contain transition-all duration-500 opacity-0 mx-auto">
+                    {{-- species name intentionally removed for cleaner empty state --}}
                 </div>
 
                 {{-- Algorithm Badge with CVSU Green --}}
@@ -145,9 +143,10 @@
             @if($isAdminView)
                 <div class="text-center mt-6">
                     <button type="button" wire:click="trainModel"
-                        class="inline-flex items-center px-4 py-2 text-white transition bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
-                        wire:loading.attr="disabled" wire:target="trainModel" {{ $isTraining ? 'disabled' : '' }}>
-                        <span wire:loading.remove wire:target="trainModel">Train Model</span>
+                        class="inline-flex items-center gap-2 px-6 py-3 text-white transition rounded-3xl font-semibold shadow-xl text-sm"
+                        style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);"
+                        aria-label="Train model" wire:loading.attr="disabled" wire:target="trainModel" {{ $isTraining ? 'disabled' : '' }}>
+                        <span wire:loading.remove wire:target="trainModel">⚙️ Train Model</span>
                         <span wire:loading wire:target="trainModel">Training...</span>
                     </button>
                     @if($lastTrainedTimestamp && $lastTrainedTimestamp !== 'Error fetching date' && $lastTrainedTimestamp !== 'N/A')
@@ -169,9 +168,10 @@
             @if($isAdminView)
                 <div class="flex flex-col items-end gap-2">
                     <button type="button" wire:click="trainModel"
-                        class="inline-flex items-center px-4 py-2 text-white transition bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm font-medium"
-                        wire:loading.attr="disabled" wire:target="trainModel" {{ $isTraining ? 'disabled' : '' }}>
-                        <span wire:loading.remove wire:target="trainModel">Train Model</span>
+                        class="inline-flex items-center gap-2 px-5 py-2 text-white transition rounded-3xl font-semibold shadow-md text-sm"
+                        style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);"
+                        aria-label="Train model" wire:loading.attr="disabled" wire:target="trainModel" {{ $isTraining ? 'disabled' : '' }}>
+                        <span wire:loading.remove wire:target="trainModel">⚙️ Train Model</span>
                         <span wire:loading wire:target="trainModel">Training...</span>
                     </button>
                     @if($lastTrainedTimestamp && $lastTrainedTimestamp !== 'Error fetching date' && $lastTrainedTimestamp !== 'N/A')
@@ -446,7 +446,9 @@
             // Try to load the image with different extensions
             const basePath = '{{ asset("assets/species") }}';
             img.src = `${basePath}/${fish.file}.png`;
-            nameLabel.textContent = fish.name;
+            if (nameLabel) {
+                nameLabel.textContent = fish.name;
+            }
             
             // Fade in
             setTimeout(() => {
