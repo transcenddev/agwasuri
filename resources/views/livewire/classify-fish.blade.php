@@ -25,7 +25,16 @@
         <div class="max-w-2xl mx-auto">
             {{-- Centered Empty State Card --}}
             <div class="text-center py-16 px-4">
-                {{-- Animated Fish Carousel with CVSU Gradient --}}
+                {{-- Trust Signal Badge --}}
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 shadow-sm" 
+                     style="background: rgba(27, 101, 27, 0.05); border: 1px solid rgba(27, 101, 27, 0.2);">
+                    <svg class="w-4 h-4" style="color: #1B651B;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="text-xs font-semibold" style="color: #1B651B;">✓ AI-Powered Recommendations</span>
+                </div>
+
+                {{-- Animated Fish Carousel --}}
                 <div class="mx-auto flex items-center justify-center w-72 h-72 mb-6 overflow-visible relative" id="fish-carousel" style="background: transparent;">
                     <img id="carousel-fish-img" src="{{ asset('assets/species/tilapia.png') }}" alt="Fish species" class="w-56 h-48 md:w-64 md:h-56 object-contain transition-all duration-500 opacity-0 mx-auto">
                     {{-- species name intentionally removed for cleaner empty state --}}
@@ -41,58 +50,52 @@
                 </div>
 
                 {{-- Heading --}}
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">
-                    No Prediction Yet
+                <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
+                    Ready to Predict Optimal Fish Species?
                 </h3>
 
                 {{-- Description --}}
-                <p class="text-gray-600 text-center mb-8 leading-relaxed">
-                    Get AI-powered fish species recommendations based on your current water quality parameters. 
-                    Click the button above to analyze your pond conditions and discover the most suitable fish species.
+                <p class="text-gray-600 text-center mb-6 leading-relaxed text-base">
+                    Get instant AI-powered recommendations based on your current water quality. 
+                    Analysis completes in seconds.
                 </p>
 
-                {{-- Feature Grid (2x2) with CVSU Green Accents --}}
-                <div class="bg-white rounded-3xl shadow-xl p-6 mb-8">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="flex items-start gap-3 text-left">
-                            <div class="flex-shrink-0 w-5 h-5 rounded-full text-white flex items-center justify-center text-xs mt-0.5" style="background: #1B651B;">✓</div>
-                            <div>
-                                <div class="text-sm font-semibold text-gray-900">Water Analysis</div>
-                                <div class="text-xs text-gray-500">Real-time data</div>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3 text-left">
-                            <div class="flex-shrink-0 w-5 h-5 rounded-full text-white flex items-center justify-center text-xs mt-0.5" style="background: #1B651B;">✓</div>
-                            <div>
-                                <div class="text-sm font-semibold text-gray-900">AI Predictions</div>
-                                <div class="text-xs text-gray-500">Species match</div>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3 text-left">
-                            <div class="flex-shrink-0 w-5 h-5 rounded-full text-white flex items-center justify-center text-xs mt-0.5" style="background: #1B651B;">✓</div>
-                            <div>
-                                <div class="text-sm font-semibold text-gray-900">Confidence Score</div>
-                                <div class="text-xs text-gray-500">Accuracy %</div>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3 text-left">
-                            <div class="flex-shrink-0 w-5 h-5 rounded-full text-white flex items-center justify-center text-xs mt-0.5" style="background: #1B651B;">✓</div>
-                            <div>
-                                <div class="text-sm font-semibold text-gray-900">Recommendations</div>
-                                <div class="text-xs text-gray-500">Actionable tips</div>
-                            </div>
-                        </div>
+                {{-- Feature Pills (horizontal) --}}
+                <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
+                        <div class="w-4 h-4 rounded-full flex items-center justify-center text-xs text-white" style="background: #1B651B;">✓</div>
+                        <span class="text-sm font-medium text-gray-700">Water Analysis</span>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
+                        <div class="w-4 h-4 rounded-full flex items-center justify-center text-xs text-white" style="background: #1B651B;">✓</div>
+                        <span class="text-sm font-medium text-gray-700">AI Predictions</span>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
+                        <div class="w-4 h-4 rounded-full flex items-center justify-center text-xs text-white" style="background: #1B651B;">✓</div>
+                        <span class="text-sm font-medium text-gray-700">Confidence Score</span>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
+                        <div class="w-4 h-4 rounded-full flex items-center justify-center text-xs text-white" style="background: #1B651B;">✓</div>
+                        <span class="text-sm font-medium text-gray-700">Recommendations</span>
                     </div>
                 </div>
 
-                {{-- Predict Button --}}
+                {{-- Footer Note (moved above button) --}}
+                <p class="text-sm text-gray-500 mb-6 flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Predictions based on average water quality • ⏱️ ~3 seconds
+                </p>
+
+                {{-- Enhanced Predict Button --}}
                 <button type="button" wire:click="predictFishType"
-                    class="inline-flex items-center gap-2 px-6 py-3 text-white transition rounded-lg text-base font-semibold shadow-lg"
+                    class="inline-flex items-center gap-2 px-8 py-4 text-white transition rounded-3xl text-lg font-bold shadow-xl hover:shadow-2xl transform hover:scale-105 {{ $canPredict ? 'animate-pulse' : '' }}"
                     style="{{ $canPredict ? 'background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);' : 'background: #9ca3af; cursor: not-allowed;' }}"
                     {{ !$canPredict ? 'disabled' : '' }}
                     wire:loading.attr="disabled" wire:target="predictFishType">
-                    <span wire:loading.remove wire:target="predictFishType">🔍 Predict Fish Type</span>
-                    <span wire:loading wire:target="predictFishType">Predicting...</span>
+                    <span wire:loading.remove wire:target="predictFishType">🔍 Predict Optimal Fish Species</span>
+                    <span wire:loading wire:target="predictFishType">Analyzing Water Quality...</span>
                 </button>
 
                 {{-- Footer Note --}}
@@ -103,40 +106,48 @@
                     Predictions are based on your average water quality over the selected date range
                 </p>
 
-                {{-- Model Information Card with CVSU Branding --}}
-                <div class="mt-8 bg-white rounded-3xl shadow-xl p-6 border-l-4" style="border-color: #1B651B;">
-                    <div class="flex items-start gap-3 mb-4">
-                        <div class="flex-shrink-0 w-8 h-8 rounded-lg text-white flex items-center justify-center" style="background: #1B651B;">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1 text-left">
-                            <h4 class="text-sm font-bold text-gray-900 mb-1">About the Model</h4>
-                            <div class="text-xs text-gray-600 space-y-1">
-                                <div class="flex items-center justify-between">
-                                    <span>Algorithm:</span>
-                                    <span class="font-semibold text-gray-900">Decision Tree (CART)</span>
+                {{-- Model Information Card with CVSU Branding - Collapsed by default --}}
+                <details class="mt-8">
+                    <summary class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200 hover:border-green-300 transition text-sm font-medium text-gray-700">
+                        ℹ️ Learn about the algorithm
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <div class="mt-4 bg-white rounded-3xl shadow-xl p-6 border-l-4" style="border-color: #1B651B;">
+                        <div class="flex items-start gap-3 mb-4">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg text-white flex items-center justify-center" style="background: #1B651B;">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 text-left">
+                                <h4 class="text-sm font-bold text-gray-900 mb-1">About the Model</h4>
+                                <div class="text-xs text-gray-600 space-y-1">
+                                    <div class="flex items-center justify-between">
+                                        <span>Algorithm:</span>
+                                        <span class="font-semibold text-gray-900">Decision Tree (CART)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span>Parameters Used:</span>
+                                        <span class="font-semibold text-gray-900">4 (Temp, DO, Salinity, pH)</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span>Model Accuracy:</span>
+                                        <span class="font-semibold" style="color: #1B651B;">~87%</span>
+                                    </div>
+                                    @if($lastTrainedTimestamp && $lastTrainedTimestamp !== 'N/A')
+                                    <div class="flex items-center justify-between">
+                                        <span>Last Trained:</span>
+                                        <span class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($lastTrainedTimestamp)->format('M d, Y') }}</span>
+                                    </div>
+                                    @endif
                                 </div>
-                                <div class="flex items-center justify-between">
-                                    <span>Parameters Used:</span>
-                                    <span class="font-semibold text-gray-900">4 (Temp, DO, Salinity, pH)</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <span>Model Accuracy:</span>
-                                    <span class="font-semibold" style="color: #1B651B;">~87%</span>
-                                </div>
-                                @if($lastTrainedTimestamp && $lastTrainedTimestamp !== 'N/A')
-                                <div class="flex items-center justify-between">
-                                    <span>Last Trained:</span>
-                                    <span class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($lastTrainedTimestamp)->format('M d, Y') }}</span>
-                                </div>
-                                @endif
                             </div>
                         </div>
                     </div>
-                </div>
+                </details>
             </div>
 
             {{-- Train Button (Admin Only) for Empty State --}}
@@ -158,27 +169,33 @@
 
     @else
         {{-- STATE 2: RESULTS STATE --}}
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        
+        {{-- Quick Action Bar --}}
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6 p-4 bg-white rounded-3xl shadow-md">
             <button type="button" wire:click="resetPrediction"
-                class="inline-flex items-center gap-2 px-4 py-2 text-white hover:opacity-90 transition rounded-lg text-sm font-semibold shadow-md"
+                class="inline-flex items-center gap-2 px-5 py-2.5 text-white hover:opacity-90 transition rounded-full text-sm font-semibold shadow-sm"
                 style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);">
                 🔄 Predict Again
             </button>
-
-            @if($isAdminView)
-                <div class="flex flex-col items-end gap-2">
+            
+            <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="window.print()"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 transition rounded-full text-sm font-medium text-gray-700 border border-gray-200">
+                    📄 Download Report
+                </button>
+                <button type="button" onclick="if(navigator.share){navigator.share({title:'Fish Prediction',text:'Recommended: {{ $topPrediction['species_name'] ?? '' }}'})}else{alert('Share not supported')}"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 transition rounded-full text-sm font-medium text-gray-700 border border-gray-200">
+                    📱 Share
+                </button>
+                @if($isAdminView)
                     <button type="button" wire:click="trainModel"
-                        class="inline-flex items-center gap-2 px-5 py-2 text-white transition rounded-3xl font-semibold shadow-md text-sm"
-                        style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);"
-                        aria-label="Train model" wire:loading.attr="disabled" wire:target="trainModel" {{ $isTraining ? 'disabled' : '' }}>
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 transition rounded-full text-sm font-medium text-gray-700 border border-gray-200"
+                        wire:loading.attr="disabled" wire:target="trainModel" {{ $isTraining ? 'disabled' : '' }}>
                         <span wire:loading.remove wire:target="trainModel">⚙️ Train Model</span>
                         <span wire:loading wire:target="trainModel">Training...</span>
                     </button>
-                    @if($lastTrainedTimestamp && $lastTrainedTimestamp !== 'Error fetching date' && $lastTrainedTimestamp !== 'N/A')
-                        <p class="text-xs text-gray-500">Last Trained: {{ $lastTrainedTimestamp }}</p>
-                    @endif
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
 
         @php
@@ -232,9 +249,11 @@
                         @php 
                             $tempStatus = $this->getWaterQualityStatus('temperature', $waterQualityData['temperature']); 
                             $tempBadgeClass = $tempStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($tempStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
+                            $tempIcon = $tempStatus['color'] === 'green' ? '🟢' : ($tempStatus['color'] === 'yellow' ? '🟡' : '🔴');
                         @endphp
                         <div class="flex justify-between items-center py-3 border-b">
                             <div class="flex items-center gap-2">
+                                <span class="text-lg">{{ $tempIcon }}</span>
                                 <span>🌡️</span>
                                 <span class="font-medium">Temperature:</span>
                                 <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['temperature'], 2) }}°C</span>
@@ -247,9 +266,11 @@
                         @php 
                             $salinityStatus = $this->getWaterQualityStatus('salinity', $waterQualityData['salinity']); 
                             $salBadgeClass = $salinityStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($salinityStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
+                            $salIcon = $salinityStatus['color'] === 'green' ? '🟢' : ($salinityStatus['color'] === 'yellow' ? '🟡' : '🔴');
                         @endphp
                         <div class="flex justify-between items-center py-3 border-b">
                             <div class="flex items-center gap-2">
+                                <span class="text-lg">{{ $salIcon }}</span>
                                 <span>🧂</span>
                                 <span class="font-medium">Salinity:</span>
                                 <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['salinity'], 2) }} ppt</span>
@@ -262,9 +283,11 @@
                         @php 
                             $doStatus = $this->getWaterQualityStatus('dissolved_oxygen', $waterQualityData['dissolved_oxygen']); 
                             $doBadgeClass = $doStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($doStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
+                            $doIcon = $doStatus['color'] === 'green' ? '🟢' : ($doStatus['color'] === 'yellow' ? '🟡' : '🔴');
                         @endphp
                         <div class="flex justify-between items-center py-3 border-b">
                             <div class="flex items-center gap-2">
+                                <span class="text-lg">{{ $doIcon }}</span>
                                 <span>💨</span>
                                 <span class="font-medium">Dissolved Oxygen:</span>
                                 <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['dissolved_oxygen'], 2) }} mg/L</span>
@@ -277,9 +300,11 @@
                         @php 
                             $phStatus = $this->getWaterQualityStatus('ph_level', $waterQualityData['ph_level']); 
                             $phBadgeClass = $phStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($phStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
+                            $phIcon = $phStatus['color'] === 'green' ? '🟢' : ($phStatus['color'] === 'yellow' ? '🟡' : '🔴');
                         @endphp
                         <div class="flex justify-between items-center py-3">
                             <div class="flex items-center gap-2">
+                                <span class="text-lg">{{ $phIcon }}</span>
                                 <span>⚗️</span>
                                 <span class="font-medium">pH Level:</span>
                                 <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['ph_level'], 2) }}</span>
@@ -327,9 +352,15 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-3xl shadow-xl p-6">
-                    <h3 class="text-xl font-bold mb-4 text-gray-800">Detailed Predictions:</h3>
-                    <div class="space-y-3">
+                {{-- Detailed Predictions - Collapsible --}}
+                <details class="bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <summary class="cursor-pointer p-6 hover:bg-gray-50 transition flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-gray-800">All Species Rankings</h3>
+                        <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <div class="px-6 pb-6 space-y-3">
                         @foreach($predictionResults as $prediction)
                             <div>
                                 <div class="flex justify-between items-center mb-2">
@@ -345,7 +376,7 @@
                             </div>
                         @endforeach
                     </div>
-                </div>
+                </details>
             </div>
 
             <div class="lg:col-span-1">
