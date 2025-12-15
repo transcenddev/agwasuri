@@ -19,15 +19,7 @@
                     </a>
                 </div>
             </div>
-            <button @click="$dispatch('toggle-sidebar-desktop')" 
-                    class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-                    x-show="expanded"
-                    title="Collapse sidebar"
-                    aria-label="Toggle sidebar">
-                <svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                </svg>
-            </button>
+            {{-- Sidebar collapse button removed per design preference. --}}
         </div>
 
         {{-- Navigation links --}}
