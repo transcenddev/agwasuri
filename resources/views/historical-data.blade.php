@@ -7,7 +7,7 @@
 
         {{-- Global filters moved to topbar; local filter card removed to avoid duplication --}}
 
-        <x-card class="mt-4 border-t border-gray-100 pt-4 shadow-sm">
+        <x-card class="mt-4">
             <x-slot name="header">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
