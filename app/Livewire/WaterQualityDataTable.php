@@ -21,6 +21,11 @@ class WaterQualityDataTable extends Component
 
     public ?string $startDate = null;
     public ?string $endDate = null;
+    
+    protected $queryString = [
+        'startDate' => ['as' => 'start', 'except' => ''],
+        'endDate' => ['as' => 'end', 'except' => ''],
+    ];
 
     #[On('user-selected')]
     public function updateUser($userId)
@@ -85,9 +90,17 @@ class WaterQualityDataTable extends Component
         } catch (\Throwable $e) {
             $this->userId = session('selected_user', Auth::id());
         }
+        
+        // Initialize date range from URL query params
+        if (request()->has('start')) {
+            $this->startDate = request('start');
+        }
+        if (request()->has('end')) {
+            $this->endDate = request('end');
+        }
 
         try {
-            \Log::info('WaterQualityDataTable:mount', ['initialUserId' => $this->userId]);
+            \Log::info('WaterQualityDataTable:mount', ['initialUserId' => $this->userId, 'startDate' => $this->startDate, 'endDate' => $this->endDate]);
         } catch (\Throwable $e) {}
     }
 

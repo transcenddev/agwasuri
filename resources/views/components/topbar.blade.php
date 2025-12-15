@@ -22,11 +22,17 @@
         <div class="flex-1"></div>
 
         {{-- Compact range presets (hidden on small screens) - moved to the right. No inner changes. --}}
-        <div id="topbar-range" x-data="{ open:false, customOpen:false, label: '24h' }" @keydown.escape.window="open=false; customOpen=false" class="hidden md:flex items-center gap-2 {{ $isAdmin ? 'ms-4' : '' }}">
+        <div id="topbar-range" x-data="{ open:false, customOpen:false, label: '24h', customLabel: 'Custom' }" @keydown.escape.window="open=false; customOpen=false" class="hidden md:flex items-center gap-2 {{ $isAdmin ? 'ms-4' : '' }}">
             <!-- Separate Custom pill to the left of the dropdown -->
             <div class="relative order-first">
-                <button @click="customOpen = !customOpen; open = false" type="button" class="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="dialog" :aria-expanded="customOpen" :aria-controls="'topbar-custom-pop'">
-                    Custom ▾
+                <button @click="customOpen = !customOpen; open = false" type="button" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="dialog" :aria-expanded="customOpen" :aria-controls="'topbar-custom-pop'">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span x-text="customLabel">Custom</span>
+                    <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
                 </button>
                 <div x-show="customOpen" x-trap="customOpen" @click.outside="customOpen=false" x-cloak id="topbar-custom-pop" role="dialog" aria-modal="true" class="absolute right-full mr-2 top-0 z-50 w-[18rem] bg-white rounded-md shadow-lg p-3">
                     <label class="text-xs text-gray-600">Start Date</label>
@@ -34,7 +40,7 @@
                     <label class="text-xs text-gray-600 mt-2">End Date</label>
                     <input type="date" id="topbar-custom-end" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
                     <div class="flex items-center gap-2 mt-2">
-                        <button type="button" id="topbar-custom-apply" @click="customOpen=false;" class="inline-flex items-center px-3 py-1.5 rounded-md bg-cvsu text-white text-sm">Apply</button>
+                        <button type="button" id="topbar-custom-apply" @click="customOpen=false; const start = document.getElementById('topbar-custom-start').value; const end = document.getElementById('topbar-custom-end').value; if(start && end) { const s = new Date(start).toLocaleDateString('en-US', {month: 'short', day: '2-digit'}); const e = new Date(end).toLocaleDateString('en-US', {month: 'short', day: '2-digit'}); customLabel = s + ' - ' + e; }" class="inline-flex items-center px-3 py-1.5 rounded-md bg-cvsu text-white text-sm">Apply</button>
                         <button type="button" @click.prevent="customOpen=false" class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-200 text-sm">Cancel</button>
                     </div>
                 </div>
@@ -57,7 +63,7 @@
             </div>
 
             <div class="relative">
-                <button @click="open = !open; customOpen=false" type="button" class="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="menu" :aria-expanded="open">
+                <button @click="open = !open; customOpen=false" type="button" class="inline-flex items-center gap-2 px-3 py-1 rounded-2xl border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="menu" :aria-expanded="open">
                     <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3M21 12A9 9 0 113 12a9 9 0 0118 0z" />
                     </svg>
@@ -80,7 +86,7 @@
             </div>
             
             <!-- Export Data Button -->
-            <button type="button" onclick="alert('Export functionality coming soon!')" class="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-gray-200 bg-white text-xs hover:bg-gray-50">
+            <button type="button" onclick="alert('Export functionality coming soon!')" class="inline-flex items-center gap-2 px-3 py-1 rounded-2xl border border-gray-200 bg-white text-xs hover:bg-gray-50">
                 <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -150,9 +156,24 @@
             // update relative display every 30s
             setInterval(() => { if (lastTs && lastEl) lastEl.textContent = fmtRelative(lastTs); }, 30000);
 
-            // Range preset buttons in topbar: dispatch date-range-updated with [start, end]
+            // Range preset buttons in topbar: update URL query params and dispatch event
             function isoNow(){ return new Date().toISOString(); }
             function isoNowMinus(ms){ return new Date(Date.now() - ms).toISOString(); }
+            
+            function updateDateRange(start, end) {
+                // Update URL query parameters
+                const url = new URL(window.location.href);
+                if (start) url.searchParams.set('start', start);
+                else url.searchParams.delete('start');
+                if (end) url.searchParams.set('end', end);
+                else url.searchParams.delete('end');
+                
+                // Update URL without page reload
+                window.history.pushState({}, '', url.toString());
+                
+                // Dispatch event for Livewire components
+                window.dispatchEvent(new CustomEvent('date-range-updated', { detail: [ start, end ] }));
+            }
 
             // Attach handlers once DOM ready
             document.addEventListener('DOMContentLoaded', function(){
@@ -165,8 +186,10 @@
                             else if (r === '24h') start = isoNowMinus(1000*60*60*24);
                             else if (r === '7d') start = isoNowMinus(1000*60*60*24*7);
                             else if (r === '30d') start = isoNowMinus(1000*60*60*24*30);
-                            window.dispatchEvent(new CustomEvent('date-range-updated', { detail: [ start, end ] }));
-                            // update visible label in dropdown
+                            
+                            updateDateRange(start, end);
+                            
+                            // Update visible label in dropdown
                             try {
                                 const disp = document.getElementById('topbar-range-display');
                                 if (disp) disp.textContent = r;
@@ -183,9 +206,10 @@
                                 alert('Please pick both start and end dates');
                                 return;
                             }
-                            // send YYYY-MM-DD strings; server expands to day bounds
-                            window.dispatchEvent(new CustomEvent('date-range-updated', { detail: [ s, e ] }));
-                            // update dropdown label to 'Custom'
+                            
+                            updateDateRange(s, e);
+                            
+                            // Update dropdown label to 'Custom'
                             try {
                                 const disp = document.getElementById('topbar-range-display');
                                 if (disp) disp.textContent = 'Custom';
