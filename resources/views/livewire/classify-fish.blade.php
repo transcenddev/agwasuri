@@ -31,7 +31,7 @@
                     <svg class="w-4 h-4" style="color: #1B651B;" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="text-xs font-semibold" style="color: #1B651B;">✓ AI-Powered Recommendations</span>
+                    <span class="text-xs font-semibold" style="color: #1B651B;">AI-Powered Recommendations</span>
                 </div>
 
                 {{-- Animated Fish Carousel --}}
@@ -63,19 +63,27 @@
                 {{-- Feature Pills (horizontal) --}}
                 <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
                     <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
-                        <div class="w-4 h-4 rounded-full flex items-center justify-center text-xs text-white" style="background: #1B651B;">✓</div>
+                        <svg class="w-4 h-4" style="color: #1B651B;" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
                         <span class="text-sm font-medium text-gray-700">Water Analysis</span>
                     </div>
                     <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
-                        <div class="w-4 h-4 rounded-full flex items-center justify-center text-xs text-white" style="background: #1B651B;">✓</div>
+                        <svg class="w-4 h-4" style="color: #1B651B;" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
                         <span class="text-sm font-medium text-gray-700">AI Predictions</span>
                     </div>
                     <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
-                        <div class="w-4 h-4 rounded-full flex items-center justify-center text-xs text-white" style="background: #1B651B;">✓</div>
+                        <svg class="w-4 h-4" style="color: #1B651B;" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
                         <span class="text-sm font-medium text-gray-700">Confidence Score</span>
                     </div>
                     <div class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100">
-                        <div class="w-4 h-4 rounded-full flex items-center justify-center text-xs text-white" style="background: #1B651B;">✓</div>
+                        <svg class="w-4 h-4" style="color: #1B651B;" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
                         <span class="text-sm font-medium text-gray-700">Recommendations</span>
                     </div>
                 </div>
@@ -85,7 +93,7 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Predictions based on average water quality • ⏱️ ~3 seconds
+                    Predictions based on average water quality | ~3 seconds
                 </p>
 
                 {{-- Enhanced Predict Button --}}
@@ -94,7 +102,10 @@
                     style="{{ $canPredict ? 'background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);' : 'background: #9ca3af; cursor: not-allowed;' }}"
                     {{ !$canPredict ? 'disabled' : '' }}
                     wire:loading.attr="disabled" wire:target="predictFishType">
-                    <span wire:loading.remove wire:target="predictFishType">🔍 Predict Optimal Fish Species</span>
+                    <svg wire:loading.remove wire:target="predictFishType" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <span wire:loading.remove wire:target="predictFishType">Predict Optimal Fish Species</span>
                     <span wire:loading wire:target="predictFishType">Analyzing Water Quality...</span>
                 </button>
 
@@ -109,7 +120,10 @@
                 {{-- Model Information Card with CVSU Branding - Collapsed by default --}}
                 <details class="mt-8">
                     <summary class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-200 hover:border-green-300 transition text-sm font-medium text-gray-700">
-                        ℹ️ Learn about the algorithm
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Learn about the algorithm
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
@@ -157,7 +171,11 @@
                         class="inline-flex items-center gap-2 px-6 py-3 text-white transition rounded-3xl font-semibold shadow-xl text-sm"
                         style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);"
                         aria-label="Train model" wire:loading.attr="disabled" wire:target="trainModel" {{ $isTraining ? 'disabled' : '' }}>
-                        <span wire:loading.remove wire:target="trainModel">⚙️ Train Model</span>
+                        <svg wire:loading.remove wire:target="trainModel" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span wire:loading.remove wire:target="trainModel">Train Model</span>
                         <span wire:loading wire:target="trainModel">Training...</span>
                     </button>
                     @if($lastTrainedTimestamp && $lastTrainedTimestamp !== 'Error fetching date' && $lastTrainedTimestamp !== 'N/A')
@@ -175,23 +193,36 @@
             <button type="button" wire:click="resetPrediction"
                 class="inline-flex items-center gap-2 px-5 py-2.5 text-white hover:opacity-90 transition rounded-full text-sm font-semibold shadow-sm"
                 style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%);">
-                🔄 Predict Again
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Predict Again
             </button>
             
             <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="window.print()"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 transition rounded-full text-sm font-medium text-gray-700 border border-gray-200">
-                    📄 Download Report
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Download Report
                 </button>
                 <button type="button" onclick="if(navigator.share){navigator.share({title:'Fish Prediction',text:'Recommended: {{ $topPrediction['species_name'] ?? '' }}'})}else{alert('Share not supported')}"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 transition rounded-full text-sm font-medium text-gray-700 border border-gray-200">
-                    📱 Share
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                    Share
                 </button>
                 @if($isAdminView)
                     <button type="button" wire:click="trainModel"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 transition rounded-full text-sm font-medium text-gray-700 border border-gray-200"
                         wire:loading.attr="disabled" wire:target="trainModel" {{ $isTraining ? 'disabled' : '' }}>
-                        <span wire:loading.remove wire:target="trainModel">⚙️ Train Model</span>
+                        <svg wire:loading.remove wire:target="trainModel" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span wire:loading.remove wire:target="trainModel">Train Model</span>
                         <span wire:loading wire:target="trainModel">Training...</span>
                     </button>
                 @endif
@@ -215,7 +246,9 @@
                              class="w-64 md:w-80 h-auto object-cover rounded-3xl mx-auto shadow-xl" />
                     @else
                         <div class="w-64 md:w-80 h-64 md:h-80 bg-gray-100 rounded-3xl flex items-center justify-center mx-auto shadow-xl">
-                            <span class="text-6xl">🐟</span>
+                            <svg class="w-24 h-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
                         </div>
                     @endif
                     
@@ -233,7 +266,10 @@
 
                 <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm shadow-md" 
                      style="background: linear-gradient(135deg, #1B651B 0%, #0f4910 100%); color: white;">
-                    ✅ PERPEKTO PARA SA {{ strtoupper($topDisplay) }} / PERFECT FOR {{ strtoupper($topDisplay) }}
+                    <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    PERPEKTO PARA SA {{ strtoupper($topDisplay) }} / PERFECT FOR {{ strtoupper($topDisplay) }}
                 </div>
             </div>
         @endif
@@ -243,18 +279,20 @@
                 @if(!empty($waterQualityData))
                     <div class="bg-white rounded-3xl shadow-xl p-6">
                         <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800">
-                            📊 Water Quality Analysis
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            Water Quality Analysis
                         </h3>
 
                         @php 
                             $tempStatus = $this->getWaterQualityStatus('temperature', $waterQualityData['temperature']); 
                             $tempBadgeClass = $tempStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($tempStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
-                            $tempIcon = $tempStatus['color'] === 'green' ? '🟢' : ($tempStatus['color'] === 'yellow' ? '🟡' : '🔴');
+                            $tempCircleClass = $tempStatus['color'] === 'green' ? 'bg-green-500' : ($tempStatus['color'] === 'yellow' ? 'bg-yellow-500' : 'bg-red-500');
                         @endphp
                         <div class="flex justify-between items-center py-3 border-b">
                             <div class="flex items-center gap-2">
-                                <span class="text-lg">{{ $tempIcon }}</span>
-                                <span>🌡️</span>
+                                <span class="inline-block w-2 h-2 rounded-full {{ $tempCircleClass }}"></span>
                                 <span class="font-medium">Temperature:</span>
                                 <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['temperature'], 2) }}°C</span>
                             </div>
@@ -266,12 +304,11 @@
                         @php 
                             $salinityStatus = $this->getWaterQualityStatus('salinity', $waterQualityData['salinity']); 
                             $salBadgeClass = $salinityStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($salinityStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
-                            $salIcon = $salinityStatus['color'] === 'green' ? '🟢' : ($salinityStatus['color'] === 'yellow' ? '🟡' : '🔴');
+                            $salCircleClass = $salinityStatus['color'] === 'green' ? 'bg-green-500' : ($salinityStatus['color'] === 'yellow' ? 'bg-yellow-500' : 'bg-red-500');
                         @endphp
                         <div class="flex justify-between items-center py-3 border-b">
                             <div class="flex items-center gap-2">
-                                <span class="text-lg">{{ $salIcon }}</span>
-                                <span>🧂</span>
+                                <span class="inline-block w-2 h-2 rounded-full {{ $salCircleClass }}"></span>
                                 <span class="font-medium">Salinity:</span>
                                 <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['salinity'], 2) }} ppt</span>
                             </div>
@@ -283,12 +320,11 @@
                         @php 
                             $doStatus = $this->getWaterQualityStatus('dissolved_oxygen', $waterQualityData['dissolved_oxygen']); 
                             $doBadgeClass = $doStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($doStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
-                            $doIcon = $doStatus['color'] === 'green' ? '🟢' : ($doStatus['color'] === 'yellow' ? '🟡' : '🔴');
+                            $doCircleClass = $doStatus['color'] === 'green' ? 'bg-green-500' : ($doStatus['color'] === 'yellow' ? 'bg-yellow-500' : 'bg-red-500');
                         @endphp
                         <div class="flex justify-between items-center py-3 border-b">
                             <div class="flex items-center gap-2">
-                                <span class="text-lg">{{ $doIcon }}</span>
-                                <span>💨</span>
+                                <span class="inline-block w-2 h-2 rounded-full {{ $doCircleClass }}"></span>
                                 <span class="font-medium">Dissolved Oxygen:</span>
                                 <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['dissolved_oxygen'], 2) }} mg/L</span>
                             </div>
@@ -300,12 +336,11 @@
                         @php 
                             $phStatus = $this->getWaterQualityStatus('ph_level', $waterQualityData['ph_level']); 
                             $phBadgeClass = $phStatus['color'] === 'green' ? 'bg-green-100 text-green-800' : ($phStatus['color'] === 'yellow' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
-                            $phIcon = $phStatus['color'] === 'green' ? '🟢' : ($phStatus['color'] === 'yellow' ? '🟡' : '🔴');
+                            $phCircleClass = $phStatus['color'] === 'green' ? 'bg-green-500' : ($phStatus['color'] === 'yellow' ? 'bg-yellow-500' : 'bg-red-500');
                         @endphp
                         <div class="flex justify-between items-center py-3">
                             <div class="flex items-center gap-2">
-                                <span class="text-lg">{{ $phIcon }}</span>
-                                <span>⚗️</span>
+                                <span class="inline-block w-2 h-2 rounded-full {{ $phCircleClass }}"></span>
                                 <span class="font-medium">pH Level:</span>
                                 <span class="text-gray-700 font-semibold">{{ number_format($waterQualityData['ph_level'], 2) }}</span>
                             </div>
@@ -327,26 +362,37 @@
 
                 <div class="bg-white rounded-3xl shadow-xl p-6 border-l-4" style="border-color: #1B651B;">
                     <h3 class="text-xl font-bold mb-4 flex items-center gap-2" style="color: #1B651B;">
-                        📋 Mga Dapat Gawin / Recommended Actions
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        Mga Dapat Gawin / Recommended Actions
                     </h3>
                     
                     <div class="space-y-3">
                         <div class="flex items-start gap-3">
-                            <span class="text-lg">✅</span>
+                            <svg class="w-5 h-5 text-green-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
                             <p class="text-sm text-gray-700">Ihanda ang {{ $topDisplay ?? 'fish' }} fingerlings</p>
                         </div>
                         <div class="flex items-start gap-3">
-                            <span class="text-lg">✅</span>
+                            <svg class="w-5 h-5 text-green-600 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
                             <p class="text-sm text-gray-700">Itakda ang feeding schedule: 3x daily (morning, noon, afternoon)</p>
                         </div>
                         @if(isset($salinityStatus) && $salinityStatus['color'] !== 'green')
                             <div class="flex items-start gap-3">
-                                <span class="text-lg">⚠️</span>
+                                <svg class="w-5 h-5 text-yellow-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
                                 <p class="text-sm text-gray-700">Bantayan ang salinity levels - {{ $salinityStatus['badgeTl'] }}</p>
                             </div>
                         @endif
                         <div class="flex items-start gap-3">
-                            <span class="text-lg">📞</span>
+                            <svg class="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
                             <p class="text-sm text-gray-700">Contact MAO Ternate for support: +63-XXX-XXX-XXXX</p>
                         </div>
                     </div>
@@ -383,7 +429,10 @@
                 @if(!empty($modelMetrics))
                     <div class="bg-white rounded-3xl shadow-xl p-6 lg:sticky lg:top-24">
                         <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800">
-                            🎯 Model Performance
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Model Performance
                         </h3>
 
                         @if(isset($modelMetrics['accuracy']))
