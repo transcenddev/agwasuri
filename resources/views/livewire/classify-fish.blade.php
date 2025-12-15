@@ -24,7 +24,7 @@
     @if(empty($predictionResults))
         <div class="max-w-2xl mx-auto">
             {{-- Centered Empty State Card --}}
-            <div class="text-center py-16 px-4">
+            <div class="text-center py-8 px-4">
                 {{-- Animated Fish Carousel --}}
                 <div class="mx-auto flex items-center justify-center w-96 h-96 mb-6 overflow-visible relative" id="fish-carousel" style="background: transparent;">
                     <img id="carousel-fish-img" src="{{ asset('assets/species/tilapia.png') }}" alt="Fish species" class="w-80 h-72 md:w-96 md:h-80 object-contain transition-all duration-500 opacity-0 mx-auto">

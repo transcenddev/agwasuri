@@ -1,6 +1,6 @@
 @section('title', 'Optimal Fish')
 <x-app-layout>
-    <x-container class="py-6">
+    <x-container class="py-4">
         @php
             $activeUserId = request('user') ?? session('selected_user', Auth::id());
         @endphp
