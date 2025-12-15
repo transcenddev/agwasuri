@@ -265,9 +265,46 @@
             </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-            <div class="lg:col-span-2 space-y-6">
-                @if(!empty($waterQualityData))
+        {{-- Model Performance Metrics Bar --}}
+        @if(!empty($modelMetrics))
+            <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
+                @if(isset($modelMetrics['accuracy']))
+                    <div class="inline-flex flex-col items-center px-6 py-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-2xl font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['accuracy'], 2) }}%</div>
+                        <div class="text-xs text-gray-600 font-semibold">Accuracy</div>
+                        <div class="text-xs text-gray-500">Overall correctness</div>
+                    </div>
+                @endif
+
+                @if(isset($modelMetrics['precision']))
+                    <div class="inline-flex flex-col items-center px-6 py-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-2xl font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['precision'], 2) }}%</div>
+                        <div class="text-xs text-gray-600 font-semibold">Precision</div>
+                        <div class="text-xs text-gray-500">Positive prediction accuracy</div>
+                    </div>
+                @endif
+
+                @if(isset($modelMetrics['recall']))
+                    <div class="inline-flex flex-col items-center px-6 py-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-2xl font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['recall'], 2) }}%</div>
+                        <div class="text-xs text-gray-600 font-semibold">Recall</div>
+                        <div class="text-xs text-gray-500">Detection rate</div>
+                    </div>
+                @endif
+
+                @if(isset($modelMetrics['f1_score']))
+                    <div class="inline-flex flex-col items-center px-6 py-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <div class="text-2xl font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['f1_score'], 2) }}%</div>
+                        <div class="text-xs text-gray-600 font-semibold">F1 Score</div>
+                        <div class="text-xs text-gray-500">Balanced performance</div>
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        {{-- Full-width content sections --}}
+        <div class="space-y-6">
+            @if(!empty($waterQualityData))
                     <div class="bg-white rounded-3xl shadow-xl p-6">
                         <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800">
                             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -414,60 +451,6 @@
                         @endforeach
                     </div>
                 </details>
-            </div>
-
-            <div class="lg:col-span-1">
-                @if(!empty($modelMetrics))
-                    <div class="bg-white rounded-3xl shadow-xl p-6 lg:sticky lg:top-24">
-                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            Model Performance
-                        </h3>
-
-                        @if(isset($modelMetrics['accuracy']))
-                            <div class="flex justify-between items-center py-3 border-b">
-                                <div>
-                                    <div class="text-sm text-gray-600 font-semibold">Accuracy</div>
-                                    <div class="text-xs text-gray-500">Overall correctness</div>
-                                </div>
-                                <div class="text-lg font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['accuracy'], 2) }}%</div>
-                            </div>
-                        @endif
-
-                        @if(isset($modelMetrics['precision']))
-                            <div class="flex justify-between items-center py-3 border-b">
-                                <div>
-                                    <div class="text-sm text-gray-600 font-semibold">Precision</div>
-                                    <div class="text-xs text-gray-500">Positive prediction accuracy</div>
-                                </div>
-                                <div class="text-lg font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['precision'], 2) }}%</div>
-                            </div>
-                        @endif
-
-                        @if(isset($modelMetrics['recall']))
-                            <div class="flex justify-between items-center py-3 border-b">
-                                <div>
-                                    <div class="text-sm text-gray-600 font-semibold">Recall</div>
-                                    <div class="text-xs text-gray-500">Detection rate</div>
-                                </div>
-                                <div class="text-lg font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['recall'], 2) }}%</div>
-                            </div>
-                        @endif
-
-                        @if(isset($modelMetrics['f1_score']))
-                            <div class="flex justify-between items-center py-3">
-                                <div>
-                                    <div class="text-sm text-gray-600 font-semibold">F1 Score</div>
-                                    <div class="text-xs text-gray-500">Balanced performance</div>
-                                </div>
-                                <div class="text-lg font-bold" style="color: #1B651B;">{{ number_format($modelMetrics['f1_score'], 2) }}%</div>
-                            </div>
-                        @endif
-                    </div>
-                @endif
-            </div>
         </div>
     @endif
 
