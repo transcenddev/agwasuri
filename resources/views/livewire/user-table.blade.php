@@ -72,11 +72,6 @@
                 <div class="flex-1">
                     <h1 class="text-lg font-semibold text-gray-900">Account Management</h1>
                     <p class="text-sm text-gray-500 mt-1">Manage accounts, roles, and API keys</p>
-                    @isset($totalUsers)
-                        <div class="text-xs text-gray-500 mt-2">
-                            {{ $totalUsers }} users · {{ $adminCount }} {{ $adminCount == 1 ? 'admin' : 'admins' }} · {{ $regularCount }} {{ $regularCount == 1 ? 'farmer' : 'farmers' }}
-                        </div>
-                    @endisset
                 </div>
             </x-slot>
 
