@@ -20,56 +20,24 @@
         }
     @endphp
 
-    {{-- Contextual Alert Banner (replaces simple badge) --}}
-    @if($statusKey !== 'disconnected' && $statusKey === 'warning')
-        <div class="mb-4 rounded-lg bg-amber-50 border-l-4 border-amber-500 p-4" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-show="!compact" x-transition>
-            <div class="flex items-start gap-3">
-                <svg class="h-6 w-6 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
-                </svg>
-                <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-amber-800">⚠️ {{ $status }}</h3>
-                    <p class="mt-1 text-sm text-amber-700">{{ $reasonText }}</p>
-                    <div class="mt-3">
-                        <a href="{{ route('historical-data') }}" class="inline-flex items-center text-sm font-medium text-amber-800 hover:text-amber-900 underline">
-                            View details
-                            <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @elseif($statusKey !== 'disconnected' && $statusKey === 'critical')
-        <div class="mb-4 rounded-lg bg-red-50 border-l-4 border-red-500 p-4" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-show="!compact" x-transition>
+    {{-- Contextual Alert Banner - ONLY show when score < 70% (critical state) --}}
+    @if($statusKey !== 'disconnected' && $this->overallScore < 70)
+        <div class="mb-4 rounded-lg bg-red-50 border-l-4 border-red-600 p-4 animate-pulse" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-show="!compact" x-transition>
             <div class="flex items-start gap-3">
                 <svg class="h-6 w-6 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
                 </svg>
                 <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-red-800">🔴 {{ $status }}</h3>
-                    <p class="mt-1 text-sm text-red-700">{{ $reasonText }}</p>
+                    <h3 class="text-sm font-semibold text-red-800">🚨 CRITICAL: Multiple parameters out of range</h3>
+                    <p class="mt-1 text-sm text-red-700">Immediate action required to prevent fish mortality and productivity loss.</p>
                     <div class="mt-3">
-                        <a href="{{ route('historical-data') }}" class="inline-flex items-center text-sm font-medium text-red-800 hover:text-red-900 underline">
-                            View details
-                            <svg class="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <a href="{{ route('historical-data') }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors">
+                            Take Action Now
+                            <svg class="ml-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
                         </a>
                     </div>
-                </div>
-            </div>
-        </div>
-    @elseif($statusKey !== 'disconnected' && $statusKey === 'healthy')
-        <div class="mb-4 rounded-lg bg-green-50 border-l-4 border-green-500 p-4" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-show="!compact" x-transition>
-            <div class="flex items-start gap-3">
-                <svg class="h-6 w-6 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-green-800">🟢 {{ $status }}</h3>
-                    <p class="mt-1 text-sm text-green-700">{{ $reasonText }}</p>
                 </div>
             </div>
         </div>
@@ -90,14 +58,50 @@
             </div>
         </div>
     @endif
-    {{-- Mobile-first: 2 columns (2x2 grid) by default, expand to 4 columns on larger screens --}}
-    <dl class="grid grid-cols-2 md:grid-cols-4 transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'gap-4' : 'gap-6'">
+    {{-- Mobile-first: 2x2.5 grid by default with score card first, expand to 5 columns on larger screens --}}
+    <dl class="grid grid-cols-2 md:grid-cols-5 transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'gap-4' : 'gap-6'">
         @php
+            $scoreBadge = $this->scoreStatusBadge();
             $tempStatus = $this->statusFor('temperature', $this->temperature);
             $salStatus = $this->statusFor('salinity', $this->salinity);
             $doStatus = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
             $phStatus = $this->statusFor('ph_level', $this->ph_level);
         @endphp
+
+        {{-- Water Quality Score Card (5th/1st KPI) - Inspired by Plant Health Design --}}
+        <div class="col-span-2 md:col-span-1 flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }}" 
+             x-data="{ compact: false }" 
+             @toggle-compact-view.window="compact = !compact" 
+             x-bind:class="compact ? 'px-3 py-4' : 'px-5 py-6'"
+             style="background: linear-gradient(135deg, {{ $this->overallScore >= 90 ? '#1B651B 0%, #0f4910 100%' : ($this->overallScore >= 70 ? '#f59e0b 0%, #d97706 100%' : '#dc2626 0%, #b91c1c 100%') }});">
+            
+            {{-- Decorative gradient overlay --}}
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+            
+            {{-- Icon --}}
+            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mb-3 relative z-10">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+
+            <dd class="flex flex-col items-center gap-2 mb-3 relative z-10">
+                <div class="flex items-baseline gap-1">
+                    <span class="font-black text-white transition-all duration-300" x-bind:class="compact ? 'text-4xl' : 'text-5xl'">{{ $this->overallScore }}</span>
+                    <span class="text-2xl font-bold text-white opacity-90">%</span>
+                </div>
+                
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-white bg-opacity-20 text-white backdrop-blur-sm uppercase tracking-wide">
+                    {{ is_array($scoreBadge) ? $scoreBadge['text'] : $scoreBadge }}
+                </span>
+            </dd>
+            
+            <dt class="text-sm font-semibold text-white opacity-90 mb-2 relative z-10">Water Quality Score</dt>
+            
+            <p class="text-xs text-white opacity-80 leading-relaxed max-w-[200px] relative z-10">
+                {{ $this->overallScore >= 90 ? 'All parameters optimal.' : ($this->overallScore >= 70 ? 'Some parameters need attention.' : 'Immediate action required.') }}
+            </p>
+        </div>
 
         {{-- Temperature (°C) --}}
         <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
@@ -126,11 +130,8 @@
             
                 @if(!empty($temperatureClassification['label']))
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
-                    <span class="flex items-center gap-2">
-                        <span class="inline-block w-2 h-2 rounded-full {{ $this->dotClassForStatus($tempStatus) }}" aria-hidden="true"></span>
-                            <span class="text-xs font-semibold {{ $this->badgeClassForStatus($tempStatus) }} px-2.5 py-0.5 rounded-full">
-                                {{ ucfirst($tempStatus) }}
-                            </span>
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full @if($tempStatus === 'good') bg-green-100 text-green-800 @elseif($tempStatus === 'warning') bg-yellow-100 text-yellow-800 @elseif($tempStatus === 'danger') bg-red-100 text-red-800 @else bg-gray-100 text-gray-600 @endif">
+                        {{ ucfirst($tempStatus) }}
                     </span>
                     {{-- simplified: only show badge (bilingual) and dot; remove duplicate label and technical notes --}}
                 </div>
@@ -173,11 +174,8 @@
             
                 @if(!empty($salinityClassification['label']))
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
-                    <span class="flex items-center gap-2">
-                        <span class="inline-block w-2 h-2 rounded-full {{ $this->dotClassForStatus($salStatus) }}" aria-hidden="true"></span>
-                        <span class="text-xs font-semibold {{ $this->badgeClassForStatus($salStatus) }} px-2.5 py-0.5 rounded-full">
-                            {{ ucfirst($salStatus) }}
-                        </span>
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full @if($salStatus === 'good') bg-green-100 text-green-800 @elseif($salStatus === 'warning') bg-yellow-100 text-yellow-800 @elseif($salStatus === 'danger') bg-red-100 text-red-800 @else bg-gray-100 text-gray-600 @endif">
+                        {{ ucfirst($salStatus) }}
                     </span>
                     {{-- simplified: only show badge (bilingual) and dot; remove duplicate label and technical notes --}}
                 </div>
@@ -220,11 +218,8 @@
             
                 @if(!empty($dissolvedOxygenClassification['label']))
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
-                    <span class="flex items-center gap-2">
-                        <span class="inline-block w-2 h-2 rounded-full {{ $this->dotClassForStatus($doStatus) }}" aria-hidden="true"></span>
-                        <span class="text-xs font-semibold {{ $this->badgeClassForStatus($doStatus) }} px-2.5 py-0.5 rounded-full">
-                            {{ ucfirst($doStatus) }}
-                        </span>
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full @if($doStatus === 'good') bg-green-100 text-green-800 @elseif($doStatus === 'warning') bg-yellow-100 text-yellow-800 @elseif($doStatus === 'danger') bg-red-100 text-red-800 @else bg-gray-100 text-gray-600 @endif">
+                        {{ ucfirst($doStatus) }}
                     </span>
                     {{-- simplified: only show badge (bilingual) and dot; remove duplicate label and technical notes --}}
                 </div>
@@ -267,11 +262,8 @@
             
                 @if(!empty($phClassification['label']))
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
-                    <span class="flex items-center gap-2">
-                        <span class="inline-block w-2 h-2 rounded-full {{ $this->dotClassForStatus($phStatus) }}" aria-hidden="true"></span>
-                        <span class="text-xs font-semibold {{ $this->badgeClassForStatus($phStatus) }} px-2.5 py-0.5 rounded-full">
-                            {{ ucfirst($phStatus) }}
-                        </span>
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full @if($phStatus === 'good') bg-green-100 text-green-800 @elseif($phStatus === 'warning') bg-yellow-100 text-yellow-800 @elseif($phStatus === 'danger') bg-red-100 text-red-800 @else bg-gray-100 text-gray-600 @endif">
+                        {{ ucfirst($phStatus) }}
                     </span>
                     {{-- simplified: only show badge (bilingual) and dot; remove duplicate label and technical notes --}}
                 </div>
