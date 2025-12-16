@@ -151,10 +151,55 @@ class WaterQualityChart extends Component
 
         // fetch a reasonable number of points for the chart (most recent first)
         $rows = $query->orderBy('recorded_at', 'desc')->limit(200)->get()->reverse()->values();
+        
+        // CRITICAL DEBUG: Log what we're fetching
+        \Log::info('WaterQualityChart loadData', [
+            'userId' => $this->userId,
+            'rowCount' => $rows->count(),
+            'hasData' => !$rows->isEmpty(),
+            'firstRow' => $rows->first() ? [
+                'recorded_at' => $rows->first()->recorded_at,
+                'temperature' => $rows->first()->temperature,
+                'ph' => $rows->first()->ph_level
+            ] : null
+        ]);
 
         if ($rows->isEmpty()) {
+            // CRITICAL: Create valid empty chart structure to prevent undefined crashes
             $this->chartData = ['labels' => [], 'series' => [], 'colors' => [], 'visible' => []];
             $this->legendData = [];
+            
+            // CRITICAL: Build minimal valid lineChartModelArray with empty series to prevent JS crashes
+            $this->lineChartModelArray = [
+                'jsonConfig' => [
+                    'chart' => [
+                        'id' => 'water-quality-' . ($this->userId ?? '0'),
+                        'type' => 'line',
+                        'height' => 420,
+                        'width' => '100%',
+                        'maintainAspectRatio' => false,
+                        'toolbar' => ['show' => false]
+                    ],
+                    'series' => [
+                        ['name' => 'Temperature', 'data' => []],
+                        ['name' => 'Salinity', 'data' => []],
+                        ['name' => 'Dissolved Oxygen', 'data' => []],
+                        ['name' => 'pH', 'data' => []]
+                    ],
+                    'xaxis' => ['type' => 'datetime'],
+                    'yaxis' => ['show' => true],
+                    'dataLabels' => ['enabled' => false],
+                    'stroke' => ['curve' => 'smooth', 'width' => [2.6, 1.6, 1.6, 1.6]],
+                    'markers' => ['size' => 0],
+                    'tooltip' => ['enabled' => true, 'shared' => true],
+                    'legend' => ['show' => true, 'position' => 'bottom']
+                ],
+                'meta' => [
+                    'series_names' => ['Temperature', 'Salinity', 'Dissolved Oxygen', 'pH'],
+                    'series_keys' => ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level']
+                ],
+                'colors' => ['#EF4444', '#14B8A6', '#2563EB', '#8B5CF6']
+            ];
             return;
         }
 
@@ -290,12 +335,27 @@ class WaterQualityChart extends Component
         }
         
         // CRITICAL FIX: Enforce chart dimensions EVERY time (prevents height collapse on Livewire updates)
-        $this->lineChartModelArray['jsonConfig']['chart']['height'] = 540;
+        $this->lineChartModelArray['jsonConfig']['chart']['height'] = 420;
         $this->lineChartModelArray['jsonConfig']['chart']['width'] = '100%';
         $this->lineChartModelArray['jsonConfig']['chart']['id'] = $this->lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-' . ($this->userId ?? '0');
         
         // CRITICAL: Force aspect ratio off to prevent responsive height collapse
         $this->lineChartModelArray['jsonConfig']['chart']['maintainAspectRatio'] = false;
+
+        // CRITICAL FIX: Ensure series data is in jsonConfig.series for ApexCharts
+        // This is the actual data that ApexCharts will render - must be populated from $series
+        $this->lineChartModelArray['jsonConfig']['series'] = [
+            ['name' => 'Temperature', 'data' => $temperatureSeries],
+            ['name' => 'Salinity', 'data' => $salinitySeries],
+            ['name' => 'Dissolved Oxygen', 'data' => $doSeries],
+            ['name' => 'pH', 'data' => $phSeries],
+        ];
+
+        // Store metadata for frontend reference
+        $this->lineChartModelArray['meta'] = [
+            'series_names' => array_keys($series),
+            'series_keys' => ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level'],
+        ];
 
         // Promote visual defaults into jsonConfig so the vendor bundle (ApexCharts) picks them up directly.
         // Colors: ensure an ordered array matching series order.

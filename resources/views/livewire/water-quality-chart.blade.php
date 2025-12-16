@@ -45,8 +45,8 @@
                         }
                     @endphp
 
-                    <div id="water-quality-chart-root" wire:ignore class="w-full px-4 pt-12 pb-4 max-w-content-xl mx-auto"
-                        style="height: 540px; min-height: 400px; max-height: 580px;"
+                    <div id="water-quality-chart-root" wire:ignore class="w-full px-4 pb-2 max-w-content-xl mx-auto"
+                        style="height: 540px; position: relative; display: block;"
                         data-chart-id="{{ $__chartId }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
@@ -55,33 +55,7 @@
                         data-chart-config='@json($lineChartModelArray)'
                         data-user-id="{{ request()->get('user') ?? session('selected_user', auth()->id()) }}">
                         {{-- Chart will be created by inline JS below, not by vendor wrapper --}}
-                        <div id="{{ $__chartId }}" class="apexcharts-canvas-wrapper" style="height: 100%; width: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @else
-        {{-- Minimal header when there's no data (header intentionally omitted) --}}
-        <div class="px-4 py-2 shrink-0 flex items-center justify-between">
-            <div class="flex items-center gap-2">&nbsp;</div>
-        </div>
-
-        {{-- Even when there's no data, output the canvases so the JS initializer can find them.
-             We attach an explicit (possibly empty) chart payload so the client has a stable shape. --}}
-        @php
-            $payload = $chartData ?? ['labels' => [], 'series' => [], 'colors' => [], 'visible' => []];
-        @endphp
-
-        <div class="w-full">
-            <div class="relative">
-                <div class="w-full p-4 max-w-content-xl mx-auto">
-                    <canvas id="waterChart-main" data-chart='@json($payload)'></canvas>
-                </div>
-
-                {{-- Friendly overlay when there's no actual data to plot or when user hides all series --}}
-                <div id="chart-empty-overlay" class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
-                    <div class="bg-white/80 dark:bg-black/70 text-gray-700 dark:text-gray-200 rounded-md px-6 py-3 shadow">
-                        No series selected or no data available. Click a legend to show data.
+                        <div id="{{ $__chartId }}" class="apexcharts-canvas-wrapper" style="height: 100%; width: 100%; position: relative;"></div>
                     </div>
                 </div>
             </div>
@@ -94,18 +68,37 @@
     <script>
         (function(){
             const root = document.getElementById('water-quality-chart-root');
-            if (!root) return;
+            if (!root) {
+                console.error('❌ Chart root element not found!');
+                return;
+            }
 
             const chartId = root.getAttribute('data-chart-id');
             const seriesNames = JSON.parse(root.getAttribute('data-series-names') || '[]');
             const seriesKeys = JSON.parse(root.getAttribute('data-series-keys') || '[]');
             const chartConfig = JSON.parse(root.getAttribute('data-chart-config') || '{}');
+            
+            // CRITICAL DEBUG: Log what we received from Livewire
+            console.log('📊 Chart initialization data:', {
+                chartId,
+                hasConfig: !!chartConfig,
+                hasJsonConfig: !!chartConfig.jsonConfig,
+                seriesCount: chartConfig?.jsonConfig?.series?.length,
+                firstSeriesDataLength: chartConfig?.jsonConfig?.series?.[0]?.data?.length,
+                allSeriesDataLengths: chartConfig?.jsonConfig?.series?.map(s => s.data?.length)
+            });
 
             // CRITICAL FIX: Create the chart manually with explicit timing control
             let chartInstance = null;
 
             function createChart() {
                 try {
+                    // Check if ApexCharts library is loaded
+                    if (typeof ApexCharts === 'undefined' || !window.ApexCharts) {
+                        console.error('ApexCharts library not loaded! Chart cannot be initialized.');
+                        return;
+                    }
+
                     // Use global registry to prevent double initialization
                     window.__waterQualityChartRegistry = window.__waterQualityChartRegistry || {};
                     
@@ -121,11 +114,16 @@
                         return;
                     }
 
-                    // Ensure we have the config
+                    console.debug('Creating chart with ID:', chartId);
+                    console.debug('Container dimensions:', container.clientWidth, 'x', container.clientHeight);
+
+                    // CRITICAL: Ensure we have valid config and series structure
                     if (!chartConfig || !chartConfig.jsonConfig) {
-                        console.error('Chart config missing');
+                        console.error('Chart config missing', chartConfig);
                         return;
                     }
+                    
+                    console.debug('Chart config:', chartConfig.jsonConfig);
 
                     // Destroy existing instance first
                     if (chartInstance && typeof chartInstance.destroy === 'function') {
@@ -133,16 +131,57 @@
                         chartInstance = null;
                     }
 
-                    // CRITICAL: Enforce dimensions BEFORE creating chart
-                    const options = chartConfig.jsonConfig || {};
+                    // CRITICAL: Deep clone and validate options to prevent undefined crashes
+                    const options = JSON.parse(JSON.stringify(chartConfig.jsonConfig || {}));
                     if (!options.chart) options.chart = {};
-                    options.chart.height = 540;
+                    options.chart.height = 420;
                     options.chart.width = '100%';
                     options.chart.maintainAspectRatio = false;
+                    
+                    // CRITICAL: Ensure series is ALWAYS an array (prevents .length undefined error)
+                    if (!Array.isArray(options.series)) {
+                        options.series = [];
+                    }
+                    // Ensure each series has valid data array
+                    options.series = options.series.map(s => ({
+                        name: s?.name || 'Unknown',
+                        data: Array.isArray(s?.data) ? s.data : []
+                    }));
+                    
+                    // If no series at all, create empty placeholders for 4 parameters
+                    if (options.series.length === 0) {
+                        options.series = [
+                            { name: 'Temperature', data: [] },
+                            { name: 'Salinity', data: [] },
+                            { name: 'Dissolved Oxygen', data: [] },
+                            { name: 'pH', data: [] }
+                        ];
+                    }
 
-                    // Create the ApexCharts instance with enforced dimensions
+                    console.debug('About to create ApexCharts instance with options:', {
+                        chartId: chartId,
+                        seriesCount: options.series.length,
+                        height: options.chart.height,
+                        hasData: options.series[0]?.data?.length > 0
+                    });
+
+                    // CRITICAL FIX: Force render even if all series are empty (shows axes/grid)
+                    options.noData = {
+                        text: 'No water quality data available yet',
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        style: { fontSize: '14px', color: '#999' }
+                    };
+
+                    // Create the ApexCharts instance with validated options
                     chartInstance = new ApexCharts(container, options);
-                    chartInstance.render();
+                    
+                    // Force immediate render to prevent blank chart
+                    chartInstance.render().then(() => {
+                        console.log('✅ Chart rendered successfully:', chartId, 'with', options.series[0]?.data?.length || 0, 'data points');
+                    }).catch(err => {
+                        console.error('❌ Chart render failed:', err);
+                    });
 
                     // Store in global registries
                     window.__waterQualityChartRegistry[chartId] = chartInstance;
@@ -166,8 +205,9 @@
                 // Use requestAnimationFrame to ensure layout is complete
                 requestAnimationFrame(() => {
                     setTimeout(() => {
+                        console.debug('initChartWithTiming: About to create chart');
                         createChart();
-                    }, 50); // Small delay to ensure container has final dimensions
+                    }, 150); // Increased delay to ensure Livewire hydration completes
                 });
             }
 
@@ -222,6 +262,38 @@
                 }
             });
 
+            // CRITICAL FIX: Listen for Livewire component updates and force chart re-render
+            // This handles user switches, date filters, and any Livewire state changes
+            if (window.Livewire && typeof Livewire.hook === 'function') {
+                // Hook into Livewire's commit phase to recreate chart after data updates
+                Livewire.hook('commit', ({ component, commit, respond }) => {
+                    // Only act on this specific component
+                    if (!component.el.querySelector('#water-quality-chart-root')) return;
+                    
+                    console.debug('Livewire commit detected, will recreate chart after render');
+                    
+                    // Schedule chart recreation after Livewire finishes DOM updates
+                    setTimeout(() => {
+                        const currentRoot = document.getElementById('water-quality-chart-root');
+                        if (currentRoot && currentRoot.getAttribute('data-chart-id') === chartId) {
+                            console.debug('Re-parsing chart config after Livewire update');
+                            // Re-read config from updated DOM attributes
+                            const freshConfig = JSON.parse(currentRoot.getAttribute('data-chart-config') || '{}');
+                            if (freshConfig && freshConfig.jsonConfig) {
+                                // Destroy old instance
+                                if (chartInstance && typeof chartInstance.destroy === 'function') {
+                                    chartInstance.destroy();
+                                    chartInstance = null;
+                                }
+                                delete window.__waterQualityChartRegistry[chartId];
+                                // Recreate with fresh data
+                                createChart();
+                            }
+                        }
+                    }, 200);
+                });
+            }
+            
             // Listen for Livewire re-render and recreate chart after DOM updates
             if (window.Livewire && typeof Livewire.hook === 'function') {
                 Livewire.hook('message.processed', (message, component) => {
@@ -1490,6 +1562,15 @@
                     if (!root) return;
                     const chartId = root.getAttribute('data-chart-id');
                     
+                    // CRITICAL: Use global registry to prevent multiple instances running simultaneously
+                    window.__waterQualityHeightAdjuster = window.__waterQualityHeightAdjuster || {};
+                    
+                    // If already initialized for this chart, skip
+                    if (window.__waterQualityHeightAdjuster[chartId]) {
+                        console.debug('Height adjuster already running for:', chartId);
+                        return;
+                    }
+                    
                     let adjusting = false;
                     let lastAdjustTime = 0;
                     const ADJUST_INTERVAL = 2000;
@@ -1497,6 +1578,12 @@
                     function computeAndApply(){
                         const now = Date.now();
                         if (adjusting || (now - lastAdjustTime < ADJUST_INTERVAL)) return;
+                        
+                        // Check if root still exists in DOM (prevents execution after component unmount)
+                        if (!document.getElementById('water-quality-chart-root')) {
+                            console.debug('Root gone, stopping height adjuster');
+                            return;
+                        }
                         
                         adjusting = true;
                         lastAdjustTime = now;
@@ -1522,14 +1609,22 @@
                             adjusting = false;
                         }
                     }
+                    
                     const debounce = (fn, t=200) => { let id; return () => { clearTimeout(id); id = setTimeout(fn, t); }; };
-                    window.addEventListener('resize', debounce(computeAndApply, 250));
-                    document.addEventListener('DOMContentLoaded', () => setTimeout(computeAndApply, 600));
-                    // Run once on load, then one retry (no infinite loop)
-                    try { 
-                        computeAndApply(); 
-                        setTimeout(computeAndApply, 1000);
-                    } catch(e){}
+                    const debouncedCompute = debounce(computeAndApply, 250);
+                    
+                    // Store listener reference for cleanup
+                    window.__waterQualityHeightAdjuster[chartId] = {
+                        active: true,
+                        listener: debouncedCompute
+                    };
+                    
+                    window.addEventListener('resize', debouncedCompute);
+                    
+                    // Run only if DOM is ready (no DOMContentLoaded listener needed - inline script runs after DOM)
+                    if (document.readyState !== 'loading') {
+                        setTimeout(computeAndApply, 100);
+                    }
                 })();
             </script>
 
