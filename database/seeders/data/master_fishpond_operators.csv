@@ -1,0 +1,8 @@
+name,pond_name,barangay,municipality,province,total_area_ha,species_cultured,water_type,contact,notes,source
+Danilo Morales,Danilo Pond,San Juan,Ternate,Cavite,0.25,Tilapia|Bangus,freshwater,,MasterListScan
+Eugenio Morales,Eugenio Pond,San Juan,Ternate,Cavite,0.30,Bangus|Tilapia,brackish,,MasterListScan
+Cesar Encarnacion,Cesar Pond,San Juan,Ternate,Cavite,0.20,Bangus,freshwater,,MasterListScan
+Reymundo Baringue,Reymundo Pond,San Juan,Ternate,Cavite,0.15,Bangus|Tilapia,freshwater,,MasterListScan
+Frederick Catatmon,Catatmon Pond,San Juan,Ternate,Cavite,0.18,Bangus,freshwater,,MasterListScan
+Tilapia Owner A,Pond A,San Juan,Ternate,Cavite,0.50,Tilapia,freshwater,,MasterListScan
+Tilapia Owner B,Pond B,San Juan,Ternate,Cavite,0.40,Tilapia,freshwater,,MasterListScan
