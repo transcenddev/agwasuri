@@ -37,7 +37,8 @@
                         }
                     @endphp
 
-                    <div id="water-quality-chart-root" wire:ignore class="w-full px-4 pt-12 pb-4 max-w-content-xl mx-auto h-64 md:h-80 lg:h-[540px] max-h-[580px] overflow-hidden"
+                    <div id="water-quality-chart-root" wire:ignore class="w-full px-4 pt-12 pb-4 max-w-content-xl mx-auto"
+                        style="height: 540px; min-height: 400px; max-height: 580px;"
                         data-chart-id="{{ $__chartId }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
@@ -88,6 +89,47 @@
             const chartId = root.getAttribute('data-chart-id');
             const seriesNames = JSON.parse(root.getAttribute('data-series-names') || '[]');
             const seriesKeys = JSON.parse(root.getAttribute('data-series-keys') || '[]');
+
+            // CRITICAL FIX: Destroy chart instance on Livewire update to prevent stale instances
+            window.addEventListener('water-quality:destroy-chart', () => {
+                try {
+                    console.debug('WaterQualityChart: destroying chart', chartId);
+                    
+                    // Find and destroy ApexCharts instance
+                    const targetCid = (window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[chartId]) || chartId || ('apexcharts' + chartId);
+                    
+                    if (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') {
+                        const chartInstance = window.ApexCharts.getChartByID(targetCid);
+                        if (chartInstance && typeof chartInstance.destroy === 'function') {
+                            chartInstance.destroy();
+                            console.debug('WaterQualityChart: destroyed instance', targetCid);
+                        }
+                    }
+                    
+                    // Clear cached chart ID mapping
+                    if (window.__waterQualityKnownChartId) {
+                        delete window.__waterQualityKnownChartId[chartId];
+                    }
+                    try {
+                        localStorage.removeItem('waterQualityKnownChartId:' + chartId);
+                    } catch (e) {}
+                    
+                    // Clear series state to force fresh initialization
+                    if (window.__waterQualitySeriesState) {
+                        delete window.__waterQualitySeriesState[chartId];
+                    }
+                    
+                } catch (e) {
+                    console.error('WaterQualityChart: destroy error', e);
+                }
+            });
+
+            // Listen for Livewire re-render and ensure cleanup
+            if (window.Livewire && typeof Livewire.on === 'function') {
+                Livewire.on('water-quality:destroy-chart', () => {
+                    window.dispatchEvent(new CustomEvent('water-quality:destroy-chart'));
+                });
+            }
 
             // Debug helper: dump ApexCharts instances and candidate ids
             try {

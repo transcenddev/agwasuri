@@ -30,6 +30,8 @@ class WaterQualityChart extends Component
     public function updateUser($userId)
     {
         $this->userId = $userId;
+        // Dispatch chart cleanup BEFORE loadData to ensure old instance is destroyed
+        $this->dispatch('water-quality:destroy-chart');
         $this->loadData();
     }
 
@@ -38,6 +40,8 @@ class WaterQualityChart extends Component
     {
         $this->startDate = $startDate;
         $this->endDate = $endDate;
+        // Dispatch chart cleanup BEFORE loadData
+        $this->dispatch('water-quality:destroy-chart');
         $this->loadData();
     }
 
@@ -280,8 +284,15 @@ class WaterQualityChart extends Component
         if (! isset($this->lineChartModelArray['jsonConfig']['chart']) || ! is_array($this->lineChartModelArray['jsonConfig']['chart'])) {
             $this->lineChartModelArray['jsonConfig']['chart'] = [];
         }
-        $this->lineChartModelArray['jsonConfig']['chart']['height'] = $this->lineChartModelArray['jsonConfig']['chart']['height'] ?? ($this->lineChartModelArray['chart']['height'] ?? 700);
+        
+        // CRITICAL FIX: Set fixed height and disable maintainAspectRatio to prevent clipping
+        $this->lineChartModelArray['jsonConfig']['chart']['height'] = 540;
         $this->lineChartModelArray['jsonConfig']['chart']['id'] = $this->lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-' . ($this->userId ?? '0');
+        
+        // Disable aspect ratio maintenance for consistent rendering
+        if (!isset($this->lineChartModelArray['jsonConfig']['chart']['maintainAspectRatio'])) {
+            $this->lineChartModelArray['jsonConfig']['chart']['maintainAspectRatio'] = false;
+        }
 
         // Promote visual defaults into jsonConfig so the vendor bundle (ApexCharts) picks them up directly.
         // Colors: ensure an ordered array matching series order.
