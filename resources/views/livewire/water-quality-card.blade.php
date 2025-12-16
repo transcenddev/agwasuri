@@ -44,8 +44,8 @@
             </div>
         </div>
     @endif
-    {{-- Mobile-first: 2x2.5 grid by default with score card first, expand to 5 columns on larger screens --}}
-    <dl class="grid grid-cols-2 md:grid-cols-5 transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'gap-4' : 'gap-6'">
+    {{-- Mobile-first: 1 col mobile, 2 cols tablet, 5 cols desktop for all KPI cards in one row --}}
+    <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'gap-4' : 'gap-6'">
         @php
             $scoreBadge = $this->scoreStatusBadge();
             $tempStatus = $this->statusFor('temperature', $this->temperature);
@@ -54,8 +54,8 @@
             $phStatus = $this->statusFor('ph_level', $this->ph_level);
         @endphp
 
-        {{-- Water Quality Score Card (5th/1st KPI) - Inspired by Plant Health Design --}}
-        <div class="col-span-2 md:col-span-1 flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }}"
+        {{-- Water Quality Score Card (1st KPI) - Inspired by Plant Health Design --}}
+        <div class="flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }}"
              x-data="{ compact: false }"
              @toggle-compact-view.window="compact = !compact"
              x-bind:class="compact ? 'px-3 py-4' : 'px-5 py-6'"
@@ -265,7 +265,8 @@
             </div>
         </div>
 
-        {{-- pH Level --}}`n        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
+        {{-- pH Level --}}
+        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level
                 @if(!is_null($this->phLevelDelta))
                     <div class="mt-1 text-xs">
