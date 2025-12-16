@@ -37,6 +37,11 @@ class WaterQualityChart extends Component
         usleep(50000); // 50ms
         
         $this->loadData();
+        // Push updated chart payload to the browser so the client can update the existing ApexCharts instance
+        $this->dispatchBrowserEvent('water-quality:chart', [
+            'chart' => $this->lineChartModelArray,
+            'initial' => $this->chartData,
+        ]);
     }
 
     #[On('date-range-updated')]
@@ -47,6 +52,11 @@ class WaterQualityChart extends Component
         // Dispatch chart cleanup BEFORE loadData
         $this->dispatchBrowserEvent('water-quality:destroy-chart');
         $this->loadData();
+        // Notify client to refresh chart options/series after date range changed
+        $this->dispatchBrowserEvent('water-quality:chart', [
+            'chart' => $this->lineChartModelArray,
+            'initial' => $this->chartData,
+        ]);
     }
 
     #[On('echo:water-quality-data-created,WaterQualityCreated')]

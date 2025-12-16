@@ -45,7 +45,7 @@
                         }
                     @endphp
 
-                    <div id="water-quality-chart-root" wire:ignore class="w-full px-4 pb-2 max-w-content-xl mx-auto"
+                    <div id="water-quality-chart-root" wire:ignore.self class="w-full px-4 pb-2 max-w-content-xl mx-auto"
                         style="height: 540px; position: relative; display: block;"
                         data-chart-id="{{ $__chartId }}"
                         data-api-key='@json($__debugApiKey)'

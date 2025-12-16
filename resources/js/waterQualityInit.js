@@ -383,3 +383,89 @@
         } catch (e) {}
     })();
 })();
+
+// Listen for chart payload updates dispatched from Livewire and update/recreate ApexCharts safely
+try {
+    window.addEventListener("water-quality:chart", (evt) => {
+        try {
+            const payload = evt && evt.detail ? evt.detail : {};
+            const chartObj = payload.chart || {};
+            const cfg = chartObj.jsonConfig || {};
+            const series = cfg.series || [];
+            const chartId =
+                cfg.chart && cfg.chart.id
+                    ? cfg.chart.id
+                    : chartObj.meta && chartObj.meta.chart_id
+                    ? chartObj.meta.chart_id
+                    : null;
+            if (!chartId) return;
+
+            const container = document.getElementById(chartId);
+            if (!container) return;
+
+            const targetCid =
+                (window.__waterQualityKnownChartId &&
+                    window.__waterQualityKnownChartId[chartId]) ||
+                chartId ||
+                "apexcharts" + chartId;
+
+            let chartInstance = null;
+            if (
+                window.ApexCharts &&
+                typeof window.ApexCharts.getChartByID === "function"
+            ) {
+                try {
+                    chartInstance = window.ApexCharts.getChartByID(targetCid);
+                } catch (e) {
+                    chartInstance = null;
+                }
+            }
+
+            if (chartInstance) {
+                // Update options and series in-place
+                try {
+                    chartInstance.updateOptions(cfg, false, true);
+                    chartInstance.updateSeries(series, true);
+                    console.debug("waterQualityInit: updated chart", chartId);
+                } catch (e) {
+                    console.error(
+                        "waterQualityInit: failed to update chart",
+                        chartId,
+                        e
+                    );
+                }
+                return;
+            }
+
+            // No existing instance: create one
+            try {
+                // ensure noData fallback shows axes when series empty
+                cfg.noData = cfg.noData || {
+                    text: "No water quality data available yet",
+                    align: "center",
+                    verticalAlign: "middle",
+                    style: { fontSize: "14px", color: "#999" },
+                };
+
+                const inst = new ApexCharts(container, cfg);
+                inst.render();
+                window.__waterQualityKnownChartId =
+                    window.__waterQualityKnownChartId || {};
+                window.__waterQualityKnownChartId[chartId] =
+                    cfg.chart && cfg.chart.id ? cfg.chart.id : chartId;
+                window.__waterQualityChartInstances =
+                    window.__waterQualityChartInstances || {};
+                window.__waterQualityChartInstances[chartId] = inst;
+                console.debug("waterQualityInit: created chart", chartId);
+            } catch (e) {
+                console.error(
+                    "waterQualityInit: failed to create chart",
+                    chartId,
+                    e
+                );
+            }
+        } catch (e) {
+            console.error("waterQualityInit: chart event handler failed", e);
+        }
+    });
+} catch (e) {}
