@@ -267,9 +267,16 @@
 
         {{-- pH Level --}}
         <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level</dt>
+
+            <dd class="flex flex-col items-center gap-1">
+                <div class="flex items-baseline gap-2">
+                    <span class="font-extrabold transition-all duration-300 {{ $this->numberColorForStatus($phStatus) }}" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
+                    <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
+                </div>
+
                 @if(!is_null($this->phLevelDelta))
-                    <div class="mt-1 text-xs" >
+                    <div class="text-xs text-gray-500" x-show="!compact">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->phLevelDelta) }}">
                             @if($this->phLevelDelta > 0)
                                 <span class="inline-block w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-current" aria-hidden="true"></span>
@@ -282,11 +289,6 @@
                         </span>
                     </div>
                 @endif
-            </dt>
-
-            <dd class="flex items-baseline gap-2">
-                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($phStatus) }}">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
-                <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
             </dd>
 
             @if(!empty($phClassification['label']))
@@ -297,7 +299,7 @@
                             'GOOD' => 'bg-blue-100 text-blue-800',
                             'BAD' => 'bg-yellow-100 text-yellow-800',
                             'HARM' => 'bg-red-100 text-red-800',
-                            default => 'text-gray-700'
+                            default => 'bg-gray-100 text-gray-600'
                         };
                         $phSparkClass = match(strtoupper($phClassification['label'])) {
                             'BEST' => 'text-green-500',
