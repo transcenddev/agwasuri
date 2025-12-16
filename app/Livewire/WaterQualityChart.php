@@ -32,6 +32,10 @@ class WaterQualityChart extends Component
         $this->userId = $userId;
         // Dispatch chart cleanup BEFORE loadData to ensure old instance is destroyed
         $this->dispatchBrowserEvent('water-quality:destroy-chart');
+        
+        // Small delay to allow browser event to process
+        usleep(50000); // 50ms
+        
         $this->loadData();
     }
 
