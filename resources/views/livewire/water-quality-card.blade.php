@@ -101,11 +101,11 @@
                     <div class="text-xs text-gray-500" x-show="!compact">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->temperatureDelta) }}">
                             @if($this->temperatureDelta > 0)
-                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
+                                <span class="inline-block w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-current" aria-hidden="true"></span>
                             @elseif($this->temperatureDelta < 0)
-                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
+                                <span class="inline-block w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-current" aria-hidden="true"></span>
                             @else
-                                <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                                <span class="inline-block w-2 h-2 rounded-full bg-current" aria-hidden="true"></span>
                             @endif
                             <span>{{ $this->formatDelta('temperature', $this->temperatureDelta) }}</span>
                         </span>
@@ -160,11 +160,11 @@
                     <div class="text-xs text-gray-500" x-show="!compact">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->salinityDelta) }}">
                             @if($this->salinityDelta > 0)
-                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
+                                <span class="inline-block w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-current" aria-hidden="true"></span>
                             @elseif($this->salinityDelta < 0)
-                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
+                                <span class="inline-block w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-current" aria-hidden="true"></span>
                             @else
-                                <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                                <span class="inline-block w-2 h-2 rounded-full bg-current" aria-hidden="true"></span>
                             @endif
                             <span>{{ $this->formatDelta('salinity', $this->salinityDelta) }}</span>
                         </span>
@@ -219,11 +219,11 @@
                     <div class="text-xs text-gray-500" x-show="!compact">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->dissolvedOxygenDelta) }}">
                             @if($this->dissolvedOxygenDelta > 0)
-                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 15.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
+                                <span class="inline-block w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-current" aria-hidden="true"></span>
                             @elseif($this->dissolvedOxygenDelta < 0)
-                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
+                                <span class="inline-block w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-current" aria-hidden="true"></span>
                             @else
-                                <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                                <span class="inline-block w-2 h-2 rounded-full bg-current" aria-hidden="true"></span>
                             @endif
                             <span>{{ $this->formatDelta('dissolved_oxygen', $this->dissolvedOxygenDelta) }}</span>
                         </span>
@@ -269,14 +269,14 @@
         <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level
                 @if(!is_null($this->phLevelDelta))
-                    <div class="mt-1 text-xs">
+                    <div class="mt-1 text-xs" >
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->phLevelDelta) }}">
                             @if($this->phLevelDelta > 0)
-                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
+                                <span class="inline-block w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[6px] border-b-current" aria-hidden="true"></span>
                             @elseif($this->phLevelDelta < 0)
-                                <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
+                                <span class="inline-block w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-current" aria-hidden="true"></span>
                             @else
-                                <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
+                                <span class="inline-block w-2 h-2 rounded-full bg-current" aria-hidden="true"></span>
                             @endif
                             <span>{{ $this->formatDelta('ph_level', $this->phLevelDelta) }}</span>
                         </span>
@@ -322,4 +322,5 @@
         </div>
     </dl>
 </div>
+
 
