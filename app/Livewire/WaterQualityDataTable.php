@@ -201,9 +201,6 @@ class WaterQualityDataTable extends Component
             $entry->doValueClass = $mapLabelToClass($doLabel);
             $entry->salValueClass = $mapLabelToClass($salLabel);
 
-            $entry->statusLabel = $statusLabel;
-            };
-=======
             // Format values with labels for display: "30.62 (BEST)"
             $entry->tempFormatted = $entry->temperature !== null
                 ? number_format($entry->temperature, 2) . ' (' . $tempLabel . ')'
@@ -219,7 +216,6 @@ class WaterQualityDataTable extends Component
                 : '-';
 
             $entry->statusLabel = $statusLabel;
->>>>>>> origin/master
             $entry->statusBadgeClass = $badgeClass;
             $entry->statusBorderClass = $statusBorderClass;
 

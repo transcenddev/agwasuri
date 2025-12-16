@@ -17,9 +17,10 @@
                             </x-slot>
                         </x-card-header>
                         <div class="flex items-center gap-3 text-xs text-gray-600">
-                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-600"></span> GOOD</div>
-                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> BAD</div>
-                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-600"></span> HARMFUL</div>
+                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-600"></span> BEST</div>
+                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-600"></span> GOOD</div>
+                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span> BAD</div>
+                            <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-600"></span> HARM</div>
                         </div>
                         
                     </div>

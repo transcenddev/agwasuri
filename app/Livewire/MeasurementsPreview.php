@@ -4,11 +4,29 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\WaterQualityData;
+use Illuminate\Support\Carbon;
+use Livewire\Attributes\On;
 
 class MeasurementsPreview extends Component
 {
     public $userId;
     public $items = [];
+
+    #[On('user-selected')]
+    public function updateUser($userId)
+    {
+        $this->userId = $userId;
+    }
+
+    #[On('echo:water-quality-data-created,WaterQualityCreated')]
+    public function handleNewDataCreated(array $event)
+    {
+        $matchesUser = isset($event['waterQualityData']['user_id']) && $event['waterQualityData']['user_id'] == $this->userId;
+        if ($matchesUser) {
+            // Refresh the component when new data arrives for this user
+            $this->render();
+        }
+    }
 
     public function mount($userId = null)
     {
@@ -34,22 +52,22 @@ class MeasurementsPreview extends Component
             $r->issues = $this->identifyIssues($r);
             $r->issuesText = empty($r->issues) ? '' : implode(', ', $r->issues);
 
-            // Apply centralized UI mapping from config if present
-            $statusMap = config('water_quality.status_map', []);
-            $mapEntry = $statusMap[$r->ui_status] ?? null;
-            if ($mapEntry) {
-                $r->badgeClass = $mapEntry['badge'] ?? ($r->ui_status === 'HARMFUL' ? 'text-red-700 bg-red-50' : ($r->ui_status === 'BAD' ? 'text-amber-700 bg-amber-50' : 'text-green-700 bg-green-50'));
-                $r->statusBorderClass = $mapEntry['border'] ?? ($r->ui_status === 'HARMFUL' ? 'border-l-4 border-red-200' : ($r->ui_status === 'BAD' ? 'border-l-4 border-amber-100' : 'border-l-4 border-green-100'));
-                // Optionally set valueClass from map if the developer prefers
-                if (!empty($mapEntry['value'])) {
-                    // prefer keeping per-parameter finer-grained classes, so only set a generic fallback
-                    $r->genericValueClass = $mapEntry['value'];
-                }
-            } else {
-                // fallback to present behavior
-                $r->badgeClass = $r->ui_status === 'HARMFUL' ? 'text-red-700 bg-red-50' : ($r->ui_status === 'BAD' ? 'text-amber-700 bg-amber-50' : 'text-green-700 bg-green-50');
-                $r->statusBorderClass = $r->ui_status === 'HARMFUL' ? 'border-l-4 border-red-200' : ($r->ui_status === 'BAD' ? 'border-l-4 border-amber-100' : 'border-l-4 border-green-100');
-            }
+            // Apply 4-tier badge and border classes (matching KPI cards)
+            $r->badgeClass = match($r->ui_status) {
+                'BEST' => 'text-green-800 bg-green-100',
+                'GOOD' => 'text-blue-800 bg-blue-100',
+                'BAD' => 'text-yellow-800 bg-yellow-100',
+                'HARM' => 'text-rose-800 bg-rose-100',
+                default => 'text-gray-700 bg-gray-100',
+            };
+            
+            $r->statusBorderClass = match($r->ui_status) {
+                'BEST' => 'border-l-4 border-green-500',
+                'GOOD' => 'border-l-4 border-blue-500',
+                'BAD' => 'border-l-4 border-yellow-500',
+                'HARM' => 'border-l-4 border-rose-500',
+                default => 'border-l-4 border-gray-400',
+            };
             return $r;
         });
 
@@ -60,103 +78,57 @@ class MeasurementsPreview extends Component
 
     protected function classifyRow($row)
     {
-        // Read thresholds from config where available
-        $cfg = config('water_quality.thresholds');
+        // Use the same 4-tier classification system as KPI cards
+        $labels = [];
 
-        $statusLevels = [];
+        try {
+            $tempLabel = strtoupper(classifyWaterParam('temperature', $row->temperature)['label'] ?? 'UNKNOWN');
+        } catch (\Throwable $e) { $tempLabel = 'UNKNOWN'; }
 
-        // pH
-        $ph = $row->ph_level;
-        if (is_numeric($ph)) {
-            if ($ph < 5.0 || $ph > 9.0) {
-                $statusLevels[] = 'HARMFUL';
-            } elseif ($ph < ($cfg['ph'][0] ?? 6.5) || $ph > ($cfg['ph'][1] ?? 8.5)) {
-                $statusLevels[] = 'BAD';
-            } else {
-                $statusLevels[] = 'GOOD';
-            }
-        }
+        try {
+            $phLabel = strtoupper(classifyWaterParam('ph', $row->ph_level)['label'] ?? 'UNKNOWN');
+        } catch (\Throwable $e) { $phLabel = 'UNKNOWN'; }
 
-        // Temperature
-        $t = $row->temperature;
-        if (is_numeric($t)) {
-            if ($t < 20.0 || $t > 35.0) {
-                $statusLevels[] = 'HARMFUL';
-            } elseif ($t < ($cfg['temperature_c'][0] ?? 25.0) || $t > ($cfg['temperature_c'][1] ?? 31.0)) {
-                $statusLevels[] = 'BAD';
-            } else {
-                $statusLevels[] = 'GOOD';
-            }
-        }
+        try {
+            $doLabel = strtoupper(classifyWaterParam('do', $row->dissolved_oxygen)['label'] ?? 'UNKNOWN');
+        } catch (\Throwable $e) { $doLabel = 'UNKNOWN'; }
 
-        // Dissolved oxygen
-        $do = $row->dissolved_oxygen;
-        if (is_numeric($do)) {
-            if ($do < 2.0) {
-                $statusLevels[] = 'HARMFUL';
-            } elseif ($do < ($cfg['dissolved_oxygen_mg_l'] ?? 5.0)) {
-                $statusLevels[] = 'BAD';
-            } else {
-                $statusLevels[] = 'GOOD';
-            }
-        }
+        try {
+            $salLabel = strtoupper(classifyWaterParam('salinity', $row->salinity)['label'] ?? 'UNKNOWN');
+        } catch (\Throwable $e) { $salLabel = 'UNKNOWN'; }
 
-        // Salinity
-        $s = $row->salinity;
-        if (is_numeric($s)) {
-            if ($s > 35.0) {
-                $statusLevels[] = 'HARMFUL';
-            } elseif ($s > ($cfg['salinity_ppt'][1] ?? 25.0)) {
-                $statusLevels[] = 'BAD';
-            } else {
-                $statusLevels[] = 'GOOD';
-            }
-        }
+        $labels = [$tempLabel, $phLabel, $doLabel, $salLabel];
 
-        // Aggregate: if any HARMFUL -> HARMFUL, else if any BAD -> BAD, else GOOD
-        if (in_array('HARMFUL', $statusLevels, true)) return 'HARMFUL';
-        if (in_array('BAD', $statusLevels, true)) return 'BAD';
-        return 'GOOD';
+        // Priority aggregation: harm > bad > good > best (same as KPI cards)
+        if (in_array('HARM', $labels, true)) return 'HARM';
+        if (in_array('BAD', $labels, true)) return 'BAD';
+        if (in_array('GOOD', $labels, true)) return 'GOOD';
+
+        // If all valid metrics are BEST
+        $allBest = collect($labels)->filter(fn($l) => $l !== 'UNKNOWN')->every(fn($l) => $l === 'BEST');
+        if ($allBest) return 'BEST';
+
+        return 'UNKNOWN';
     }
 
     protected function valueClass($type, $value)
     {
         if (!is_numeric($value)) return '';
 
-        // Use config thresholds for sensible ranges
-        $t = config('water_quality.thresholds', []);
-
-        switch ($type) {
-            case 'temperature':
-                $low = $t['temperature_c'][0] ?? 25.0;
-                $high = $t['temperature_c'][1] ?? 31.0;
-                if ($value < 20.0 || $value > 35.0) return 'text-red-700 font-semibold';
-                if ($value < $low || $value > $high) return 'text-amber-600';
-                return 'text-green-700';
-
-            case 'salinity':
-                $low = $t['salinity_ppt'][0] ?? 7.0;
-                $high = $t['salinity_ppt'][1] ?? 25.0;
-                if ($value > 35.0) return 'text-red-700 font-semibold';
-                if ($value < $low || $value > $high) return 'text-amber-600';
-                return 'text-green-700';
-
-            case 'dissolved_oxygen':
-                $threshold = $t['dissolved_oxygen_mg_l'] ?? 5.0;
-                if ($value < 2.0) return 'text-red-700 font-semibold';
-                if ($value < $threshold) return 'text-amber-600';
-                return 'text-green-700';
-
-            case 'ph':
-                $low = $t['ph'][0] ?? 6.5;
-                $high = $t['ph'][1] ?? 8.5;
-                if ($value < 5.0 || $value > 9.0) return 'text-red-700 font-semibold';
-                if ($value < $low || $value > $high) return 'text-amber-600';
-                return 'text-green-700';
-
-            default:
-                return '';
+        // Use classifyWaterParam to get label, then map to color class (matching KPI cards)
+        try {
+            $label = strtoupper(classifyWaterParam($type, $value)['label'] ?? 'UNKNOWN');
+        } catch (\Throwable $e) {
+            return 'text-gray-600';
         }
+
+        return match($label) {
+            'BEST' => 'text-green-700',
+            'GOOD' => 'text-blue-700',
+            'BAD' => 'text-yellow-700',
+            'HARM' => 'text-rose-700',
+            default => 'text-gray-600',
+        };
     }
 
     protected function identifyIssues($row)
