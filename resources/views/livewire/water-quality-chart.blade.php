@@ -354,8 +354,9 @@
                     window.__waterQualityOptionsApplied[cid] = window.__waterQualityOptionsApplied[cid] || {};
                     const normalizedOpts = opts || {};
 
-                    // Ensure immutable visual defaults are always present unless explicitly forced off.
+                    // CRITICAL FIX: Ensure immutable visual defaults INCLUDING HEIGHT are always present
                     const immutableDefaults = {
+                        chart: { height: 540, width: '100%', maintainAspectRatio: false },  // Prevent height collapse
                         stroke: { show: true, curve: 'smooth', width: 2, lineCap: 'round' },
                         markers: { size: 0 },
                         xaxis: { type: 'datetime' },

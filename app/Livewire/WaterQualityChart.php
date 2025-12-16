@@ -285,14 +285,13 @@ class WaterQualityChart extends Component
             $this->lineChartModelArray['jsonConfig']['chart'] = [];
         }
         
-        // CRITICAL FIX: Set fixed height and disable maintainAspectRatio to prevent clipping
+        // CRITICAL FIX: Enforce chart dimensions EVERY time (prevents height collapse on Livewire updates)
         $this->lineChartModelArray['jsonConfig']['chart']['height'] = 540;
+        $this->lineChartModelArray['jsonConfig']['chart']['width'] = '100%';
         $this->lineChartModelArray['jsonConfig']['chart']['id'] = $this->lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-' . ($this->userId ?? '0');
         
-        // Disable aspect ratio maintenance for consistent rendering
-        if (!isset($this->lineChartModelArray['jsonConfig']['chart']['maintainAspectRatio'])) {
-            $this->lineChartModelArray['jsonConfig']['chart']['maintainAspectRatio'] = false;
-        }
+        // CRITICAL: Force aspect ratio off to prevent responsive height collapse
+        $this->lineChartModelArray['jsonConfig']['chart']['maintainAspectRatio'] = false;
 
         // Promote visual defaults into jsonConfig so the vendor bundle (ApexCharts) picks them up directly.
         // Colors: ensure an ordered array matching series order.
@@ -339,7 +338,11 @@ class WaterQualityChart extends Component
             [
                 'breakpoint' => 640,
                 'options' => [
-                    'chart' => [ 'height' => 360 ],
+                    'chart' => [ 
+                        'height' => 360,  // Mobile height
+                        'width' => '100%',  // Enforce width on mobile too
+                        'maintainAspectRatio' => false  // CRITICAL: prevent height collapse
+                    ],
                     'legend' => [ 'position' => 'bottom', 'horizontalAlign' => 'center' ],
                     'stroke' => [ 
                         'curve' => 'smooth',  // Keep smooth curves on mobile
