@@ -7,10 +7,14 @@ Focus on concrete, discoverable patterns, commands and file locations — not ge
 # Repo metadata
 language: php
 framework: laravel-11
-frontend: livewire
+frontend: livewire-3.4 + volt
+styling: tailwindcss-3.1 (with custom cvsu color palette)
+testing: pest-3.7
+broadcasting: laravel-reverb-1.0
+charting: asantibanez/livewire-charts-4.1 + chart.js-4.4 + apexcharts-5.3
 dev-start: npm run dev-start
 tests: php artisan test
-last-updated: 2025-12-14
+last-updated: 2025-12-16
 ```
 
 ## Quick Commands
@@ -38,27 +42,122 @@ php artisan test
 
 ## Quick Architecture Summary
 
--   App is a Laravel 11 monolith with Livewire components driving the UI (see `app/Livewire`).
--   Real-time flows use `laravel/reverb` and an event `App\Events\WaterQualityCreated` (channel: `water-quality-data-created`).
--   Sensor data arrives at a single public route: `POST /store-water-quality-data` (defined in `routes/web.php`) and is processed by `App\Http\Controllers\Api\WaterQualityDataController`.
--   ML inference & training are performed by an external service; the UI Livewire component calls it at `https://api.agwasuri.app` (see `app/Livewire/ClassifyFish.php`).
+-   **Framework**: Laravel 11 monolith with Livewire 3.4 components (+ Volt for auth pages) driving the UI
+-   **Real-time**: Laravel Reverb WebSocket server broadcasts water quality updates via `App\Events\WaterQualityCreated` on channel `water-quality-data-created`
+-   **Frontend**: Vite bundler, Tailwind CSS 3.1 with custom CVSU color palette, Chart.js + ApexCharts for visualizations
+-   **Authentication**: Laravel Breeze (Livewire/Volt variant) with custom middleware `IsAdmin` for admin routes
+-   **Database**: SQLite (default for dev), migrations support MySQL/PostgreSQL
+-   **API ingestion**: Single public route `POST /store-water-quality-data` (CSRF-exempt, Bearer token auth) handled by `App\Http\Controllers\Api\WaterQualityDataController`
+-   **ML integration**: External Python API at `https://api.agwasuri.app` for fish classification predictions and model training (called from `app/Livewire/ClassifyFish.php`)
+-   **Theme system**: Dark/light mode toggle with localStorage persistence and server-side cookie normalization via `NormalizeThemeCookie` middleware
+
+## Core Data Flow
+
+1. **Sensor → API**: ESP32/Arduino POST to `/store-water-quality-data` with Bearer auth
+2. **Controller → Model**: `WaterQualityDataController::store()` validates, creates `WaterQualityData` record
+3. **Event → Broadcast**: `WaterQualityCreated` event fires, Reverb broadcasts to subscribed clients
+4. **Frontend → Updates**: Livewire components (`WaterQualityChart`, `WaterQualityCard`) listen and re-render in real-time
+5. **ML workflow**: `ClassifyFish` component computes averages → POSTs to ML API → displays recommendations
 
 ## Key Files (start here)
 
--   `routes/web.php` — registers site views and `POST store-water-quality-data` route.
--   `app/Http/Controllers/Api/WaterQualityDataController.php` — request validation, Bearer API key extraction, user lookup (`user_id` + `api_key`), create `WaterQualityData`, broadcasts `WaterQualityCreated`.
--   `app/Models/WaterQualityData.php` — model and `$fillable` columns stored (`recorded_at`, `temperature`, `salinity`, `dissolved_oxygen`, `ph_level`, `user_id`).
--   `app/Models/User.php` — primary key is `user_id` (not `id`) and stores `api_key` in `$fillable`.
--   `app/Events/WaterQualityCreated.php` — broadcasts `waterQualityData` on channel `water-quality-data-created` (uses ShouldBroadcastNow).
--   `app/Livewire/ClassifyFish.php` — client-side integration to external ML API: constants `PREDICT_ENDPOINT` and `TRAIN_ENDPOINT`, request shapes and how averages are computed before sending.
--   `app/Models/ModelMetadata.php` and table `model_metadata` — used to record `last_trained_at` timestamp returned by the train API.
+### Routes & Controllers
+
+-   **routes/web.php** — main route definitions: views, API endpoints, theme setter, logout
+-   **routes/auth.php** — Volt-based auth routes (login, register, password reset, email verification)
+-   **routes/channels.php** — Broadcast authorization for private channels (admin, user-specific)
+-   **app/Http/Controllers/Api/WaterQualityDataController.php** — sensor data ingestion (`store()`) and latest data endpoint (`latest()`)
+-   **app/Http/Controllers/Api/RecommendationController.php** — cached fish recommendation endpoint for dashboard widgets
+-   **app/Http/Controllers/ThemeController.php** — server-side theme cookie setter
+
+### Models & Database
+
+-   **app/Models/User.php** — primary key is `user_id` (NOT `id`), includes virtual `name` accessor combining `first_name` + `last_name`, `api_key` field, `isAdmin()` helper, backward-compatible `id` attribute getter
+-   **app/Models/WaterQualityData.php** — fillable: `recorded_at`, `temperature`, `salinity`, `dissolved_oxygen`, `ph_level`, `user_id`
+-   **app/Models/ModelMetadata.php** — tracks ML model training timestamps (table: `model_metadata`, columns: `model_name`, `last_trained_at`)
+-   **database/migrations/0001_01_01_000000_create_users_table.php** — users schema with aquaculture-specific fields (fishpond_name, barangay, species_cultured, etc.)
+-   **database/migrations/2024_10_30_080654_create_water_quality_data_table.php** — water quality data schema with foreign key to users.user_id
+-   **database/seeders/** — `DatabaseSeeder`, `BulkUserSeeder`, `WaterQualityDataSeeder` (idempotent, use updateOrCreate)
+
+### Livewire Components
+
+-   **app/Livewire/ClassifyFish.php** — ML prediction UI: computes averages, calls external API, handles training, displays results (500 lines)
+-   **app/Livewire/WaterQualityChart.php** — real-time chart component using Chart.js, listens to Reverb broadcasts
+-   **app/Livewire/WaterQualityDataTable.php** — tabulated data display with user/date filters
+-   **app/Livewire/WaterQualityCard.php** — latest measurement card widget
+-   **app/Livewire/UserFilter.php** — admin user selection dropdown
+-   **app/Livewire/DateFilter.php** — date range picker component
+-   **app/Livewire/Forms/** — form objects for validation and reusability
+-   **app/Livewire/Actions/Logout.php** — logout action component
+
+### Events & Broadcasting
+
+-   **app/Events/WaterQualityCreated.php** — broadcasts new water quality records on channel `water-quality-data-created` (implements `ShouldBroadcastNow`)
+
+### Frontend Assets
+
+-   **resources/js/app.js** — main JS entry: imports theme system, waterQualityInit, exposes global helpers
+-   **resources/js/bootstrap.js** — axios + Echo initialization
+-   **resources/js/echo.js** — Reverb configuration using Pusher protocol
+-   **resources/js/theme.js** — dark/light mode toggle logic, localStorage persistence
+-   **resources/js/waterQualityInit.js** — Livewire-aware chart initialization
+-   **resources/css/app.css** — Tailwind directives + custom CVSU theme variables
+-   **tailwind.config.js** — custom color palette (`cvsu.*`), dark mode class strategy, content paths
+
+### Configuration & Helpers
+
+-   **config/water_quality.php** — classification ranges for pH, temperature, salinity, DO (used by helper functions for status badges)
+-   **app/Support/helpers.php** — global helper functions including `classifyWaterParam()` (206 lines)
+-   **app/Http/Middleware/IsAdmin.php** — admin route guard
+-   **app/Http/Middleware/NormalizeThemeCookie.php** — ensures theme cookie consistency
+-   **app/Observers/UserObserver.php** — user model lifecycle hooks
+-   **app/Services/** — `WaterQualityChartService.php`, `SampleWaterQualityService.php`
+
+### Scripts & Automation
+
+-   **scripts/dev-start.js** — cross-platform launcher for dev-start.ps1 or dev-start.sh
+-   **scripts/dev-start.ps1** — PowerShell: creates/seeds SQLite, runs migrations, starts dev servers
+-   **scripts/create-admin.ps1** — idempotent admin account creation
+-   **scripts/send-sample-water-data.ps1** — test sensor data POST script
+-   **scripts/generate-water-quality-data.ps1** — bulk data generation for testing
+-   **package.json scripts** — `dev`, `dev-start`, `dev-reset`, `build`, `build:theme`
+-   **composer.json scripts** — `dev` (concurrently runs server + reverb + vite)
 
 ## Important Conventions & Gotchas
 
--   User primary key: `User::$primaryKey = 'user_id'`. Do not assume `id`.
--   Sensor API auth: controller expects `Authorization: Bearer <API_KEY>` header and matches `user_id` + `api_key` (see `WaterQualityDataController::store`).
--   The controller currently contains a guard `if ($request->temperature != 85.0000) { ... }` — this appears to be a special-case filter and may be a debugging/legacy artefact. Review before changing behavior.
--   Real-time: created water quality rows are broadcast via `WaterQualityCreated` event and consumed by front-end Livewire/Reverb. If you change the event payload, update listeners and livewire code accordingly.
+### User Model & Authentication
+
+-   **User primary key**: `User::$primaryKey = 'user_id'` (NOT `id`). Always use `user_id` in foreign keys and queries.
+-   **Virtual name attribute**: User model has no `name` column; it's computed from `first_name + last_name` via accessor.
+-   **API authentication**: Sensor API expects `Authorization: Bearer <API_KEY>` header + matching `user_id` in request body. Controller validates both in `WaterQualityDataController::store()`.
+-   **Backward compatibility**: User model provides `getIdAttribute()` getter so `$user->id` works for libraries expecting `id`.
+
+### Data Ingestion & Broadcasting
+
+-   **Temperature filter**: `WaterQualityDataController::store()` contains guard `if ($request->temperature != 85.0000)` — legacy debugging code, review before removing.
+-   **CSRF exemption**: `/store-water-quality-data` route is CSRF-exempt (see `bootstrap/app.php` middleware config).
+-   **Real-time updates**: `WaterQualityCreated` event broadcasts immediately (`ShouldBroadcastNow`). Livewire components listen via Echo/Reverb.
+-   **Latest endpoint**: `GET /api/water-quality/latest?user={userId}&limit={limit}` returns time-series data for charting (cached, reversed to oldest→newest).
+
+### Frontend & Theme System
+
+-   **Dark mode**: Uses Tailwind `class` strategy. Toggle stored in `localStorage` (`agwasuri_theme`), synced to server cookie via `NormalizeThemeCookie` middleware.
+-   **Theme persistence**: `resources/js/theme.js` + `resources/js/app.js` ensure state survives Livewire partial updates via `message.processed` hook.
+-   **CVSU colors**: Custom Tailwind palette in `tailwind.config.js` uses CSS variables (`--cvsu-*`) with fallbacks for runtime flexibility.
+-   **Chart libraries**: Project uses BOTH Chart.js 4.4 (via Livewire Charts wrapper) AND ApexCharts 5.3. Check component before adding chart code.
+
+### Database & Migrations
+
+-   **SQLite default**: Development uses SQLite (`database/database.sqlite`). Production supports MySQL/PostgreSQL.
+-   **Idempotent seeders**: Use `updateOrCreate` to avoid duplicate key errors. See `DatabaseSeeder`, `BulkUserSeeder`.
+-   **Foreign keys**: Water quality data foreign key references `users(user_id)` with `onDelete('cascade')`.
+
+### ML Integration
+
+-   **External API**: ML service at `https://api.agwasuri.app` (NOT hosted in this repo). Endpoints: `/predict`, `/train_model`.
+-   **Request timeout**: ClassifyFish uses 30s timeout for training requests (see `Http::timeout(30)`).
+-   **Model metadata**: After training, timestamp saved to `model_metadata` table (`model_name='fish_classifier'`, `last_trained_at`).
+-   **Admin-only training**: Only users with `isAdmin()` can trigger model training via UI.
 
 ## Dev / Run / Test Workflows
 
@@ -128,9 +227,45 @@ ML endpoints called from UI (see `ClassifyFish`):
 
 ## When Editing / Refactoring
 
--   If you change the water-quality DB schema, update `WaterQualityData::$fillable`, the migration `database/migrations/2024_10_30_080654_create_water_quality_data_table.php`, seeders under `database/seeders/WaterQualityDataSeeder.php`, and any averaging code in `ClassifyFish::predictFishType()`.
--   If you rename the broadcast channel or event properties, update `app/Events/WaterQualityCreated.php` and ensure front-end subscriptions (Livewire/Reverb) match.
--   Respect `User::$primaryKey = 'user_id'` (authentication and API key matching depends on it).
+### Schema Changes
+
+-   If you change the water-quality DB schema, update ALL of:
+    1. `WaterQualityData::$fillable` array
+    2. Migration: `database/migrations/2024_10_30_080654_create_water_quality_data_table.php`
+    3. Seeders: `database/seeders/WaterQualityDataSeeder.php`
+    4. ML averaging logic in `ClassifyFish::predictFishType()`
+    5. Chart data serialization in `WaterQualityDataController::latest()`
+
+### Broadcasting Changes
+
+-   If you rename the broadcast channel or event properties:
+    1. Update `app/Events/WaterQualityCreated.php` (`broadcastOn()`, `broadcastWith()`)
+    2. Update Livewire listeners (check `WaterQualityChart`, `WaterQualityCard`)
+    3. Update `routes/channels.php` if using private channels
+    4. Test with `php artisan reverb:start` running
+
+### User Model Changes
+
+-   Respect `User::$primaryKey = 'user_id'` in ALL queries and relationships
+-   If adding user fields, update:
+    1. Migration: `database/migrations/0001_01_01_000000_create_users_table.php`
+    2. Model fillable: `app/Models/User.php`
+    3. Seeders: `database/seeders/BulkUserSeeder.php`
+    4. Registration form if relevant: `resources/views/livewire/pages/auth/register.blade.php`
+
+### Frontend & Styling
+
+-   When adding Tailwind classes, ensure they're in `tailwind.config.js` content paths
+-   For CVSU brand colors, use existing `cvsu-*` utilities (don't hardcode hex values)
+-   Theme-aware components must handle both light/dark modes (test toggle)
+-   After JS changes, restart Vite (`npm run dev`) to see updates
+
+### Testing Changes
+
+-   When adding features, write Pest tests in `tests/Feature/` or `tests/Unit/`
+-   Test broadcasting events with `Event::fake()` and `Event::assertDispatched()`
+-   For API tests, use `actingAs()` with real User models (remember `user_id` primary key)
+-   Run full suite before committing: `php artisan test`
 
 ## Useful quick references
 
@@ -163,7 +298,7 @@ If anything above is unclear, tell me which files or behaviors you want expanded
 
 ---
 
-Last updated: 2025-12-14
+Last updated: 2025-12-16
 
 See design guidance and UX documentation in `docs/WEB_DESIGN.md` for UI/UX, sitemap, visual tokens, and handoff checklists.
 
