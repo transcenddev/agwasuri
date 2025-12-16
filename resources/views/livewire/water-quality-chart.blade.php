@@ -25,15 +25,23 @@
                             $lineChartModelArray['colors'] = $__defaultColors;
                         }
 
-                        // Make temperature more visually prominent by default
-                        $__defaultStrokeWidths = [2.6, 1.6, 1.6, 1.6];
-                        if (empty($lineChartModelArray['jsonConfig']['stroke']['width'])) {
-                            $lineChartModelArray['jsonConfig']['stroke']['width'] = $__defaultStrokeWidths;
+                        // CRITICAL FIX: Ensure smooth curves and no markers (wavy lines, no circles)
+                        if (empty($lineChartModelArray['jsonConfig']['stroke'])) {
+                            $lineChartModelArray['jsonConfig']['stroke'] = [
+                                'curve' => 'smooth',
+                                'width' => [2.6, 1.6, 1.6, 1.6]
+                            ];
+                        } elseif (empty($lineChartModelArray['jsonConfig']['stroke']['curve'])) {
+                            $lineChartModelArray['jsonConfig']['stroke']['curve'] = 'smooth';
                         }
 
-                        // Small markers to help identify series points without cluttering
+                        // CRITICAL FIX: Disable markers completely (no circle points)
                         if (empty($lineChartModelArray['jsonConfig']['markers'])) {
-                            $lineChartModelArray['jsonConfig']['markers'] = ['size' => 3];
+                            $lineChartModelArray['jsonConfig']['markers'] = [
+                                'size' => 0,
+                                'strokeWidth' => 0,
+                                'hover' => ['size' => 0]
+                            ];
                         }
                     @endphp
 

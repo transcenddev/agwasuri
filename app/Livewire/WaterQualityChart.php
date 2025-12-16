@@ -298,11 +298,18 @@ class WaterQualityChart extends Component
         // Colors: ensure an ordered array matching series order.
         $this->lineChartModelArray['jsonConfig']['colors'] = $this->lineChartModelArray['jsonConfig']['colors'] ?? array_values($colors);
 
-        // Stroke widths (temperature emphasized)
-        $this->lineChartModelArray['jsonConfig']['stroke'] = $this->lineChartModelArray['jsonConfig']['stroke'] ?? ['width' => [2.6, 1.6, 1.6, 1.6]];
+        // CRITICAL FIX: Stroke configuration with smooth curves (wavy lines, not straight)
+        $this->lineChartModelArray['jsonConfig']['stroke'] = $this->lineChartModelArray['jsonConfig']['stroke'] ?? [
+            'curve' => 'smooth',  // This makes lines wavy instead of straight
+            'width' => [2.6, 1.6, 1.6, 1.6]  // Temperature emphasized
+        ];
 
-        // Markers
-        $this->lineChartModelArray['jsonConfig']['markers'] = $this->lineChartModelArray['jsonConfig']['markers'] ?? ['size' => 3];
+        // CRITICAL FIX: Disable markers (no circle points on lines)
+        $this->lineChartModelArray['jsonConfig']['markers'] = $this->lineChartModelArray['jsonConfig']['markers'] ?? [
+            'size' => 0,  // Set to 0 to hide circle points completely
+            'strokeWidth' => 0,
+            'hover' => ['size' => 0]  // Also disable on hover
+        ];
 
         // Mobile / readability defaults: hide inline data labels and prefer tooltips
         $this->lineChartModelArray['jsonConfig']['dataLabels'] = $this->lineChartModelArray['jsonConfig']['dataLabels'] ?? ['enabled' => false];
@@ -334,8 +341,14 @@ class WaterQualityChart extends Component
                 'options' => [
                     'chart' => [ 'height' => 360 ],
                     'legend' => [ 'position' => 'bottom', 'horizontalAlign' => 'center' ],
-                    'stroke' => [ 'width' => [2.2, 1.2, 1.2, 1.2] ],
-                    'markers' => [ 'size' => 2 ],
+                    'stroke' => [ 
+                        'curve' => 'smooth',  // Keep smooth curves on mobile
+                        'width' => [2.2, 1.2, 1.2, 1.2] 
+                    ],
+                    'markers' => [ 
+                        'size' => 0,  // Keep markers disabled on mobile
+                        'strokeWidth' => 0 
+                    ],
                     'xaxis' => [ 'labels' => ['rotate' => -45] ],
                 ],
             ],
