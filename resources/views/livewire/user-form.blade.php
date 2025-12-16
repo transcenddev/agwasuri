@@ -110,6 +110,118 @@
                              @error('water_type') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                          </div>
 
+                        {{-- Farm Type --}}
+                        <div>
+                            <label for="farm_type" class="block text-sm font-medium text-gray-700">Farm Type</label>
+                            <input type="text" wire:model.defer="farm_type" id="farm_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('farm_type') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Culture System --}}
+                        <div>
+                            <label for="culture_system" class="block text-sm font-medium text-gray-700">Culture System</label>
+                            <input type="text" wire:model.defer="culture_system" id="culture_system" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('culture_system') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Culture Method --}}
+                        <div>
+                            <label for="culture_method" class="block text-sm font-medium text-gray-700">Culture Method</label>
+                            <input type="text" wire:model.defer="culture_method" id="culture_method" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('culture_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Activities During Pond Preparation --}}
+                        <div>
+                            <label for="activities_during_pond_preperation" class="block text-sm font-medium text-gray-700">Activities During Pond Preparation</label>
+                            <input type="text" wire:model.defer="activities_during_pond_preperation" id="activities_during_pond_preperation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('activities_during_pond_preperation') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Liming --}}
+                        <div>
+                            <label for="liming" class="block text-sm font-medium text-gray-700">Liming</label>
+                            <input type="text" wire:model.defer="liming" id="liming" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('liming') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Fertilizer --}}
+                        <div>
+                            <label for="fertilizer" class="block text-sm font-medium text-gray-700">Fertilizer</label>
+                            <input type="text" wire:model.defer="fertilizer" id="fertilizer" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('fertilizer') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Disinfectant --}}
+                        <div>
+                            <label for="disinfectant" class="block text-sm font-medium text-gray-700">Disinfectant</label>
+                            <input type="text" wire:model.defer="disinfectant" id="disinfectant" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('disinfectant') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Source of Fingerlings/Larvae --}}
+                        <div>
+                            <label for="source_of_fingerlings_larvae" class="block text-sm font-medium text-gray-700">Source of Fingerlings/Larvae</label>
+                            <input type="text" wire:model.defer="source_of_fingerlings_larvae" id="source_of_fingerlings_larvae" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('source_of_fingerlings_larvae') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Stocking Density --}}
+                        <div>
+                            <label for="stocking_density" class="block text-sm font-medium text-gray-700">Stocking Density</label>
+                            <input type="text" wire:model.defer="stocking_density" id="stocking_density" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('stocking_density') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Culture Period --}}
+                        <div>
+                            <label for="culture_period" class="block text-sm font-medium text-gray-700">Culture Period</label>
+                            <input type="text" wire:model.defer="culture_period" id="culture_period" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('culture_period') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Harvest Method --}}
+                        <div>
+                            <label for="harvest_method" class="block text-sm font-medium text-gray-700">Harvest Method</label>
+                            <input type="text" wire:model.defer="harvest_method" id="harvest_method" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('harvest_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Total Production Per Cropping --}}
+                        <div>
+                            <label for="total_production_per_cropping" class="block text-sm font-medium text-gray-700">Total Production Per Cropping</label>
+                            <input type="text" wire:model.defer="total_production_per_cropping" id="total_production_per_cropping" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('total_production_per_cropping') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Feeds --}}
+                        <div>
+                            <label for="feeds" class="block text-sm font-medium text-gray-700">Feeds</label>
+                            <input type="text" wire:model.defer="feeds" id="feeds" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('feeds') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Amount Per Day --}}
+                        <div>
+                            <label for="amount_per_day" class="block text-sm font-medium text-gray-700">Amount Per Day</label>
+                            <input type="text" wire:model.defer="amount_per_day" id="amount_per_day" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('amount_per_day') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Frequency --}}
+                        <div>
+                            <label for="frequency" class="block text-sm font-medium text-gray-700">Frequency</label>
+                            <input type="text" wire:model.defer="frequency" id="frequency" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('frequency') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
+                        {{-- Product Destination --}}
+                        <div>
+                            <label for="product_destination" class="block text-sm font-medium text-gray-700">Product Destination</label>
+                            <input type="text" wire:model.defer="product_destination" id="product_destination" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @error('product_destination') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                        </div>
+
                         {{-- API Key --}}
                         <div class="sm:col-span-2">
                             <label for="api_key" class="block text-sm font-medium text-gray-700">API Key</label>

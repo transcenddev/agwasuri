@@ -12,36 +12,38 @@ return [
     */
 
     'ph' => [
-        ['min' => null,  'max' => 5.0, 'label' => 'HARMFUL', 'note' => 'highly acidic'],
-        ['min' => 5.0,   'max' => 6.4, 'label' => 'HARMFUL', 'note' => 'acidic / suboptimal'],
-        ['min' => 6.5,   'max' => 8.5, 'label' => 'GOOD',    'note' => 'optimal (DENR standard)' ],
-        ['min' => 6.5,   'max' => 9.0, 'label' => 'GOOD',    'note' => 'acceptable range for production'],
-        ['min' => 7.9,   'max' => 8.3, 'label' => 'GOOD',    'note' => 'typical Manila Bay range'],
-        ['min' => 9.0,   'max' => null,'label' => 'HARMFUL', 'note' => 'highly alkaline'],
+        ['min' => null, 'max' => 6.00, 'label' => 'HARM', 'note' => 'extremely outside the acceptable range and may pose high risk to fish health and survival'],
+        ['min' => 6.00, 'max' => 6.49, 'label' => 'BAD',  'note' => 'outside the acceptable range; indicates undesirable conditions requiring corrective action'],
+        ['min' => 6.50, 'max' => 7.88, 'label' => 'GOOD', 'note' => 'within the acceptable range but outside the typical operating range observed in the study'],
+        ['min' => 7.89, 'max' => 8.31, 'label' => 'BEST', 'note' => 'typical operating range observed and within the acceptable standard'],
+        ['min' => 8.32, 'max' => 8.50, 'label' => 'GOOD', 'note' => 'within the acceptable range but outside the typical operating range observed in the study'],
+        ['min' => 8.51, 'max' => 9.00, 'label' => 'BAD',  'note' => 'outside the acceptable range; indicates undesirable conditions requiring corrective action'],
+        ['min' => 9.00, 'max' => null, 'label' => 'HARM', 'note' => 'extremely outside the acceptable range and may pose high risk to fish health and survival'],
     ],
 
     'temperature_c' => [
-        ['min' => null,  'max' => 20.0, 'label' => 'HARMFUL', 'note' => 'sub-lethal / harmful to growth'],
-        ['min' => 20.0,  'max' => 25.0, 'label' => 'BAD',     'note' => 'suboptimal for culture'],
-        ['min' => 25.0,  'max' => 31.0, 'label' => 'GOOD',    'note' => 'optimal (DENR recommended)'],
-        ['min' => 26.7,  'max' => 31.0, 'label' => 'GOOD',    'note' => 'typical observed range in Philippine studies'],
-        ['min' => 31.0,  'max' => 35.0, 'label' => 'GOOD',    'note' => 'upper tolerance / acceptable'],
-        ['min' => 35.0,  'max' => null, 'label' => 'HARMFUL', 'note' => 'lethal / fatal to many species'],
+        ['min' => null,  'max' => 20.00, 'label' => 'HARM', 'note' => 'sub-lethal or lethal range that may impair survival, consistent with thresholds cited in the study'],
+        ['min' => 20.00, 'max' => 24.99, 'label' => 'BAD',  'note' => 'outside the recommended range and may reduce fish performance and stability'],
+        ['min' => 25.00, 'max' => 29.83, 'label' => 'GOOD', 'note' => 'within the recommended range but below the typical upper operating range observed in the study'],
+        ['min' => 29.84, 'max' => 31.00, 'label' => 'BEST', 'note' => 'upper operating range aligned with observed values while remaining within the recommended limit'],
+        ['min' => 31.01, 'max' => 35.00, 'label' => 'BAD',  'note' => 'outside the recommended range and may reduce fish performance and stability'],
+        ['min' => 35.00, 'max' => null,  'label' => 'HARM', 'note' => 'sub-lethal or lethal range that may impair survival, consistent with thresholds cited in the study'],
     ],
 
     'salinity_ppt' => [
-        ['min' => null, 'max' => 7.0,  'label' => 'Low',      'note' => 'freshwater–brackish conditions'],
-        ['min' => 7.0,  'max' => 25.0, 'label' => 'Moderate', 'note' => 'low–moderate brackish'],
-        ['min' => 25.0, 'max' => null, 'label' => 'High',     'note' => 'high salinity / limited freshwater species'],
+        ['min' => null,  'max' => 5.00,  'label' => 'HARM', 'note' => 'very low salinity condition that may increase stress risk and reduce survival for cultured species requiring brackish conditions'],
+        ['min' => 5.00,  'max' => 6.99,  'label' => 'BAD',  'note' => 'low range that may be unsuitable for stable culture conditions without careful management'],
+        ['min' => 7.00,  'max' => 9.99,  'label' => 'GOOD', 'note' => 'light range that supports more stable conditions than lower ranges'],
+        ['min' => 10.00, 'max' => 17.33, 'label' => 'BEST', 'note' => 'optimal operating range aligned with the observed peak range reported in the study'],
+        ['min' => 17.34, 'max' => 25.00, 'label' => 'GOOD', 'note' => 'acceptable upper range; requires monitoring to prevent spikes due to evaporation and concentration'],
+        ['min' => 25.01, 'max' => null,  'label' => 'HARM', 'note' => 'excessively high salinity that may increase stress risk and reduce survival if sustained'],
     ],
 
     'dissolved_oxygen_mg_l' => [
-        ['min' => null, 'max' => 2.0,  'label' => 'HARMFUL', 'note' => 'critical / lethal levels'],
-        ['min' => 2.0,  'max' => 3.0,  'label' => 'HARMFUL', 'note' => 'severe stress'],
-        ['min' => 3.0,  'max' => 5.0,  'label' => 'GOOD',    'note' => 'suboptimal but survivable'],
-        ['min' => 5.0,  'max' => null, 'label' => 'GOOD',    'note' => 'optimal (commonly recommended ≥5.0 mg/L)'],
-        ['min' => 3.8,  'max' => 7.6,  'label' => 'GOOD',    'note' => 'typical observed range in local ponds'],
-        ['min' => 13.0, 'max' => 14.0, 'label' => 'GOOD',    'note' => 'very high DO in some case studies'],
+        ['min' => null, 'max' => 3.75, 'label' => 'HARM', 'note' => 'below the minimum observed range; indicates critically low oxygen conditions requiring immediate action'],
+        ['min' => 3.75, 'max' => 4.99, 'label' => 'BAD',  'note' => 'below the recommended minimum; may result in stress and reduced growth performance'],
+        ['min' => 5.00, 'max' => 6.12, 'label' => 'GOOD', 'note' => 'meets the recommended minimum and remains within the observed range'],
+        ['min' => 6.13, 'max' => null, 'label' => 'BEST', 'note' => 'satisfies the minimum guideline for fish production'],
     ],
 
     'meta' => [

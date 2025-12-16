@@ -1,14 +1,38 @@
 <div>
-    {{-- Connection status moved to topbar; avoid duplicate indicator here --}}
+    {{-- Connection status indicator --}}
+    <div class="flex items-center justify-end gap-4 text-sm text-gray-600 mb-3">
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-500">Last updated: {{ $lastUpdated ? \Illuminate\Support\Carbon::parse($lastUpdated)->format('M d, Y H:i:s') : 'Never' }}</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            @if($connectionStatus === 'connected')
+                <div class="relative w-3 h-3 flex items-center justify-center" aria-hidden="true">
+                    <span class="absolute inset-0 m-auto inline-flex h-3 w-3 rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-400"></span>
+                </div>
+                <span class="font-medium text-emerald-600">Connected</span>
+                <span class="sr-only"> Sensor online</span>
+            @else
+                <div class="relative w-3 h-3 flex items-center justify-center" aria-hidden="true">
+                    <span class="absolute inset-0 m-auto inline-flex h-3 w-3 rounded-full bg-rose-400 opacity-75 animate-ping"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-400"></span>
+                </div>
+                <span class="font-medium text-rose-600">Disconnected</span>
+                <span class="sr-only"> Sensor offline</span>
+            @endif
+        </div>
+    </div>
 
     {{-- Overall status pill (aggregated) --}}
     @php
         $status = $overallStatus ?? $this->overallStatus;
         $statusKey = strtolower($status ?? '');
         $reasons = [
-            'healthy' => 'All parameters within safe range',
-            'warning' => 'Dissolved oxygen below recommended level',
-            'critical' => 'Immediate action needed: DO critically low',
+            'best' => 'All parameters in optimal range',
+            'good' => 'Parameters within acceptable range',
+            'bad' => 'Some parameters need attention',
+            'harm' => 'Critical conditions - immediate action required',
         ];
         $reasonText = $reasons[$statusKey] ?? '';
         // Badge classes: base badge styling + status-specific classes
@@ -20,28 +44,20 @@
         }
     @endphp
 
-    {{-- Contextual Alert Banner - ONLY show when score < 70% (critical state) --}}
-    @if($statusKey !== 'disconnected' && $this->overallScore < 70)
-        <div class="mb-4 rounded-lg bg-red-50 border-l-4 border-red-600 p-4 animate-pulse" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-show="!compact" x-transition>
-            <div class="flex items-start gap-3">
-                <svg class="h-6 w-6 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
-                </svg>
-                <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-red-800">🚨 CRITICAL: Multiple parameters out of range</h3>
-                    <p class="mt-1 text-sm text-red-700">Immediate action required to prevent fish mortality and productivity loss.</p>
-                    <div class="mt-3">
-                        <a href="{{ route('historical-data') }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors">
-                            Take Action Now
-                            <svg class="ml-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
+    <div class="mb-3">
+        <div>
+            @if($statusKey !== 'disconnected')
+                <span class="{{ $badgeClasses }}">
+                    {{ $status }}
+                </span>
+                @if(!empty($reasonText))
+                    <div class="mt-1 text-xs text-gray-500 truncate max-w-[18rem] sm:max-w-none">{{ $reasonText }}</div>
+                @endif
+            @else
+                {{-- badge hidden when disconnected to avoid duplicate messaging (alert shown above) --}}
+            @endif
         </div>
-    @endif
+    </div>
     {{-- When disconnected, show a more prominent alert with troubleshooting link --}}
     @if(strtolower($overallStatus ?? $this->overallStatus) === 'disconnected')
         <div class="mb-4">
@@ -58,90 +74,63 @@
             </div>
         </div>
     @endif
-    {{-- Mobile-first: 2x2.5 grid by default with score card first, expand to 5 columns on larger screens --}}
-    <dl class="grid grid-cols-2 md:grid-cols-5 transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'gap-4' : 'gap-6'">
+    {{-- Mobile-first: 2 columns (2x2 grid) by default, expand to 4 columns on larger screens --}}
+    <dl class="grid grid-cols-2 gap-4 md:grid-cols-4">
         @php
-            $scoreBadge = $this->scoreStatusBadge();
             $tempStatus = $this->statusFor('temperature', $this->temperature);
             $salStatus = $this->statusFor('salinity', $this->salinity);
             $doStatus = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
             $phStatus = $this->statusFor('ph_level', $this->ph_level);
         @endphp
 
-        {{-- Water Quality Score Card (5th/1st KPI) - Inspired by Plant Health Design --}}
-        <div class="col-span-2 md:col-span-1 flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }}" 
-             x-data="{ compact: false }" 
-             @toggle-compact-view.window="compact = !compact" 
-             x-bind:class="compact ? 'px-3 py-4' : 'px-5 py-6'"
-             style="background: linear-gradient(135deg, {{ $this->overallScore >= 90 ? '#1B651B 0%, #0f4910 100%' : ($this->overallScore >= 70 ? '#f59e0b 0%, #d97706 100%' : '#dc2626 0%, #b91c1c 100%') }});">
-            
-            {{-- Decorative gradient overlay --}}
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
-            
-            {{-- Icon --}}
-            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mb-3 relative z-10">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-
-            <dd class="flex flex-col items-center gap-2 mb-3 relative z-10">
-                <div class="flex items-baseline gap-1">
-                    <span class="font-black text-white transition-all duration-300" x-bind:class="compact ? 'text-4xl' : 'text-5xl'">{{ $this->overallScore }}</span>
-                    <span class="text-2xl font-bold text-white opacity-90">%</span>
-                </div>
-                
-                <span class="px-3 py-1 rounded-full text-xs font-bold bg-white bg-opacity-20 text-white backdrop-blur-sm uppercase tracking-wide">
-                    {{ is_array($scoreBadge) ? $scoreBadge['text'] : $scoreBadge }}
-                </span>
-            </dd>
-            
-            <dt class="text-sm font-semibold text-white opacity-90 mb-2 relative z-10">Water Quality Score</dt>
-            
-            <p class="text-xs text-white opacity-80 leading-relaxed max-w-[200px] relative z-10">
-                {{ $this->overallScore >= 90 ? 'All parameters optimal.' : ($this->overallScore >= 70 ? 'Some parameters need attention.' : 'Immediate action required.') }}
-            </p>
-        </div>
-
         {{-- Temperature (°C) --}}
-        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature (°C)</dt>
-
-            <dd class="flex flex-col items-center gap-1">
-                <div class="flex items-baseline gap-2">
-                    <span class="font-extrabold transition-all duration-300 {{ $this->numberColorForStatus($tempStatus) }}" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
-                    <span class="text-sm text-gray-600">{{ $this->unitFor('temperature') }}</span>
-                </div>
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($tempStatus) }}">
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature (°C)
                 @if(!is_null($this->temperatureDelta))
-                    <div class="text-xs text-gray-500" x-show="!compact">
+                    <div class="mt-1 text-xs">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->temperatureDelta) }}">
                             @if($this->temperatureDelta > 0)
+                                {{-- up arrow --}}
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
                             @elseif($this->temperatureDelta < 0)
+                                {{-- down arrow --}}
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 16a1 1 0 01-.707-.293l-4-4a1 1 0 111.414-1.414L9 12.586V4a1 1 0 112 0v8.586l2.293-2.293a1 1 0 111.414 1.414l-4 4A1 1 0 0110 16z" clip-rule="evenodd"/></svg>
                             @else
+                                {{-- neutral dot --}}
                                 <svg class="w-2 h-2 rounded-full" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true"><circle cx="4" cy="4" r="3"/></svg>
                             @endif
                             <span>{{ $this->formatDelta('temperature', $this->temperatureDelta) }}</span>
                         </span>
                     </div>
                 @endif
+            </dt>
+
+            <dd class="flex items-baseline gap-2">
+                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($tempStatus) }}">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
+                <span class="text-sm text-gray-600">{{ $this->unitFor('temperature') }}</span>
             </dd>
-            
-                <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
+
+            @if(!empty($temperatureClassification['label']))
+                <div class="mt-2 text-xs">
                     @php
-                        $tempBadge = ucfirst($tempStatus ?: 'unknown');
-                        $tempBadgeClass = $tempStatus === 'good' ? 'bg-green-100 text-green-800' : ($tempStatus === 'warning' ? 'bg-yellow-100 text-yellow-800' : ($tempStatus === 'danger' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'));
-                        $tempSparkClass = $tempStatus === 'good' ? 'text-green-500' : ($tempStatus === 'warning' ? 'text-yellow-500' : ($tempStatus === 'danger' ? 'text-red-500' : 'text-gray-400'));
+                        $tempLabelColor = match(strtoupper($temperatureClassification['label'])) {
+                            'BEST' => 'text-green-600 font-semibold',
+                            'GOOD' => 'text-blue-600 font-semibold',
+                            'BAD' => 'text-amber-600 font-semibold',
+                            'HARM' => 'text-rose-600 font-semibold',
+                            default => 'text-gray-700'
+                        };
                     @endphp
-                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full {{ $tempBadgeClass }}">
-                        {{ $tempBadge }}
-                    </span>
+                    <span class="font-medium {{ $tempLabelColor }}">{{ $temperatureClassification['label'] }}</span>
+                    @if(!empty($temperatureClassification['note']))
+                        <span class="ml-2 text-gray-500">{{ $temperatureClassification['note'] }}</span>
+                    @endif
                 </div>
+            @endif
             <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
                 @if(!empty($temperatureSparklinePath))
-                    <svg class="w-20 h-6 {{ $tempSparkClass ?? 'text-gray-400' }}" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $temperatureSparklinePath }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                    <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="{{ $temperatureSparklinePath }}" fill="none" stroke="var(--wq-series-temperature)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
@@ -150,16 +139,10 @@
         </div>
 
         {{-- Salinity (ppt) --}}
-        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity (ppt)</dt>
-
-            <dd class="flex flex-col items-center gap-1">
-                <div class="flex items-baseline gap-2">
-                    <span class="font-extrabold {{ $this->numberColorForStatus($salStatus) }} transition-all duration-300" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
-                    <span class="text-sm text-gray-600">{{ $this->unitFor('salinity') }}</span>
-                </div>
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($salStatus) }}">
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity (ppt)
                 @if(!is_null($this->salinityDelta))
-                    <div class="text-xs text-gray-500" x-show="!compact">
+                    <div class="mt-1 text-xs">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->salinityDelta) }}">
                             @if($this->salinityDelta > 0)
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
@@ -172,22 +155,34 @@
                         </span>
                     </div>
                 @endif
+            </dt>
+
+            <dd class="flex items-baseline gap-2">
+                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($salStatus) }}">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
+                <span class="text-sm text-gray-600">{{ $this->unitFor('salinity') }}</span>
             </dd>
-            
-                <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
+
+            @if(!empty($salinityClassification['label']))
+                <div class="mt-2 text-xs">
                     @php
-                        $salBadge = ucfirst($salStatus ?: 'unknown');
-                        $salBadgeClass = $salStatus === 'good' ? 'bg-green-100 text-green-800' : ($salStatus === 'warning' ? 'bg-yellow-100 text-yellow-800' : ($salStatus === 'danger' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'));
-                        $salSparkClass = $salStatus === 'good' ? 'text-green-500' : ($salStatus === 'warning' ? 'text-yellow-500' : ($salStatus === 'danger' ? 'text-red-500' : 'text-gray-400'));
+                        $salLabelColor = match(strtoupper($salinityClassification['label'])) {
+                            'BEST' => 'text-green-600 font-semibold',
+                            'GOOD' => 'text-blue-600 font-semibold',
+                            'BAD' => 'text-amber-600 font-semibold',
+                            'HARM' => 'text-rose-600 font-semibold',
+                            default => 'text-gray-700'
+                        };
                     @endphp
-                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full {{ $salBadgeClass }}">
-                        {{ $salBadge }}
-                    </span>
+                    <span class="font-medium {{ $salLabelColor }}">{{ $salinityClassification['label'] }}</span>
+                    @if(!empty($salinityClassification['note']))
+                        <span class="ml-2 text-gray-500">{{ $salinityClassification['note'] }}</span>
+                    @endif
                 </div>
-            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500" x-show="!compact">
+            @endif
+            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
                 @if(!empty($salinitySparklinePath))
-                    <svg class="w-20 h-6 {{ $salSparkClass ?? 'text-gray-400' }}" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $salinitySparklinePath }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                    <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="{{ $salinitySparklinePath }}" fill="none" stroke="var(--wq-series-salinity)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
@@ -196,16 +191,10 @@
         </div>
 
         {{-- Dissolved Oxygen (mg/L) --}}
-        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen (mg/L)</dt>
-
-            <dd class="flex flex-col items-center gap-1">
-                <div class="flex items-baseline gap-2">
-                    <span class="font-extrabold {{ $this->numberColorForStatus($doStatus) }} transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
-                    <span class="text-sm text-gray-600">{{ $this->unitFor('dissolved_oxygen') }}</span>
-                </div>
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($doStatus) }}">
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen (mg/L)
                 @if(!is_null($this->dissolvedOxygenDelta))
-                    <div class="text-xs text-gray-500" x-show="!compact">
+                    <div class="mt-1 text-xs">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->dissolvedOxygenDelta) }}">
                             @if($this->dissolvedOxygenDelta > 0)
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
@@ -218,22 +207,34 @@
                         </span>
                     </div>
                 @endif
+            </dt>
+
+            <dd class="flex items-baseline gap-2">
+                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($doStatus) }}">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
+                <span class="text-sm text-gray-600">{{ $this->unitFor('dissolved_oxygen') }}</span>
             </dd>
-            
-                <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
+
+            @if(!empty($dissolvedOxygenClassification['label']))
+                <div class="mt-2 text-xs">
                     @php
-                        $doBadge = ucfirst($doStatus ?: 'unknown');
-                        $doBadgeClass = $doStatus === 'good' ? 'bg-green-100 text-green-800' : ($doStatus === 'warning' ? 'bg-yellow-100 text-yellow-800' : ($doStatus === 'danger' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'));
-                        $doSparkClass = $doStatus === 'good' ? 'text-green-500' : ($doStatus === 'warning' ? 'text-yellow-500' : ($doStatus === 'danger' ? 'text-red-500' : 'text-gray-400'));
+                        $doLabelColor = match(strtoupper($dissolvedOxygenClassification['label'])) {
+                            'BEST' => 'text-green-600 font-semibold',
+                            'GOOD' => 'text-blue-600 font-semibold',
+                            'BAD' => 'text-amber-600 font-semibold',
+                            'HARM' => 'text-rose-600 font-semibold',
+                            default => 'text-gray-700'
+                        };
                     @endphp
-                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full {{ $doBadgeClass }}">
-                        {{ $doBadge }}
-                    </span>
+                    <span class="font-medium {{ $doLabelColor }}">{{ $dissolvedOxygenClassification['label'] }}</span>
+                    @if(!empty($dissolvedOxygenClassification['note']))
+                        <span class="ml-2 text-gray-500">{{ $dissolvedOxygenClassification['note'] }}</span>
+                    @endif
                 </div>
-            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500" x-show="!compact">
+            @endif
+            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
                 @if(!empty($doSparklinePath))
-                    <svg class="w-20 h-6 {{ $doSparkClass ?? 'text-gray-400' }}" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $doSparklinePath }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                    <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="{{ $doSparklinePath }}" fill="none" stroke="var(--wq-series-do)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>
@@ -241,17 +242,11 @@
             </div>
         </div>
 
-        {{-- pH --}}
-        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
-            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH</dt>
-
-            <dd class="flex flex-col items-center gap-1">
-                <div class="flex items-baseline gap-2">
-                    <span class="font-extrabold {{ $this->numberColorForStatus($phStatus) }} transition-all duration-300" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
-                    <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
-                </div>
+        {{-- pH Level --}}
+        <div class="flex flex-col items-center justify-center px-5 py-6 sm:py-6 text-center rounded-2xl min-h-24 {{ $this->classesForStatus($phStatus) }}">
+            <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level
                 @if(!is_null($this->phLevelDelta))
-                    <div class="text-xs text-gray-500" x-show="!compact">
+                    <div class="mt-1 text-xs">
                         <span class="inline-flex items-center gap-1 {{ $this->trendClass($this->phLevelDelta) }}">
                             @if($this->phLevelDelta > 0)
                                 <svg class="w-3 h-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 4a1 1 0 01.707.293l4 4a1 1 0 11-1.414 1.414L11 7.414V16a1 1 0 11-2 0V7.414L6.707 9.707A1 1 0 015.293 8.293l4-4A1 1 0 0110 4z" clip-rule="evenodd"/></svg>
@@ -264,22 +259,34 @@
                         </span>
                     </div>
                 @endif
+            </dt>
+
+            <dd class="flex items-baseline gap-2">
+                <span class="text-[clamp(1.5rem,4vw,3rem)] font-extrabold {{ $this->numberColorForStatus($phStatus) }}">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
+                <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
             </dd>
-            
-                <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
+
+            @if(!empty($phClassification['label']))
+                <div class="mt-2 text-xs">
                     @php
-                        $phBadge = ucfirst($phStatus ?: 'unknown');
-                        $phBadgeClass = $phStatus === 'good' ? 'bg-green-100 text-green-800' : ($phStatus === 'warning' ? 'bg-yellow-100 text-yellow-800' : ($phStatus === 'danger' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'));
-                        $phSparkClass = $phStatus === 'good' ? 'text-green-500' : ($phStatus === 'warning' ? 'text-yellow-500' : ($phStatus === 'danger' ? 'text-red-500' : 'text-gray-400'));
+                        $phLabelColor = match(strtoupper($phClassification['label'])) {
+                            'BEST' => 'text-green-600 font-semibold',
+                            'GOOD' => 'text-blue-600 font-semibold',
+                            'BAD' => 'text-amber-600 font-semibold',
+                            'HARM' => 'text-rose-600 font-semibold',
+                            default => 'text-gray-700'
+                        };
                     @endphp
-                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full {{ $phBadgeClass }}">
-                        {{ $phBadge }}
-                    </span>
+                    <span class="font-medium {{ $phLabelColor }}">{{ $phClassification['label'] }}</span>
+                    @if(!empty($phClassification['note']))
+                        <span class="ml-2 text-gray-500">{{ $phClassification['note'] }}</span>
+                    @endif
                 </div>
-            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500" x-show="!compact">
+            @endif
+            <div class="mt-3 w-full flex items-center justify-center text-xs text-gray-500">
                 @if(!empty($phSparklinePath))
-                    <svg class="w-20 h-6 {{ $phSparkClass ?? 'text-gray-400' }}" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
-                        <polyline points="{{ $phSparklinePath }}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
+                    <svg class="w-20 h-6" viewBox="0 0 72 28" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="{{ $phSparklinePath }}" fill="none" stroke="var(--wq-series-ph)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" />
                     </svg>
                 @else
                     <div class="w-20 h-6 bg-white/0" aria-hidden="true"></div>

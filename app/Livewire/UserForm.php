@@ -25,6 +25,22 @@ class UserForm extends Component
     public $total_fishpond_area = null;
     public $species_cultured_string = ''; // Use a string for input
     public $water_type = '';
+    public $farm_type = '';
+    public $culture_system = '';
+    public $culture_method = '';
+    public $activities_during_pond_preperation = '';
+    public $liming = '';
+    public $fertilizer = '';
+    public $disinfectant = '';
+    public $source_of_fingerlings_larvae = '';
+    public $stocking_density = '';
+    public $culture_period = '';
+    public $harvest_method = '';
+    public $total_production_per_cropping = '';
+    public $feeds = '';
+    public $amount_per_day = '';
+    public $frequency = '';
+    public $product_destination = '';
     public $api_key = ''; // Changed from remember_token
 
     public $isEditing = false;
@@ -61,6 +77,22 @@ class UserForm extends Component
                  'nullable', // Still allow null if admin
                  Rule::in(['Freshwater', 'Brackishwater', 'Saltwater']),
             ],
+            'farm_type' => ['nullable', 'string', 'max:255'],
+            'culture_system' => ['nullable', 'string', 'max:255'],
+            'culture_method' => ['nullable', 'string', 'max:255'],
+            'activities_during_pond_preperation' => ['nullable', 'string', 'max:255'],
+            'liming' => ['nullable', 'string', 'max:255'],
+            'fertilizer' => ['nullable', 'string', 'max:255'],
+            'disinfectant' => ['nullable', 'string', 'max:255'],
+            'source_of_fingerlings_larvae' => ['nullable', 'string', 'max:255'],
+            'stocking_density' => ['nullable', 'string', 'max:255'],
+            'culture_period' => ['nullable', 'string', 'max:255'],
+            'harvest_method' => ['nullable', 'string', 'max:255'],
+            'total_production_per_cropping' => ['nullable', 'string', 'max:255'],
+            'feeds' => ['nullable', 'string', 'max:255'],
+            'amount_per_day' => ['nullable', 'string', 'max:255'],
+            'frequency' => ['nullable', 'string', 'max:255'],
+            'product_destination' => ['nullable', 'string', 'max:255'],
 
             'api_key' => [
                 'nullable',
@@ -97,6 +129,22 @@ class UserForm extends Component
             $this->total_fishpond_area = $user->total_fishpond_area;
             $this->species_cultured_string = is_array($user->species_cultured) ? implode(', ', $user->species_cultured) : $user->species_cultured;
             $this->water_type = $user->water_type;
+            $this->farm_type = $user->farm_type;
+            $this->culture_system = $user->culture_system;
+            $this->culture_method = $user->culture_method;
+            $this->activities_during_pond_preperation = $user->activities_during_pond_preperation;
+            $this->liming = $user->liming;
+            $this->fertilizer = $user->fertilizer;
+            $this->disinfectant = $user->disinfectant;
+            $this->source_of_fingerlings_larvae = $user->source_of_fingerlings_larvae;
+            $this->stocking_density = $user->stocking_density;
+            $this->culture_period = $user->culture_period;
+            $this->harvest_method = $user->harvest_method;
+            $this->total_production_per_cropping = $user->total_production_per_cropping;
+            $this->feeds = $user->feeds;
+            $this->amount_per_day = $user->amount_per_day;
+            $this->frequency = $user->frequency;
+            $this->product_destination = $user->product_destination;
             $this->api_key = $user->api_key;
             $this->isEditing = true;
         } else {
@@ -131,6 +179,22 @@ class UserForm extends Component
             'total_fishpond_area' => $validatedData['total_fishpond_area'] ?? null,
             'species_cultured' => $speciesArray,
             'water_type' => $validatedData['water_type'] ?? null,
+            'farm_type' => $validatedData['farm_type'] ?? null,
+            'culture_system' => $validatedData['culture_system'] ?? null,
+            'culture_method' => $validatedData['culture_method'] ?? null,
+            'activities_during_pond_preperation' => $validatedData['activities_during_pond_preperation'] ?? null,
+            'liming' => $validatedData['liming'] ?? null,
+            'fertilizer' => $validatedData['fertilizer'] ?? null,
+            'disinfectant' => $validatedData['disinfectant'] ?? null,
+            'source_of_fingerlings_larvae' => $validatedData['source_of_fingerlings_larvae'] ?? null,
+            'stocking_density' => $validatedData['stocking_density'] ?? null,
+            'culture_period' => $validatedData['culture_period'] ?? null,
+            'harvest_method' => $validatedData['harvest_method'] ?? null,
+            'total_production_per_cropping' => $validatedData['total_production_per_cropping'] ?? null,
+            'feeds' => $validatedData['feeds'] ?? null,
+            'amount_per_day' => $validatedData['amount_per_day'] ?? null,
+            'frequency' => $validatedData['frequency'] ?? null,
+            'product_destination' => $validatedData['product_destination'] ?? null,
             'api_key' => $validatedData['api_key'] ?? null,
         ];
 

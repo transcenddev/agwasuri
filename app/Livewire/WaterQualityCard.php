@@ -192,7 +192,7 @@ class WaterQualityCard extends Component
                 $this->salinitySparklinePath = $this->buildSparklinePath($salValues, 72, 28, 4);
                 $this->doSparklinePath = $this->buildSparklinePath($doValues, 72, 28, 4);
                 $this->phSparklinePath = $this->buildSparklinePath($phValues, 72, 28, 4);
-            } catch (	hrowable $e) {
+            } catch (\Throwable $e) {
                 $this->temperatureSparklinePath = '';
                 $this->salinitySparklinePath = '';
                 $this->doSparklinePath = '';
@@ -229,7 +229,7 @@ class WaterQualityCard extends Component
 
     /**
      * Compute an aggregated overall status from individual metric statuses.
-     * Priority: danger -> warning -> good
+     * Priority: harm > bad > good > best > disconnected
      */
     protected function computeOverallStatus(): void
     {
@@ -240,23 +240,34 @@ class WaterQualityCard extends Component
         $statuses[] = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
         $statuses[] = $this->statusFor('ph_level', $this->ph_level);
 
-        if (in_array('danger', $statuses, true)) {
-            $this->overallStatus = 'Critical';
+        if (in_array('harm', $statuses, true)) {
+            $this->overallStatus = 'HARM';
             return;
         }
 
-        if (in_array('warning', $statuses, true)) {
-            $this->overallStatus = 'Warning';
+        if (in_array('bad', $statuses, true)) {
+            $this->overallStatus = 'BAD';
             return;
         }
 
-        // if all unknown or null, mark disconnected; otherwise healthy
+        if (in_array('good', $statuses, true)) {
+            $this->overallStatus = 'GOOD';
+            return;
+        }
+
+        // if all available metrics are best
+        if (collect($statuses)->filter(fn($s) => $s !== 'unknown')->every(fn($s) => $s === 'best')) {
+            $this->overallStatus = 'BEST';
+            return;
+        }
+
+        // if all unknown or null, mark disconnected
         if (collect($statuses)->every(fn($s) => $s === 'unknown')) {
             $this->overallStatus = 'Disconnected';
             return;
         }
 
-        $this->overallStatus = 'Healthy';
+        $this->overallStatus = 'BEST';
     }
 
     /**
@@ -354,9 +365,10 @@ class WaterQualityCard extends Component
     public function overallClassesForStatus(string $status): string
     {
         return match(strtolower($status)) {
-            'healthy' => 'bg-cvsu-50 text-cvsu-800',
-            'warning' => 'bg-yellow-50 text-yellow-800',
-            'critical' => 'bg-rose-50 text-rose-700',
+            'best' => 'bg-green-50 text-green-800',
+            'good' => 'bg-blue-50 text-blue-800',
+            'bad' => 'bg-yellow-50 text-yellow-800',
+            'harm' => 'bg-rose-50 text-rose-700',
             'disconnected' => 'bg-amber-50 text-amber-800',
             default => 'bg-gray-50 text-gray-700',
         };
@@ -404,9 +416,10 @@ class WaterQualityCard extends Component
     public function classesForStatus(string $status): string
     {
         return match($status) {
-            'good' => 'bg-cvsu-50 border-cvsu-200 text-cvsu-700',
-            'warning' => 'bg-yellow-50 border-yellow-200 text-yellow-700',
-            'danger' => 'bg-rose-50 border-rose-200 text-rose-700',
+            'best' => 'bg-green-50 border-green-200 text-green-700',
+            'good' => 'bg-blue-50 border-blue-200 text-blue-700',
+            'bad' => 'bg-yellow-50 border-yellow-200 text-yellow-700',
+            'harm' => 'bg-rose-50 border-rose-200 text-rose-700',
             default => 'bg-gray-50 border-gray-200 text-gray-700',
         };
     }
@@ -428,9 +441,10 @@ class WaterQualityCard extends Component
     public function numberColorForStatus(string $status): string
     {
         return match($status) {
-            'good' => 'text-cvsu-700',
-            'warning' => 'text-yellow-700',
-            'danger' => 'text-rose-700',
+            'best' => 'text-green-700',
+            'good' => 'text-blue-700',
+            'bad' => 'text-yellow-700',
+            'harm' => 'text-rose-700',
             default => 'text-gray-700',
         };
     }
@@ -483,12 +497,10 @@ class WaterQualityCard extends Component
         $key = strtoupper(trim((string) $label));
 
         return match($key) {
-            'GOOD', 'GOOD', 'OK', 'OPTIMAL' => 'text-green-700',
-            'HARMFUL', 'DANGER', 'CRITICAL' => 'text-rose-700',
-            'BAD', 'WARNING' => 'text-yellow-700',
-            'LOW' => 'text-cyan-700',
-            'MODERATE' => 'text-yellow-700',
-            'HIGH' => 'text-rose-700',
+            'BEST' => 'text-green-700',
+            'GOOD' => 'text-blue-700',
+            'BAD' => 'text-yellow-700',
+            'HARM' => 'text-rose-700',
             default => 'text-gray-700',
         };
     }

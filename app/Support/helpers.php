@@ -79,22 +79,18 @@ if (! function_exists('classifyWaterParam')) {
 
 if (! function_exists('map_classification_to_status')) {
     /**
-     * Map a classification label (e.g. GOOD, BAD, HARMFUL, Low, Moderate, High)
-     * to a normalized status key used by UI (`good`, `warning`, `harmful`, `unknown`).
+     * Map a classification label (e.g. BEST, GOOD, BAD, HARM)
+     * to a normalized status key used by UI (`best`, `good`, `bad`, `harm`, `unknown`).
      */
     function map_classification_to_status(string $label): string
     {
         $label = trim(strtoupper($label));
 
         return match ($label) {
+            'BEST' => 'best',
             'GOOD' => 'good',
-            'OPTIMAL' => 'good',
-            'TYPICAL' => 'good',
-            'BAD' => 'warning',
-            'LOW' => 'warning',
-            'MODERATE' => 'warning',
-            'HARMFUL' => 'harmful',
-            'HIGH' => 'harmful',
+            'BAD' => 'bad',
+            'HARM' => 'harm',
             default => 'unknown',
         };
     }
@@ -110,7 +106,7 @@ if (! function_exists('status_color')) {
         $key = strtolower($statusOrLabel);
 
         // If a raw label was provided, map it first
-        if (! in_array($key, ['good','warning','harmful','unknown'], true)) {
+        if (! in_array($key, ['best','good','bad','harm','unknown'], true)) {
             $key = map_classification_to_status($statusOrLabel);
         }
 

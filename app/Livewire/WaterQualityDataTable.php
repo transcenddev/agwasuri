@@ -150,56 +150,76 @@ class WaterQualityDataTable extends Component
                 $salLabel = strtoupper(classifyWaterParam('salinity', $entry->salinity)['label'] ?? 'UNKNOWN');
             } catch (\Throwable $e) { $salLabel = 'UNKNOWN'; }
 
-            // Map classifier labels to simplified ui statuses: GOOD / BAD / HARMFUL
-            $toUiStatus = function (?string $label) {
+            // Determine overall row status based on new classification system
+            // Priority: harm > bad > good > best
+            $labels = [$tempLabel, $phLabel, $doLabel, $salLabel];
+
+            $hasHarm = in_array('HARM', $labels, true);
+            $hasBad = in_array('BAD', $labels, true);
+            $hasGood = in_array('GOOD', $labels, true);
+            $allBest = collect($labels)->filter(fn($l) => $l !== 'UNKNOWN')->every(fn($l) => $l === 'BEST');
+
+            if ($hasHarm) {
+                $statusBorderClass = 'border-l-4 border-rose-500';
+                $badgeClass = 'text-rose-700 bg-rose-100';
+                $statusLabel = 'HARM';
+            } elseif ($hasBad) {
+                $statusBorderClass = 'border-l-4 border-yellow-500';
+                $badgeClass = 'text-yellow-700 bg-yellow-100';
+                $statusLabel = 'BAD';
+            } elseif ($hasGood) {
+                $statusBorderClass = 'border-l-4 border-blue-500';
+                $badgeClass = 'text-blue-700 bg-blue-100';
+                $statusLabel = 'GOOD';
+            } elseif ($allBest) {
+                $statusBorderClass = 'border-l-4 border-green-500';
+                $badgeClass = 'text-green-700 bg-green-100';
+                $statusLabel = 'BEST';
+            } else {
+                $statusBorderClass = 'border-l-4 border-gray-400';
+                $badgeClass = 'text-gray-700 bg-gray-100';
+                $statusLabel = 'Unknown';
+            }
+
+            // Map individual parameter labels to a text color class for values.
+            $mapLabelToClass = function (?string $label) {
                 $lab = strtoupper((string) $label);
-                $goodish = ['GOOD', 'LOW', 'MODERATE', 'OK', 'OPTIMAL'];
-                if ($lab === 'UNKNOWN' || $lab === '') return 'BAD';
-                if (in_array($lab, $goodish, true)) return 'GOOD';
-                if ($lab === 'CRITICAL') return 'HARMFUL';
-                return 'BAD';
+                if ($lab === 'UNKNOWN' || $lab === '') {
+                    return 'text-gray-600';
+                }
+                return match($lab) {
+                    'BEST' => 'text-green-600',
+                    'GOOD' => 'text-blue-600',
+                    'BAD' => 'text-yellow-600',
+                    'HARM' => 'text-rose-600',
+                    default => 'text-gray-600',
+                };
             };
 
-            $tUi = $toUiStatus($tempLabel);
-            $pUi = $toUiStatus($phLabel);
-            $dUi = $toUiStatus($doLabel);
-            $sUi = $toUiStatus($salLabel);
+            $entry->tempValueClass = $mapLabelToClass($tempLabel);
+            $entry->phValueClass = $mapLabelToClass($phLabel);
+            $entry->doValueClass = $mapLabelToClass($doLabel);
+            $entry->salValueClass = $mapLabelToClass($salLabel);
 
-            // Aggregate row status: any HARMFUL -> HARMFUL, else any BAD -> BAD, else GOOD
-            $rowStatuses = [$tUi, $pUi, $dUi, $sUi];
-            if (in_array('HARMFUL', $rowStatuses, true)) {
-                $uiStatus = 'HARMFUL';
-            } elseif (in_array('BAD', $rowStatuses, true)) {
-                $uiStatus = 'BAD';
-            } else {
-                $uiStatus = 'GOOD';
-            }
-
-            // Apply centralized UI classes from config if present
-            $statusMap = config('water_quality.status_map', []);
-            $mapEntry = $statusMap[$uiStatus] ?? null;
-            if ($mapEntry) {
-                $statusBorderClass = $mapEntry['border'] ?? ($uiStatus === 'HARMFUL' ? 'border-l-4 border-red-200' : ($uiStatus === 'BAD' ? 'border-l-4 border-amber-100' : 'border-l-4 border-green-100'));
-                $badgeClass = $mapEntry['badge'] ?? ($uiStatus === 'HARMFUL' ? 'text-red-700 bg-red-50' : ($uiStatus === 'BAD' ? 'text-amber-700 bg-amber-50' : 'text-green-700 bg-green-50'));
-            } else {
-                // fallback to existing palette
-                $statusBorderClass = $uiStatus === 'HARMFUL' ? 'border-l-4 border-red-500' : ($uiStatus === 'BAD' ? 'border-l-4 border-yellow-400' : 'border-l-4 border-green-500');
-                $badgeClass = $uiStatus === 'HARMFUL' ? 'text-red-700 bg-red-100' : ($uiStatus === 'BAD' ? 'text-yellow-700 bg-yellow-100' : 'text-green-700 bg-green-100');
-            }
-
-            // Map ui status to per-value classes (prefer more specific per-param logic elsewhere)
-            $uiToValueClass = function (?string $ui) {
-                if ($ui === 'GOOD') return 'text-green-700';
-                if ($ui === 'HARMFUL') return 'text-red-700 font-semibold';
-                return 'text-amber-600';
+            $entry->statusLabel = $statusLabel;
             };
+=======
+            // Format values with labels for display: "30.62 (BEST)"
+            $entry->tempFormatted = $entry->temperature !== null
+                ? number_format($entry->temperature, 2) . ' (' . $tempLabel . ')'
+                : '-';
+            $entry->salFormatted = $entry->salinity !== null
+                ? number_format($entry->salinity, 2) . ' (' . $salLabel . ')'
+                : '-';
+            $entry->doFormatted = $entry->dissolved_oxygen !== null
+                ? number_format($entry->dissolved_oxygen, 2) . ' (' . $doLabel . ')'
+                : '-';
+            $entry->phFormatted = $entry->ph_level !== null
+                ? number_format($entry->ph_level, 2) . ' (' . $phLabel . ')'
+                : '-';
 
-            $entry->tempValueClass = $uiToValueClass($tUi);
-            $entry->phValueClass = $uiToValueClass($pUi);
-            $entry->doValueClass = $uiToValueClass($dUi);
-            $entry->salValueClass = $uiToValueClass($sUi);
-
-            $entry->statusLabel = $uiStatus;
+            $entry->statusLabel = $statusLabel;
+>>>>>>> origin/master
             $entry->statusBadgeClass = $badgeClass;
             $entry->statusBorderClass = $statusBorderClass;
 
