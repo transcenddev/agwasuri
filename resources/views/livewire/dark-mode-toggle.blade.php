@@ -86,7 +86,7 @@
         </svg>
 
         <!-- Render label so parent (sidebar) can toggle visibility via Alpine's `expanded` state -->
-        <span class="text-sm whitespace-nowrap" x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Theme</span>
+        <span class="text-sm whitespace-nowrap" x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Theme</span>
 
         <!-- Moon Icon (Dark Mode) -->
     <svg data-role="icon-moon" class="w-5 h-5 transition-all duration-300 opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24">

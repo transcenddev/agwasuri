@@ -92,50 +92,23 @@
 </script>
 
 <script>
-console.log('🔍 THEME DEBUG - Script loaded');
-
-// Check what's in storage RIGHT NOW
-console.log('localStorage theme:', localStorage.getItem('agwasuri_theme'));
-console.log('Cookie theme:', document.cookie);
-console.log('HTML has dark class?', document.documentElement.classList.contains('dark'));
-
-// Listen to ALL Livewire events
-document.addEventListener('livewire:init', () => {
-    console.log('✅ Livewire initialized');
-});
-
-document.addEventListener('livewire:navigating', (event) => {
-    console.log('🚀 NAVIGATING TO:', event.detail.url);
-    console.log('Dark mode BEFORE nav:', document.documentElement.classList.contains('dark'));
-});
-
-document.addEventListener('livewire:navigated', (event) => {
-    console.log('🎯 NAVIGATED TO:', event.detail.url);
-    console.log('Dark mode AFTER nav:', document.documentElement.classList.contains('dark'));
-    console.log('localStorage theme:', localStorage.getItem('agwasuri_theme'));
-});
-
-// Watch when toggle is clicked
-window.addEventListener('agwasuri:theme-changed', (e) => {
-    console.log('🎨 Theme changed to:', e.detail);
-});
+// Minimal non-verbose listeners: forward user-selected and delegated clicks without debug logs.
+// Keep errors visible but avoid noisy console output used during debugging.
 
 // Forward `user-selected` browser events to Livewire (so server-side #[On] handlers run)
 window.addEventListener('user-selected', function(e){
     try {
         if (window.Livewire && typeof Livewire.emit === 'function') {
-            var userId = e?.detail?.userId ?? e?.detail?.userId ?? null;
+            var userId = (e && e.detail && (e.detail.userId ?? e.detail.id)) || null;
             Livewire.emit('user-selected', userId);
-            console.log('[livewire-forward] user-selected ->', userId);
         }
-    } catch(err) { console.warn('forward user-selected failed', err); }
+    } catch(err) { console.warn('forward user-selected failed'); }
 });
 
 // Delegated click handler: forward clicks on elements with `data-livewire-user-id`
-console.log('[livewire-delegate] handler attached');
 document.addEventListener('click', function(e){
     try {
-        var el = e.target.closest && e.target.closest('[data-livewire-user-id]');
+        var el = e.target && e.target.closest ? e.target.closest('[data-livewire-user-id]') : null;
         if (!el) return;
         var id = el.getAttribute('data-livewire-user-id');
         if (!id) return;
@@ -152,9 +125,8 @@ document.addEventListener('click', function(e){
                         input.value = '';
                     }
                 }
-            } catch(e){}
-            console.log('[livewire-delegate] emitted user-selected ->', id);
+            } catch(e){ /* noop */ }
         }
-    } catch(e) {}
+    } catch(e) { /* noop */ }
 }, { capture: false });
 </script>

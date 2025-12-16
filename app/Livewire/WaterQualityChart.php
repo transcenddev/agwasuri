@@ -31,7 +31,7 @@ class WaterQualityChart extends Component
     {
         $this->userId = $userId;
         // Dispatch chart cleanup BEFORE loadData to ensure old instance is destroyed
-        $this->dispatch('water-quality:destroy-chart');
+        $this->dispatchBrowserEvent('water-quality:destroy-chart');
         $this->loadData();
     }
 
@@ -41,7 +41,7 @@ class WaterQualityChart extends Component
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         // Dispatch chart cleanup BEFORE loadData
-        $this->dispatch('water-quality:destroy-chart');
+        $this->dispatchBrowserEvent('water-quality:destroy-chart');
         $this->loadData();
     }
 

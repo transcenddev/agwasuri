@@ -13,7 +13,7 @@
                 <div class="w-10 h-10 flex-shrink-0">
                     <img src="{{ asset('assets/agwasuri-logo.svg') }}" alt="AgwaSuri logo" class="w-10 h-10 object-contain" />
                 </div>
-                <div x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+                <div x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                     <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-all duration-200">
                         <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span>
                     </a>
@@ -32,7 +32,7 @@
                 <svg class="w-5 h-5 flex-shrink-0 transition-transform duration-200 hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                <span class="text-sm whitespace-nowrap" x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Dashboard</span>
+                <span class="text-sm whitespace-nowrap" x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Dashboard</span>
             </a>
 
             <a href="{{ route('optimal-fish') }}" 
@@ -45,7 +45,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3" />
                     <circle cx="16" cy="9" r="1" fill="currentColor" />
                 </svg>
-                <span class="text-sm whitespace-nowrap" x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Optimal Fish</span>
+                <span class="text-sm whitespace-nowrap" x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Optimal Fish</span>
             </a>
 
             <a href="{{ route('historical-data', ['user' => request('user')]) }}" 
@@ -56,7 +56,7 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span class="text-sm whitespace-nowrap" x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">History</span>
+                <span class="text-sm whitespace-nowrap" x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">History</span>
             </a>
 
             @if(auth()->user()->isAdmin())
@@ -69,7 +69,7 @@
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
-                        <span class="text-sm whitespace-nowrap" x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Accounts</span>
+                        <span class="text-sm whitespace-nowrap" x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Accounts</span>
                     </a>
             @endif
         </nav>
@@ -93,7 +93,7 @@
                 <svg data-role="icon-moon" class="w-5 h-5 flex-shrink-0 transition-all duration-300 opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
-                <span class="text-sm whitespace-nowrap" x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Theme</span>
+                <span class="text-sm whitespace-nowrap" x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Theme</span>
             </button>
 
             {{-- Profile link --}}
@@ -105,7 +105,7 @@
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <span class="text-sm whitespace-nowrap" x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Profile</span>
+                <span class="text-sm whitespace-nowrap" x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Profile</span>
             </a>
 
             {{-- Logout link (styled like Profile) --}}
@@ -118,7 +118,7 @@
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    <span class="text-sm whitespace-nowrap" x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Logout</span>
+                    <span class="text-sm whitespace-nowrap" x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">Logout</span>
                 </button>
             </form>
         </div>

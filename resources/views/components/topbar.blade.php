@@ -34,7 +34,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
-                <div x-show="customOpen" x-trap="customOpen" @click.outside="customOpen=false" x-cloak id="topbar-custom-pop" role="dialog" aria-modal="true" class="absolute right-full mr-2 top-0 z-50 w-[18rem] bg-white rounded-md shadow-lg p-3">
+                <div x-show="customOpen" x-trap="customOpen" @click.outside="customOpen=false" x-cloak id="topbar-custom-pop" role="dialog" aria-modal="true" class="absolute left-0 top-full z-50 mt-2 w-[18rem] bg-white rounded-md shadow-lg p-3">
                     <label class="text-xs text-gray-600">Start Date</label>
                     <input x-ref="customStart" type="date" id="topbar-custom-start" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
                     <label class="text-xs text-gray-600 mt-2">End Date</label>
@@ -73,7 +73,7 @@
                     </svg>
                 </button>
 
-                <div x-show="open" @click.outside="open=false; customOpen=false" x-cloak class="absolute left-0 top-full z-50 mt-2 min-w-[18rem] bg-white rounded-md shadow-lg p-2">
+                <div x-show="open" @click.outside="open=false; customOpen=false" x-cloak class="absolute left-0 top-full z-50 mt-2 min-w-[6rem] bg-white rounded-md shadow-lg p-2">
                     <div class="flex flex-col gap-1">
                         <!-- presets only inside dropdown -->
                         <div class="pt-1"></div>

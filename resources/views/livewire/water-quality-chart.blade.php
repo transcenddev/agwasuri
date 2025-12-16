@@ -52,8 +52,10 @@
                         data-series-names='@json($__seriesNames)'
                         data-series-keys='@json($__seriesKeys)'
                         data-initial='@json($chartData)'
+                        data-chart-config='@json($lineChartModelArray)'
                         data-user-id="{{ request()->get('user') ?? session('selected_user', auth()->id()) }}">
-                        @livewire(\App\Livewire\LivewireChartsLineWrapper::class, ['lineChartModel' => $lineChartModelArray], key('water-quality-' . $__chartId))
+                        {{-- Chart will be created by inline JS below, not by vendor wrapper --}}
+                        <div id="{{ $__chartId }}" class="apexcharts-canvas-wrapper" style="height: 100%; width: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -97,11 +99,76 @@
             const chartId = root.getAttribute('data-chart-id');
             const seriesNames = JSON.parse(root.getAttribute('data-series-names') || '[]');
             const seriesKeys = JSON.parse(root.getAttribute('data-series-keys') || '[]');
+            const chartConfig = JSON.parse(root.getAttribute('data-chart-config') || '{}');
+
+            // CRITICAL FIX: Create the chart manually with explicit timing control
+            let chartInstance = null;
+
+            function createChart() {
+                try {
+                    const container = document.getElementById(chartId);
+                    if (!container) {
+                        console.error('Chart container not found:', chartId);
+                        return;
+                    }
+
+                    // Ensure we have the config
+                    if (!chartConfig || !chartConfig.jsonConfig) {
+                        console.error('Chart config missing');
+                        return;
+                    }
+
+                    // Destroy existing instance first
+                    if (chartInstance && typeof chartInstance.destroy === 'function') {
+                        chartInstance.destroy();
+                        chartInstance = null;
+                    }
+
+                    // CRITICAL: Enforce dimensions BEFORE creating chart
+                    const options = chartConfig.jsonConfig || {};
+                    if (!options.chart) options.chart = {};
+                    options.chart.height = 540;
+                    options.chart.width = '100%';
+                    options.chart.maintainAspectRatio = false;
+
+                    // Create the ApexCharts instance with enforced dimensions
+                    chartInstance = new ApexCharts(container, options);
+                    chartInstance.render();
+
+                    // console.info('WaterQualityChart: created chart instance', chartId, 'height:', options.chart.height);
+
+                    // Store in global registry for access by update functions
+                    if (!window.__waterQualityChartInstances) {
+                        window.__waterQualityChartInstances = {};
+                    }
+                    window.__waterQualityChartInstances[chartId] = chartInstance;
+
+                } catch (e) {
+                    console.error('WaterQualityChart: chart creation failed', e);
+                }
+            }
+
+            // CRITICAL: Wait for DOM to be ready AND Livewire to finish updating
+            function initChartWithTiming() {
+                // Use requestAnimationFrame to ensure layout is complete
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        createChart();
+                    }, 50); // Small delay to ensure container has final dimensions
+                });
+            }
+
+            // Initial creation
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initChartWithTiming);
+            } else {
+                initChartWithTiming();
+            }
 
             // CRITICAL FIX: Destroy chart instance on Livewire update to prevent stale instances
             window.addEventListener('water-quality:destroy-chart', () => {
                 try {
-                    console.debug('WaterQualityChart: destroying chart', chartId);
+                    // console.debug('WaterQualityChart: destroying chart', chartId);
                     
                     // Find and destroy ApexCharts instance
                     const targetCid = (window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[chartId]) || chartId || ('apexcharts' + chartId);
@@ -110,7 +177,7 @@
                         const chartInstance = window.ApexCharts.getChartByID(targetCid);
                         if (chartInstance && typeof chartInstance.destroy === 'function') {
                             chartInstance.destroy();
-                            console.debug('WaterQualityChart: destroyed instance', targetCid);
+                            // console.debug('WaterQualityChart: destroyed instance', targetCid);
                         }
                     }
                     
@@ -126,6 +193,16 @@
                     if (window.__waterQualitySeriesState) {
                         delete window.__waterQualitySeriesState[chartId];
                     }
+                    
+                    // CRITICAL: Recreate chart after Livewire update completes
+                    // console.debug('WaterQualityChart: scheduling chart recreation');
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            setTimeout(() => {
+                                createChart();
+                            }, 100); // Wait for Livewire to finish DOM patch
+                        });
+                    });
                     
                 } catch (e) {
                     console.error('WaterQualityChart: destroy error', e);
@@ -143,7 +220,7 @@
             try {
                 window.__waterQualityDumpInstances = window.__waterQualityDumpInstances || function(){
                     try {
-                        console.debug('waterChart: dumping ApexCharts instances...');
+                        // console.debug('waterChart: dumping ApexCharts instances...');
                         const candidateIds = [];
                         try { candidateIds.push(chartId); } catch(e){}
                         try { candidateIds.push('apexcharts' + chartId); } catch(e){}
@@ -154,14 +231,14 @@
                         } catch(e){}
                         const uniq = Array.from(new Set(candidateIds.filter(Boolean)));
                         if (!window.ApexCharts || typeof window.ApexCharts.getChartByID !== 'function') {
-                            console.debug('waterChart: ApexCharts.getChartByID not available', !!window.ApexCharts);
+                            // console.debug('waterChart: ApexCharts.getChartByID not available', !!window.ApexCharts);
                         }
                         uniq.forEach(id => {
                             try {
                                 const inst = (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') ? window.ApexCharts.getChartByID(id) : null;
-                                console.debug('waterChart: candidate', id, 'hasInstance', !!inst, inst && inst.w && inst.w.config && inst.w.config.chart && inst.w.config.chart.id ? inst.w.config.chart.id : null);
+                                // console.debug('waterChart: candidate', id, 'hasInstance', !!inst, inst && inst.w && inst.w.config && inst.w.config.chart && inst.w.config.chart.id ? inst.w.config.chart.id : null);
                             } catch (e) {
-                                console.debug('waterChart: getChartByID failed for', id, e);
+                                // console.debug('waterChart: getChartByID failed for', id, e);
                             }
                         });
                     } catch(e){}
@@ -373,7 +450,7 @@
                     window.ApexCharts.exec(cid, 'updateOptions', finalOpts, false, true);
                     window.__waterQualityOptionsApplied[cid][sig] = true;
                 } catch (e) {
-                    try { console.debug('waterChart: safeUpdateOptions failed', e); } catch (_) {}
+                    try { /* console.debug('waterChart: safeUpdateOptions failed', e); */ } catch (_) {}
                 }
             }
 
@@ -411,7 +488,7 @@
                                         ? state.series.map(s => ({ name: s.name, data: s.data.map(p => ({ x: p.x, y: p.y })) }))
                                         : state.series.map(s => ({ name: s.name, data: s.data.map(p => p.y) }));
                                     window.ApexCharts.exec(cid, 'updateSeries', rebuilt);
-                                    console.info('WaterQualityChart: fallback forced updateSeries for', cid, timeKey);
+                                    // console.info('WaterQualityChart: fallback forced updateSeries for', cid, timeKey);
                                 } catch (e) {
                                     console.error('WaterQualityChart: fallback updateSeries failed', e);
                                 }
@@ -483,7 +560,7 @@
                             } catch (err) {
                                 // ignore storage problems
                             }
-                            console.info('WaterQualityChart: discovered chart DOM id', found.id);
+                            // console.info('WaterQualityChart: discovered chart DOM id', found.id);
                             return;
                         }
 
@@ -491,7 +568,7 @@
                         if (attempts < MAX_ATTEMPTS) {
                             setTimeout(tryDiscover, INTERVAL_MS);
                         } else {
-                            console.debug('WaterQualityChart: discovery attempts exhausted for', chartId);
+                            // console.debug('WaterQualityChart: discovery attempts exhausted for', chartId);
                         }
                     }
 
@@ -518,7 +595,7 @@
                     coalesce.timer = setTimeout(() => {
                         try {
                             const bufLen = (coalesce.buf || []).length;
-                            console.debug('WaterQualityChart: coalesce flush running', { chartId, bufLen });
+                            // console.debug('WaterQualityChart: coalesce flush running', { chartId, bufLen });
                             if (!bufLen) {
                                 // nothing to do
                                 coalesce.timer = null;
@@ -559,7 +636,7 @@
 
                                 try {
                                     window.ApexCharts.exec(cid, 'appendData', { series: appendSeries });
-                                    console.debug('WaterQualityChart: coalesce appendData applied', { chartId: cid, bufLen });
+                                    // console.debug('WaterQualityChart: coalesce appendData applied', { chartId: cid, bufLen });
                                     // Force an immediate redraw to ensure the appended points render
                                     try { safeUpdateOptions(cid, {}); } catch (e) {}
                                     coalesce.buf = [];
@@ -606,7 +683,7 @@
                     }
                 } catch (e) {
                     // ignore pruning errors
-                    try { console.debug('waterChart: pruneAppendedMap error', e); } catch (_) {}
+                    try { /* console.debug('waterChart: pruneAppendedMap error', e); */ } catch (_) {}
                 }
             }
 
@@ -729,11 +806,11 @@
                                                                     originalExec(cid, 'updateSeries', rebuilt);
                                                                 }
                                                             } catch (innerExecErr) {
-                                                                console.debug('WaterQualityChart: exec-wrapper originalExec failed', innerExecErr);
+                                                                // console.debug('WaterQualityChart: exec-wrapper originalExec failed', innerExecErr);
                                                             }
                                                     window.__waterQualityLastForcedAt[chartId] = now;
                                                 } catch (updErr) {
-                                                    console.debug('WaterQualityChart: exec-wrapper updateSeries failed', updErr);
+                                                    // console.debug('WaterQualityChart: exec-wrapper updateSeries failed', updErr);
                                                 }
                                             }
                                         }
@@ -762,7 +839,7 @@
                         window.__waterQualityExecWrapped = true;
                     }
                 } catch (wrapErr) {
-                    console.debug('WaterQualityChart: failed to wrap ApexCharts.exec', wrapErr);
+                    // console.debug('WaterQualityChart: failed to wrap ApexCharts.exec', wrapErr);
                 }
 
                 while(queue.length){
@@ -779,7 +856,7 @@
 
                 try {
                     // DEBUG: log incoming payloads to help diagnose buffer behavior
-                    try { console.debug('WaterQualityChart.appendToChart payload', payload); } catch (e) {}
+                    try { /* console.debug('WaterQualityChart.appendToChart payload', payload); */ } catch (e) {}
                     // Build series payload expected by ApexCharts.appendData or exec appendData
                     // Build series payload. Use the same x format as the initial chart labels
                     // (short time string 'HH:mm') because the chart is rendered with category labels.
@@ -818,7 +895,7 @@
                             // Read existing category labels from the chart DOM (last resort)
                             let existingCategories = [];
                                 } catch (e) {
-                                    console.debug('WaterQualityChart: forced redraw updateOptions failed', e);
+                                    // console.debug('WaterQualityChart: forced redraw updateOptions failed', e);
                                 }
 
                                 // Attempt direct instance updateSeries (preferred over ApexCharts.exec)
@@ -858,11 +935,11 @@
                                                 console.log('✅ Direct instance updateSeries called', { chartId: inst.w && inst.w.config && inst.w.config.chart && inst.w.config.chart.id });
                                             }
                                         } catch(e) {
-                                            console.debug('waterChart: direct instance.updateSeries threw', e);
-                                            try { if (typeof inst.render === 'function') { inst.render(); console.info('waterChart: direct instance.render() called as fallback'); } } catch(e) {}
+                                            // console.debug('waterChart: direct instance.updateSeries threw', e);
+                                            try { if (typeof inst.render === 'function') { inst.render(); /* console.info('waterChart: direct instance.render() called as fallback'); */ } } catch(e) {}
                                         }
                                     } else {
-                                        console.debug('waterChart: no ApexCharts instance found for direct update', { tried: targetCid, known: window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[cidAttr] });
+                                        // console.debug('waterChart: no ApexCharts instance found for direct update', { tried: targetCid, known: window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[cidAttr] });
                                     }
                             try {
                                 const labelNodes = Array.from(document.querySelectorAll('#' + chartId + ' .apexcharts-xaxis-texts-g text'));
@@ -903,15 +980,15 @@
                                             window.__waterQualityKnownChartId[chartId] = cid;
                                             try { localStorage.setItem('waterQualityKnownChartId:' + chartId, cid); } catch (e) {}
 
-                                            console.info('ApexCharts.exec appendData succeeded for', cid, { timeKey, isDatetimeMode, numericTs: typeof numericTs !== 'undefined' ? numericTs : null });
+                                            // console.info('ApexCharts.exec appendData succeeded for', cid, { timeKey, isDatetimeMode, numericTs: typeof numericTs !== 'undefined' ? numericTs : null });
 
                                             try { appendedSet.add(timeKey); } catch (err) {}
                                             try {
                                                 if (!payload.__replay) {
-                                                    try { console.debug('WaterQualityChart: buffering payload for', chartId, timeLabel); } catch (e) {}
+                                                    try { /* console.debug('WaterQualityChart: buffering payload for', chartId, timeLabel); */ } catch (e) {}
                                                     appendBuffer.push(payload);
                                                     if (appendBuffer.length > MAX_BUFFER) appendBuffer.shift();
-                                                    try { console.debug('WaterQualityChart: buffer length', chartId, appendBuffer.length); } catch (e) {}
+                                                    try { /* console.debug('WaterQualityChart: buffer length', chartId, appendBuffer.length); */ } catch (e) {}
 
                                                     // Update client-owned series state and trim if needed
                                                     try {
@@ -1091,7 +1168,7 @@
                                     for (const cid of candidates) {
                                         try {
                                             window.ApexCharts.exec(cid, 'appendData', { series });
-                                            console.info('ApexCharts.exec appendData succeeded for', cid, { timeKey, isDatetimeMode, numericTs: typeof numericTs !== 'undefined' ? numericTs : null });
+                                            // console.info('ApexCharts.exec appendData succeeded for', cid, { timeKey, isDatetimeMode, numericTs: typeof numericTs !== 'undefined' ? numericTs : null });
 
                                             // Persist discovered mapping for faster targeting next time
                                             try { window.__waterQualityKnownChartId[chartId] = cid; try { localStorage.setItem('waterQualityKnownChartId:' + chartId, cid); } catch (e) {} } catch (err) {}
@@ -1176,7 +1253,7 @@
                                                         const comp = window.Livewire.find(lwId);
                                                         if (comp && typeof comp.refresh === 'function') {
                                                             comp.refresh();
-                                                            console.info('WaterQualityChart: requested Livewire refresh for', lwId);
+                                                            // console.info('WaterQualityChart: requested Livewire refresh for', lwId);
                                                             window.__waterQualityFailureCount[chartId] = 0;
                                                             return;
                                                         }
@@ -1231,7 +1308,7 @@
                                     }
                                 } catch (e) {}
 
-                                console.info('WaterQualityChart: fallback updateSeries/updateOptions applied for', fallbackCid);
+                                // console.info('WaterQualityChart: fallback updateSeries/updateOptions applied for', fallbackCid);
                                 return;
                             } catch (e) {
                                 // ignore fallback errors and continue
