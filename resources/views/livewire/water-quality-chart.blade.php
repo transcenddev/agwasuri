@@ -6,7 +6,7 @@
             {{-- Legend intentionally removed for simplified UI (series toggling handled elsewhere) --}}
 
             {{-- Chart Area: render via the lightweight wrapper that consumes the serializable model array --}}
-            <div class="w-full">
+            <div class="w-full" wire:ignore wire:key="chart-container-{{ $userId }}">
                 <div class="relative">
                     @php
                         $__chartId = $lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-0';
@@ -106,6 +106,15 @@
 
             function createChart() {
                 try {
+                    // Use global registry to prevent double initialization
+                    window.__waterQualityChartRegistry = window.__waterQualityChartRegistry || {};
+                    
+                    if (window.__waterQualityChartRegistry[chartId]) {
+                        console.debug('Chart already exists, skipping init:', chartId);
+                        chartInstance = window.__waterQualityChartRegistry[chartId];
+                        return chartInstance;
+                    }
+                    
                     const container = document.getElementById(chartId);
                     if (!container) {
                         console.error('Chart container not found:', chartId);
@@ -135,13 +144,17 @@
                     chartInstance = new ApexCharts(container, options);
                     chartInstance.render();
 
-                    // console.info('WaterQualityChart: created chart instance', chartId, 'height:', options.chart.height);
-
-                    // Store in global registry for access by update functions
+                    // Store in global registries
+                    window.__waterQualityChartRegistry[chartId] = chartInstance;
+                    window.__waterQualityKnownChartId = window.__waterQualityKnownChartId || {};
+                    window.__waterQualityKnownChartId[chartId] = options.chart.id || chartId;
+                    
                     if (!window.__waterQualityChartInstances) {
                         window.__waterQualityChartInstances = {};
                     }
                     window.__waterQualityChartInstances[chartId] = chartInstance;
+                    
+                    console.debug('Chart created:', chartId);
 
                 } catch (e) {
                     console.error('WaterQualityChart: chart creation failed', e);
@@ -168,17 +181,25 @@
             // CRITICAL FIX: Destroy chart instance on Livewire update to prevent stale instances
             window.addEventListener('water-quality:destroy-chart', () => {
                 try {
-                    // console.debug('WaterQualityChart: destroying chart', chartId);
+                    // Clean up global registry
+                    if (window.__waterQualityChartRegistry && window.__waterQualityChartRegistry[chartId]) {
+                        delete window.__waterQualityChartRegistry[chartId];
+                    }
                     
                     // Find and destroy ApexCharts instance
                     const targetCid = (window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[chartId]) || chartId || ('apexcharts' + chartId);
                     
                     if (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') {
-                        const chartInstance = window.ApexCharts.getChartByID(targetCid);
-                        if (chartInstance && typeof chartInstance.destroy === 'function') {
-                            chartInstance.destroy();
-                            // console.debug('WaterQualityChart: destroyed instance', targetCid);
+                        const inst = window.ApexCharts.getChartByID(targetCid);
+                        if (inst && typeof inst.destroy === 'function') {
+                            inst.destroy();
+                            console.debug('Chart destroyed:', chartId);
                         }
+                    }
+                    
+                    if (chartInstance && typeof chartInstance.destroy === 'function') {
+                        chartInstance.destroy();
+                        chartInstance = null;
                     }
                     
                     // Clear cached chart ID mapping
@@ -194,23 +215,25 @@
                         delete window.__waterQualitySeriesState[chartId];
                     }
                     
-                    // CRITICAL: Recreate chart after Livewire update completes
-                    // console.debug('WaterQualityChart: scheduling chart recreation');
-                    requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            setTimeout(() => {
-                                createChart();
-                            }, 100); // Wait for Livewire to finish DOM patch
-                        });
-                    });
+                    // DON'T recreate here - let Livewire hook handle it
                     
                 } catch (e) {
                     console.error('WaterQualityChart: destroy error', e);
                 }
             });
 
-            // Listen for Livewire re-render and ensure cleanup
-            if (window.Livewire && typeof Livewire.on === 'function') {
+            // Listen for Livewire re-render and recreate chart after DOM updates
+            if (window.Livewire && typeof Livewire.hook === 'function') {
+                Livewire.hook('message.processed', (message, component) => {
+                    setTimeout(() => {
+                        const container = document.getElementById(chartId);
+                        if (container && !window.__waterQualityChartRegistry[chartId]) {
+                            console.debug('Recreating chart after Livewire update');
+                            createChart();
+                        }
+                    }, 150);
+                });
+                
                 Livewire.on('water-quality:destroy-chart', () => {
                     window.dispatchEvent(new CustomEvent('water-quality:destroy-chart'));
                 });
@@ -354,16 +377,31 @@
 
             function trimAndUpdate(cid) {
                 try {
-                    // Ensure bounded length
-                    while (seriesState.categories.length > MAX_POINTS) seriesState.categories.shift();
-                    seriesState.series.forEach(s => { while (s.data.length > MAX_POINTS) s.data.shift(); });
-
-                    // Update chart categories to reflect trimmed state. We avoid
-                    // forcing a full updateSeries here because real-time appends
-                    // will be coalesced and flushed separately to reduce redraws.
-                    try { safeUpdateOptions(cid, { xaxis: { categories: seriesState.categories } }); } catch (e) {}
+                    if (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') {
+                        const inst = window.ApexCharts.getChartByID(cid);
+                        if (inst && inst.w && inst.w.config && inst.w.config.series) {
+                            const series = inst.w.config.series;
+                            // Guard against undefined
+                            if (!Array.isArray(series) || series.length === 0) {
+                                return;
+                            }
+                            
+                            const rebuilt = series.map((s, idx) => {
+                                const state = seriesState.series[idx];
+                                if (!state || !Array.isArray(state.data)) return s;
+                                
+                                if (state.data.length > MAX_POINTS) {
+                                    const trimmed = state.data.slice(-MAX_POINTS);
+                                    state.data = trimmed;
+                                }
+                                return { name: s.name, data: state.data };
+                            });
+                            
+                            inst.updateSeries(rebuilt, false);
+                        }
+                    }
                 } catch (e) {
-                    // ignore trim errors
+                    console.debug('trimAndUpdate error:', e);
                 }
             }
 
@@ -823,9 +861,9 @@
                     // Use seconds resolution (HH:mm:ss) as fallback label for category charts
                     const timeLabel = pad(dt.getHours()) + ':' + pad(dt.getMinutes()) + ':' + pad(dt.getSeconds());
 
-                    // Detect whether our series state uses datetime point objects
+                    // Detect whether our series state uses datetime point objects (with null-safe access)
                     // Accept numeric timestamps or ISO strings with 'T'
-                    const isDatetimeMode = !!(seriesState.series && seriesState.series[0] && seriesState.series[0].data && seriesState.series[0].data.length && (typeof seriesState.series[0].data[0].x === 'number' || (typeof seriesState.series[0].data[0].x === 'string' && seriesState.series[0].data[0].x.indexOf('T') !== -1)));
+                    const isDatetimeMode = !!(seriesState?.series?.[0]?.data?.length && (typeof seriesState.series[0].data[0]?.x === 'number' || (typeof seriesState.series[0].data[0]?.x === 'string' && seriesState.series[0].data[0].x.indexOf('T') !== -1)));
                     const parsedTs = Date.parse(payload.recorded_at);
                     const numericTs = Number.isFinite(parsedTs) ? parsedTs : payload.recorded_at;
                     const timeKey = isDatetimeMode ? numericTs : timeLabel;
@@ -1347,7 +1385,12 @@
 
                 const located = locateChartInstanceByLogicalId(logicalId);
                 if (!located) {
-                    console.error('waterChart: Chart not found for logical id:', logicalId);
+                    // Chart instance not found - this can happen legitimately during destroy/recreate cycles
+                    // Only log error if chart container exists (otherwise it's expected during teardown)
+                    const container = document.getElementById(logicalId);
+                    if (container) {
+                        console.warn('waterChart: Chart instance not ready for logical id:', logicalId, '- will retry on next event');
+                    }
                     return;
                 }
 
@@ -1441,31 +1484,52 @@
             <!-- debug/test UI removed -->
 
             <script>
-                // Auto-adjust ApexCharts height to fit parent between 360 and 480px
+                // Auto-adjust ApexCharts height with debouncing (prevents infinite loops)
                 (function(){
                     const root = document.getElementById('water-quality-chart-root');
                     if (!root) return;
                     const chartId = root.getAttribute('data-chart-id');
+                    
+                    let adjusting = false;
+                    let lastAdjustTime = 0;
+                    const ADJUST_INTERVAL = 2000;
+                    
                     function computeAndApply(){
+                        const now = Date.now();
+                        if (adjusting || (now - lastAdjustTime < ADJUST_INTERVAL)) return;
+                        
+                        adjusting = true;
+                        lastAdjustTime = now;
+                        
                         try {
-                            const parent = root.parentElement || root;
-                            const avail = parent.clientHeight || root.clientHeight || 420;
-                            // leave some breathing room for paddings/legend
-                            const offset = 32;
-                            let target = Math.round(avail - offset);
-                            if (target < 360) target = 360;
-                            if (target > 480) target = 480;
-                            if (window.ApexCharts && typeof window.ApexCharts.exec === 'function') {
-                                try { window.ApexCharts.exec(chartId, 'updateOptions', { chart: { height: target } }, false, true); } catch (_){}
-                                try { window.dispatchEvent(new Event('resize')); } catch(_){}
+                            const targetCid = (window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[chartId]) || chartId;
+                            
+                            if (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') {
+                                const instance = window.ApexCharts.getChartByID(targetCid);
+                                if (instance) {
+                                    const parent = root.parentElement || root;
+                                    const avail = parent.clientHeight || root.clientHeight || 420;
+                                    const offset = 32;
+                                    let target = Math.round(avail - offset);
+                                    if (target < 360) target = 360;
+                                    if (target > 480) target = 480;
+                                    instance.updateOptions({ chart: { height: target } }, false, false);
+                                }
                             }
-                        } catch (e) { /* ignore */ }
+                        } catch (e) { 
+                            console.debug('computeAndApply error:', e);
+                        } finally {
+                            adjusting = false;
+                        }
                     }
                     const debounce = (fn, t=200) => { let id; return () => { clearTimeout(id); id = setTimeout(fn, t); }; };
                     window.addEventListener('resize', debounce(computeAndApply, 250));
                     document.addEventListener('DOMContentLoaded', () => setTimeout(computeAndApply, 600));
-                    // Try once immediately and again shortly after
-                    try { computeAndApply(); setTimeout(computeAndApply, 900); } catch(e){}
+                    // Run once on load, then one retry (no infinite loop)
+                    try { 
+                        computeAndApply(); 
+                        setTimeout(computeAndApply, 1000);
+                    } catch(e){}
                 })();
             </script>
 
