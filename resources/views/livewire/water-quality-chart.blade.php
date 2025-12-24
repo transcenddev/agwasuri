@@ -46,7 +46,7 @@
                     @endphp
 
                     <div id="water-quality-chart-root" wire:ignore.self class="w-full px-4 pb-2 max-w-content-xl mx-auto"
-                        style="height: 540px; position: relative; display: block;"
+                        style="position: relative; display: block; height: 100%; min-height: 480px;"
                         data-chart-id="{{ $__chartId }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
@@ -134,7 +134,7 @@
                     // CRITICAL: Deep clone and validate options to prevent undefined crashes
                     const options = JSON.parse(JSON.stringify(chartConfig.jsonConfig || {}));
                     if (!options.chart) options.chart = {};
-                    options.chart.height = 420;
+                    options.chart.height = 480;
                     options.chart.width = '100%';
                     options.chart.maintainAspectRatio = false;
                     

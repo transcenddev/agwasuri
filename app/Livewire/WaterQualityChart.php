@@ -185,7 +185,7 @@ class WaterQualityChart extends Component
                     'chart' => [
                         'id' => 'water-quality-' . ($this->userId ?? '0'),
                         'type' => 'line',
-                        'height' => 420,
+                        'height' => 480,
                         'width' => '100%',
                         'maintainAspectRatio' => false,
                         'toolbar' => ['show' => false]
@@ -345,7 +345,7 @@ class WaterQualityChart extends Component
         }
         
         // CRITICAL FIX: Enforce chart dimensions EVERY time (prevents height collapse on Livewire updates)
-        $this->lineChartModelArray['jsonConfig']['chart']['height'] = 420;
+        $this->lineChartModelArray['jsonConfig']['chart']['height'] = 480;
         $this->lineChartModelArray['jsonConfig']['chart']['width'] = '100%';
         $this->lineChartModelArray['jsonConfig']['chart']['id'] = $this->lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-' . ($this->userId ?? '0');
         
