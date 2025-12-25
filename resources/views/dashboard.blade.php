@@ -40,7 +40,7 @@
                 <x-slot name="header">
                     <div class="flex items-center justify-between">
                         <div class="font-medium text-gray-700 text-sm">Recent Measurements</div>
-                        <a href="{{ route('historical-data') }}" class="text-xs text-cvsu hover:underline">View full →</a>
+                        <a href="{{ route('historical-data') }}" class="text-xs text-cvsu hover:underline">See more →</a>
                     </div>
                 </x-slot>
 

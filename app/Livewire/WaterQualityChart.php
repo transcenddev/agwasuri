@@ -176,8 +176,36 @@ class WaterQualityChart extends Component
 
         if ($rows->isEmpty()) {
             // CRITICAL: Create valid empty chart structure to prevent undefined crashes
-            $this->chartData = ['labels' => [], 'series' => [], 'colors' => [], 'visible' => []];
-            $this->legendData = [];
+            $colors = [
+                'Temperature' => '#EF4444',
+                'Salinity' => '#14B8A6',
+                'Dissolved Oxygen' => '#2563EB',
+                'pH' => '#8B5CF6',
+            ];
+
+            $this->chartData = [
+                'labels' => [],
+                'series' => [
+                    'Temperature' => [],
+                    'Salinity' => [],
+                    'Dissolved Oxygen' => [],
+                    'pH' => [],
+                ],
+                'colors' => $colors,
+                'visible' => [
+                    'Temperature' => true,
+                    'Salinity' => true,
+                    'Dissolved Oxygen' => true,
+                    'pH' => true,
+                ],
+            ];
+            $this->legendData = collect($colors)->map(function ($color, $name) {
+                return [
+                    'name' => $name,
+                    'color' => $color,
+                    'visible' => true,
+                ];
+            })->values()->all();
             
             // CRITICAL: Build minimal valid lineChartModelArray with empty series to prevent JS crashes
             $this->lineChartModelArray = [
@@ -202,13 +230,17 @@ class WaterQualityChart extends Component
                     'stroke' => ['curve' => 'smooth', 'width' => [2.6, 1.6, 1.6, 1.6]],
                     'markers' => ['size' => 0],
                     'tooltip' => ['enabled' => true, 'shared' => true],
-                    'legend' => ['show' => true, 'position' => 'bottom']
+                    'legend' => ['show' => true, 'position' => 'bottom'],
+                    'colors' => array_values($colors),
+                    'noData' => [
+                        'text' => 'No water quality data available yet',
+                    ],
                 ],
                 'meta' => [
                     'series_names' => ['Temperature', 'Salinity', 'Dissolved Oxygen', 'pH'],
                     'series_keys' => ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level']
                 ],
-                'colors' => ['#EF4444', '#14B8A6', '#2563EB', '#8B5CF6']
+                'colors' => array_values($colors)
             ];
             return;
         }

@@ -173,7 +173,7 @@
     } else {
         // Defensive: if Livewire isn't available yet, attempt a global hook later
         console.debug("waterQualityInit: Livewire not present at init time");
-    }
+     }
 
     // Expose helper for manual invocation/debugging
     window.waterQualityInit = function (root) {
@@ -409,8 +409,11 @@ try {
                 chartId ||
                 "apexcharts" + chartId;
 
-            let chartInstance = null;
+            window.__agwasuriCharts = window.__agwasuriCharts || {};
+            let chartInstance = window.__agwasuriCharts[chartId] || null;
+
             if (
+                !chartInstance &&
                 window.ApexCharts &&
                 typeof window.ApexCharts.getChartByID === "function"
             ) {
@@ -426,6 +429,7 @@ try {
                 try {
                     chartInstance.updateOptions(cfg, false, true);
                     chartInstance.updateSeries(series, true);
+                    window.__agwasuriCharts[chartId] = chartInstance;
                     console.debug("waterQualityInit: updated chart", chartId);
                 } catch (e) {
                     console.error(
@@ -436,6 +440,13 @@ try {
                 }
                 return;
             }
+
+            // If DOM has canvas but instance missing, wipe once before creating
+            try {
+                if (container.querySelector(".apexcharts-canvas")) {
+                    container.innerHTML = "";
+                }
+            } catch (e) {}
 
             // No existing instance: create one
             try {
@@ -456,6 +467,7 @@ try {
                 window.__waterQualityChartInstances =
                     window.__waterQualityChartInstances || {};
                 window.__waterQualityChartInstances[chartId] = inst;
+                window.__agwasuriCharts[chartId] = inst;
                 console.debug("waterQualityInit: created chart", chartId);
             } catch (e) {
                 console.error(

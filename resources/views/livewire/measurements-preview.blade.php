@@ -31,78 +31,52 @@
 
                     <tbody class="divide-y divide-gray-100">
                         @foreach($items as $row)
-                                        @php
-                                        $s = strtoupper($row->ui_status ?? 'GOOD');
-                                        $statusBorderClass = $row->statusBorderClass ?? match($s) {
-                                            'HARM', 'HARMFUL' => 'border-l-4 border-red-200',
-                                            'BAD' => 'border-l-4 border-amber-100',
-                                            'GOOD' => 'border-l-4 border-blue-100',
-                                            'BEST' => 'border-l-4 border-green-100',
-                                            default => 'border-l-4 border-gray-100'
-                                        };
+                            @php
+                                $s = strtoupper($row->ui_status ?? 'GOOD');
+                                $statusBorderClass = $row->statusBorderClass ?? 'border-l-4 border-gray-100';
+                                $badgeClass = $row->badgeClass ?? 'text-gray-700 bg-gray-50';
+                                $dotClass = $row->statusDotClass ?? 'bg-gray-400';
+                            @endphp
 
-                                        $badgeClass = $row->badgeClass ?? match($s) {
-                                            'HARM','HARMFUL' => 'text-red-700 bg-red-50',
-                                            'BAD' => 'text-amber-700 bg-amber-50',
-                                            'GOOD' => 'text-blue-700 bg-blue-50',
-                                            'BEST' => 'text-green-700 bg-green-50',
-                                            default => 'text-gray-700 bg-gray-50'
-                                        };
+                            @php
+                                // Map status to border color (match historical table)
+                                $borderMap = [
+                                    'BEST' => 'border-l-4 border-emerald-200',
+                                    'GOOD' => 'border-l-4 border-sky-200',
+                                    'BAD' => 'border-l-4 border-amber-200',
+                                    'HARM' => 'border-l-4 border-rose-200',
+                                    'UNKNOWN' => 'border-l-4 border-gray-100',
+                                ];
+                                $rowBorder = $borderMap[$s] ?? 'border-l-4 border-gray-100';
+                            @endphp
+                            <tr class="bg-white odd:bg-white even:bg-gray-50 hover:bg-gray-100 {{ $rowBorder }}">
+                                <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ optional($row->recorded_at)->format('Y-m-d H:i') ?? $row->recorded_at }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700 text-center">
+                                    <div x-data="{ open:false }" class="inline-block relative" @mouseenter="open=true" @mouseleave="open=false" @focusin="open=true" @focusout="open=false">
+                                        <span tabindex="0" class="text-xs font-semibold px-2.5 py-0.5 rounded-full
+                                            @if($s === 'BEST') bg-emerald-100 text-emerald-800
+                                            @elseif($s === 'GOOD') bg-blue-100 text-blue-800
+                                            @elseif($s === 'BAD') bg-amber-100 text-amber-800
+                                            @elseif($s === 'HARM') bg-rose-100 text-rose-800
+                                            @else bg-gray-200 text-gray-700 @endif">
+                                            {{ $s }}
+                                        </span>
+                                        @if(!empty($row->culpritsText))
+                                            <div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-sm text-xs text-gray-700 p-2 z-50">
+                                                <div class="font-medium mb-1">Causes:</div>
+                                                <div>{{ $row->culpritsText }}</div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-6 py-3 text-sm text-right text-gray-800">{{ isset($row->temperature) ? number_format($row->temperature, 1) : '—' }}</td>
 
-                                        $valueColor = match($s) {
-                                            'HARM','HARMFUL' => 'text-red-600',
-                                            'BAD' => 'text-amber-600',
-                                            'GOOD' => 'text-blue-600',
-                                            'BEST' => 'text-green-600',
-                                            default => 'text-gray-700'
-                                        };
+                                <td class="px-6 py-3 text-sm text-right text-gray-800">{{ isset($row->salinity) ? number_format($row->salinity, 1) : '—' }}</td>
 
-                                        $dotClass = match($s) {
-                                            'HARM','HARMFUL' => 'bg-red-600',
-                                            'BAD' => 'bg-amber-500',
-                                            'GOOD' => 'bg-blue-500',
-                                            'BEST' => 'bg-green-600',
-                                            default => 'bg-gray-400'
-                                        };
+                                <td class="px-6 py-3 text-sm text-right text-gray-800">{{ isset($row->dissolved_oxygen) ? number_format($row->dissolved_oxygen, 2) : '—' }}</td>
 
-                                        $tempClass = $row->tempValueClass ?? $valueColor;
-                                        $salClass = $row->salValueClass ?? $valueColor;
-                                        $doClass = $row->doValueClass ?? $valueColor;
-                                        $phClass = $row->phValueClass ?? $valueColor;
-                                    @endphp
-
-                                        <tr class="bg-white odd:bg-white even:bg-gray-50 hover:bg-gray-100">
-                                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700 {{ $statusBorderClass }}">{{ optional($row->recorded_at)->format('Y-m-d H:i') ?? $row->recorded_at }}</td>
-                                            <td class="px-4 py-3 text-sm text-gray-700 text-center">
-                                                <div x-data="{ open:false }" class="inline-block relative" @mouseenter="open=true" @mouseleave="open=false" @focusin="open=true" @focusout="open=false">
-                                                    <span tabindex="0" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $badgeClass }}">
-                                                        <span class="inline-block w-2 h-2 rounded-full mr-2 {{ $dotClass }}" aria-hidden="true"></span>
-                                                        {{ $s }}
-                                                    </span>
-                                                    @if(!empty($row->issuesText))
-                                                        <div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-sm text-xs text-gray-700 p-2 z-50">
-                                                            <div class="font-medium mb-1">Causes:</div>
-                                                            <div>{{ $row->issuesText }}</div>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-3 text-sm text-right">
-                                                <span class="font-medium {{ $tempClass }}">{{ isset($row->temperature) ? number_format($row->temperature, 1) : '—' }}</span>
-                                            </td>
-
-                                            <td class="px-6 py-3 text-sm text-right">
-                                                <span class="font-medium {{ $salClass }}">{{ isset($row->salinity) ? number_format($row->salinity, 1) : '—' }}</span>
-                                            </td>
-
-                                            <td class="px-6 py-3 text-sm text-right">
-                                                <span class="font-medium {{ $doClass }}">{{ isset($row->dissolved_oxygen) ? number_format($row->dissolved_oxygen, 2) : '—' }}</span>
-                                            </td>
-
-                                            <td class="px-6 py-3 text-sm text-right">
-                                                <span class="font-medium {{ $phClass }}">{{ isset($row->ph_level) ? number_format($row->ph_level, 2) : '—' }}</span>
-                                            </td>
-                                        </tr>
+                                <td class="px-6 py-3 text-sm text-right text-gray-800">{{ isset($row->ph_level) ? number_format($row->ph_level, 2) : '—' }}</td>
+                            </tr>
                         @endforeach
                     </tbody>
                     </table>
@@ -114,35 +88,22 @@
                 @foreach($items as $row)
                     @php
                         $s = strtoupper($row->ui_status ?? 'GOOD');
-                        $statusClass = match($s) {
-                            'HARM','HARMFUL' => 'border-l-4 border-red-200 bg-white',
-                            'BAD' => 'border-l-4 border-amber-100 bg-white',
-                            'GOOD' => 'border-l-4 border-blue-100 bg-white',
-                            'BEST' => 'border-l-4 border-green-100 bg-white',
-                            default => 'border-l-4 border-gray-100 bg-white'
-                        };
-                        $badgeClass = match($s) {
-                            'HARM','HARMFUL' => 'text-red-700 bg-red-50',
-                            'BAD' => 'text-amber-700 bg-amber-50',
-                            'GOOD' => 'text-blue-700 bg-blue-50',
-                            'BEST' => 'text-green-700 bg-green-50',
-                            default => 'text-gray-700 bg-gray-50'
-                        };
-                        $valueColor = match($s) {
-                            'HARM','HARMFUL' => 'text-red-600',
-                            'BAD' => 'text-amber-600',
-                            'GOOD' => 'text-blue-600',
-                            'BEST' => 'text-green-600',
-                            default => 'text-gray-700'
-                        };
-
-                        $tempClass = $row->tempValueClass ?? $valueColor;
-                        $salClass = $row->salValueClass ?? $valueColor;
-                        $doClass = $row->doValueClass ?? $valueColor;
-                        $phClass = $row->phValueClass ?? $valueColor;
+                        $statusClass = ($row->statusBorderClass ?? 'border-l-4 border-gray-100') . ' bg-white';
+                        $badgeClass = $row->badgeClass ?? 'text-gray-700 bg-gray-50';
+                        $dotClass = $row->statusDotClass ?? 'bg-gray-400';
                     @endphp
 
-                    <div class="bg-white border rounded-md p-3 hover:bg-gray-50 {{ $statusClass }}">
+                    @php
+                        $borderMap = [
+                            'BEST' => 'border-l-4 border-emerald-200',
+                            'GOOD' => 'border-l-4 border-sky-200',
+                            'BAD' => 'border-l-4 border-amber-200',
+                            'HARM' => 'border-l-4 border-rose-200',
+                            'UNKNOWN' => 'border-l-4 border-gray-100',
+                        ];
+                        $rowBorder = $borderMap[$s] ?? 'border-l-4 border-gray-100';
+                    @endphp
+                    <div class="bg-white border rounded-md p-3 hover:bg-gray-50 {{ $rowBorder }}">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <div x-data="{ open:false }" class="relative inline-block" @click.outside="open=false">
@@ -150,10 +111,10 @@
                                         <span class="inline-block w-2 h-2 rounded-full mr-2 {{ $dotClass }}" aria-hidden="true"></span>
                                         {{ $s }}
                                     </button>
-                                    @if(!empty($row->issuesText))
+                                    @if(!empty($row->culpritsText))
                                         <div x-show="open" x-cloak class="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded shadow-sm text-xs text-gray-700 p-2 z-50">
                                             <div class="font-medium mb-1">Causes:</div>
-                                            <div>{{ $row->issuesText }}</div>
+                                            <div>{{ $row->culpritsText }}</div>
                                         </div>
                                     @endif
                                 </div>
@@ -165,28 +126,28 @@
                             <div class="truncate">
                                 <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🌡️</span> <span>Temperature (°C)</span></div>
                                 <div class="font-semibold">
-                                    <span class="{{ $row->tempValueClass ?? '' }}">{{ isset($row->temperature) ? number_format($row->temperature,1) : '—' }}</span>
+                                    <span class="text-gray-800">{{ isset($row->temperature) ? number_format($row->temperature,1) : '—' }}</span>
                                 </div>
                             </div>
 
                             <div class="truncate">
                                 <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧂</span> <span>Salinity (ppt)</span></div>
                                 <div class="font-semibold">
-                                    <span class="{{ $row->salValueClass ?? '' }}">{{ isset($row->salinity) ? number_format($row->salinity,1) : '—' }}</span>
+                                    <span class="text-gray-800">{{ isset($row->salinity) ? number_format($row->salinity,1) : '—' }}</span>
                                 </div>
                             </div>
 
                             <div class="truncate">
                                 <div class="text-xs text-gray-500 flex items-center gap-2"> <span>💧</span> <span>Dissolved Oxygen (mg/L)</span></div>
                                 <div class="font-semibold">
-                                    <span class="{{ $row->doValueClass ?? '' }}">{{ isset($row->dissolved_oxygen) ? number_format($row->dissolved_oxygen,2) : '—' }}</span>
+                                    <span class="text-gray-800">{{ isset($row->dissolved_oxygen) ? number_format($row->dissolved_oxygen,2) : '—' }}</span>
                                 </div>
                             </div>
 
                             <div class="truncate">
                                 <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧪</span> <span>pH</span></div>
                                 <div class="font-semibold">
-                                    <span class="{{ $row->phValueClass ?? '' }}">{{ isset($row->ph_level) ? number_format($row->ph_level,2) : '—' }}</span>
+                                    <span class="text-gray-800">{{ isset($row->ph_level) ? number_format($row->ph_level,2) : '—' }}</span>
                                 </div>
                             </div>
                         </div>

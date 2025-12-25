@@ -46,7 +46,7 @@
                     @endphp
 
                     <div id="water-quality-chart-root" wire:ignore.self class="w-full px-4 pb-2 max-w-content-xl mx-auto"
-                        style="position: relative; display: block; height: 100%; min-height: 480px;"
+                        style="position: relative; display: block; height: 480px;"
                         data-chart-id="{{ $__chartId }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
@@ -55,7 +55,7 @@
                         data-chart-config='@json($lineChartModelArray)'
                         data-user-id="{{ request()->get('user') ?? session('selected_user', auth()->id()) }}">
                         {{-- Chart will be created by inline JS below, not by vendor wrapper --}}
-                        <div id="{{ $__chartId }}" class="apexcharts-canvas-wrapper" style="height: 100%; width: 100%; position: relative;"></div>
+                        <div id="{{ $__chartId }}" class="apexcharts-canvas-wrapper" style="min-height:480px;height:480px;width:100%;position:relative;"></div>
                     </div>
                 </div>
             </div>
@@ -137,6 +137,7 @@
                     options.chart.height = 480;
                     options.chart.width = '100%';
                     options.chart.maintainAspectRatio = false;
+                    options.chart.id = chartId; // enforce stable id for instance lookup
                     
                     // CRITICAL: Ensure series is ALWAYS an array (prevents .length undefined error)
                     if (!Array.isArray(options.series)) {
@@ -192,6 +193,8 @@
                         window.__waterQualityChartInstances = {};
                     }
                     window.__waterQualityChartInstances[chartId] = chartInstance;
+                    window.__agwasuriCharts = window.__agwasuriCharts || {};
+                    window.__agwasuriCharts[chartId] = chartInstance;
                     
                     console.debug('Chart created:', chartId);
 

@@ -295,9 +295,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Wulkan Display Font Family */
 @font-face {
   font-family: 'Wulkan Display';
-  /* Prefer webfont (woff) when available; reference fonts in resources/fonts so Vite bundles them */
-  src: url('../fonts/Wulkan-Display-Medium.woff') format('woff'),
-    url('../fonts/Wulkan-Display-Medium.otf') format('opentype');
+  /* Prefer available opentype first to avoid dev-server 404s when .woff is missing */
+  src: url('../fonts/Wulkan-Display-Medium.otf') format('opentype'),
+    url('../fonts/Wulkan-Display-Medium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -305,8 +305,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @font-face {
   font-family: 'Wulkan Display';
-  src: url('../fonts/Wulkan-Display-Bold.woff') format('woff'),
-    url('../fonts/Wulkan-Display-Bold.otf') format('opentype');
+  src: url('../fonts/Wulkan-Display-Bold.otf') format('opentype'),
+    url('../fonts/Wulkan-Display-Bold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -314,8 +314,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @font-face {
   font-family: 'Wulkan Display';
-  src: url('../fonts/Wulkan-Display-Black.woff') format('woff'),
-    url('../fonts/Wulkan-Display-Black.otf') format('opentype');
+  src: url('../fonts/Wulkan-Display-Black.otf') format('opentype'),
+    url('../fonts/Wulkan-Display-Black.woff') format('woff');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
