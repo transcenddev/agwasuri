@@ -160,24 +160,24 @@ class WaterQualityDataTable extends Component
             $allBest = collect($labels)->filter(fn($l) => $l !== 'UNKNOWN')->every(fn($l) => $l === 'BEST');
 
             if ($hasHarm) {
-                $statusBorderClass = 'border-l-4 border-rose-500';
-                $badgeClass = 'text-rose-700 bg-rose-100';
+                $statusBorderClass = 'border-l-4 border-red-600';
+                $badgeClass = 'bg-red-100 text-red-800';
                 $statusLabel = 'HARM';
             } elseif ($hasBad) {
                 $statusBorderClass = 'border-l-4 border-yellow-500';
-                $badgeClass = 'text-yellow-700 bg-yellow-100';
+                $badgeClass = 'bg-yellow-100 text-yellow-800';
                 $statusLabel = 'BAD';
             } elseif ($hasGood) {
                 $statusBorderClass = 'border-l-4 border-blue-500';
-                $badgeClass = 'text-blue-700 bg-blue-100';
+                $badgeClass = 'bg-blue-100 text-blue-800';
                 $statusLabel = 'GOOD';
             } elseif ($allBest) {
                 $statusBorderClass = 'border-l-4 border-green-500';
-                $badgeClass = 'text-green-700 bg-green-100';
+                $badgeClass = 'bg-green-100 text-green-800';
                 $statusLabel = 'BEST';
             } else {
                 $statusBorderClass = 'border-l-4 border-gray-400';
-                $badgeClass = 'text-gray-700 bg-gray-100';
+                $badgeClass = 'bg-gray-100 text-gray-600';
                 $statusLabel = 'Unknown';
             }
 
@@ -188,10 +188,10 @@ class WaterQualityDataTable extends Component
                     return 'text-gray-600';
                 }
                 return match($lab) {
-                    'BEST' => 'text-green-600',
-                    'GOOD' => 'text-blue-600',
-                    'BAD' => 'text-yellow-600',
-                    'HARM' => 'text-rose-600',
+                    'BEST' => 'text-green-800',
+                    'GOOD' => 'text-blue-800',
+                    'BAD' => 'text-yellow-800',
+                    'HARM' => 'text-red-800',
                     default => 'text-gray-600',
                 };
             };
