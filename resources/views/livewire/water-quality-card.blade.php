@@ -94,7 +94,7 @@
 
             <dd class="flex flex-col items-center gap-1">
                 <div class="flex items-baseline gap-2">
-                    <span class="font-extrabold transition-all duration-300 {{ $this->numberColorForStatus($tempStatus) }}" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
+                    <span class="font-extrabold transition-all duration-300 text-gray-900" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->temperature !== null ? number_format($this->temperature, 1) : '-' }}</span>
                     <span class="text-sm text-gray-600">{{ $this->unitFor('temperature') }}</span>
                 </div>
                 @if(!is_null($this->temperatureDelta))
@@ -153,7 +153,7 @@
 
             <dd class="flex flex-col items-center gap-1">
                 <div class="flex items-baseline gap-2">
-                    <span class="font-extrabold transition-all duration-300 {{ $this->numberColorForStatus($salStatus) }}" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
+                    <span class="font-extrabold transition-all duration-300 text-gray-900" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->salinity !== null ? number_format($this->salinity, 2) : '-' }}</span>
                     <span class="text-sm text-gray-600">{{ $this->unitFor('salinity') }}</span>
                 </div>
                 @if(!is_null($this->salinityDelta))
@@ -212,7 +212,7 @@
 
             <dd class="flex flex-col items-center gap-1">
                 <div class="flex items-baseline gap-2">
-                    <span class="font-extrabold transition-all duration-300 {{ $this->numberColorForStatus($doStatus) }}" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
+                    <span class="font-extrabold transition-all duration-300 text-gray-900" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->dissolved_oxygen !== null ? number_format($this->dissolved_oxygen, 1) : '-' }}</span>
                     <span class="text-sm text-gray-600">{{ $this->unitFor('dissolved_oxygen') }}</span>
                 </div>
                 @if(!is_null($this->dissolvedOxygenDelta))
@@ -271,7 +271,7 @@
 
             <dd class="flex flex-col items-center gap-1">
                 <div class="flex items-baseline gap-2">
-                    <span class="font-extrabold transition-all duration-300 {{ $this->numberColorForStatus($phStatus) }}" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
+                    <span class="font-extrabold transition-all duration-300 text-gray-900" x-bind:class="compact ? 'text-2xl' : 'text-[clamp(1.5rem,4vw,3rem)]'">{{ $this->ph_level !== null ? number_format($this->ph_level, 2) : '-'}}</span>
                     <span class="text-sm text-gray-600">{{ $this->unitFor('ph_level') }}</span>
                 </div>
 
