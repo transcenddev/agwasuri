@@ -154,12 +154,12 @@ class WaterQualityDataTable extends Component
             // Priority: harm > bad > good > best
             $labels = [$tempLabel, $phLabel, $doLabel, $salLabel];
 
-            $hasHarm = in_array('HARM', $labels, true);
+            $harmCount = collect($labels)->filter(fn($l) => $l === 'HARM')->count();
             $hasBad = in_array('BAD', $labels, true);
             $hasGood = in_array('GOOD', $labels, true);
             $allBest = collect($labels)->filter(fn($l) => $l !== 'UNKNOWN')->every(fn($l) => $l === 'BEST');
 
-            if ($hasHarm) {
+            if ($harmCount >= 2) {
                 $statusBorderClass = 'border-l-4 border-red-600';
                 $badgeClass = 'bg-red-100 text-red-800';
                 $statusLabel = 'HARM';
