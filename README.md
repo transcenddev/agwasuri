@@ -15,6 +15,16 @@ Water quality monitoring system for fishponds using IoT sensors, real-time broad
 -   [Contributing](#contributing)
 -   [License](#license)
 
+## Quick Links
+
+-   [GitHub Repository](https://github.com/lokodata/agwasuri_prod)
+-   [Architecture Diagram](docs/architecture.md)
+-   [Water Quality Config](config/water_quality.php)
+-   [Sensor Data Controller](app/Http/Controllers/Api/WaterQualityDataController.php)
+-   [User Model](app/Models/User.php)
+-   [Livewire ML Client](app/Livewire/ClassifyFish.php)
+-   [LICENSE](LICENSE)
+
 ## Background
 
 Agwasuri helps small-scale aquaculture operators, researchers, and municipal officers collect, visualize, and act on pond water-quality data. It combines sensor ingestion (ESP32/Arduino devices), real-time broadcasts (Laravel Reverb), and a lightweight ML service to recommend suitable fish species and reduce stock loss.
@@ -79,7 +89,7 @@ DB_DATABASE=database/database.sqlite
 Create the SQLite file if it doesn't exist:
 
 ```pwsh
-if (-not (Test-Path database\database.sqlite)) { New-Item database\database.sqlite -ItemType File }
+if (-not (Test-Path database\database.sqlite)) { New-Item database/database.sqlite -ItemType File }
 ```
 
 4. Run migrations, seeders and install optional packages
@@ -141,17 +151,17 @@ npm run dev-start
 -   Default: runs non-destructive migrations/seeds and starts the dev stack.
 -   Destructive reset: `npm run dev-start -- --fresh` (POSIX) or `npm run dev-start -- -Fresh` (PowerShell) — this drops and rebuilds the DB after confirmation.
 
-See `scripts/` for platform-specific behaviour.
+See [scripts/](scripts/) for platform-specific behaviour.
 
 ## API / Architecture
 
 A brief overview of the main components and important files:
 
--   Routes: `routes/web.php` — registers `POST /store-water-quality-data` and site routes
--   Controller: `app/Http/Controllers/Api/WaterQualityDataController.php` — validates requests, authenticates via `Authorization: Bearer <API_KEY>` (matching `user_id` + `api_key`), creates `WaterQualityData` records and broadcasts `WaterQualityCreated` events
--   Models: `app/Models/WaterQualityData.php`, `app/Models/User.php` (primary key: `user_id`), `app/Models/ModelMetadata.php`
--   Events: `app/Events/WaterQualityCreated.php` — broadcasts on channel `water-quality-data-created` (ShouldBroadcastNow)
--   Livewire: `app/Livewire/ClassifyFish.php` — calls external ML endpoints (`/predict` and `/train_model` at `https://api.agwasuri.app`)
+-   Routes: [routes/web.php](routes/web.php) - registers `POST /store-water-quality-data` and site routes
+-   Controller: [app/Http/Controllers/Api/WaterQualityDataController.php](app/Http/Controllers/Api/WaterQualityDataController.php) - validates requests, authenticates via `Authorization: Bearer <API_KEY>` (matching `user_id` + `api_key`), creates `WaterQualityData` records and broadcasts `WaterQualityCreated` events
+-   Models: [app/Models/WaterQualityData.php](app/Models/WaterQualityData.php), [app/Models/User.php](app/Models/User.php) (primary key: `user_id`), [app/Models/ModelMetadata.php](app/Models/ModelMetadata.php)
+-   Events: [app/Events/WaterQualityCreated.php](app/Events/WaterQualityCreated.php) - broadcasts on channel `water-quality-data-created` (ShouldBroadcastNow)
+-   Livewire: [app/Livewire/ClassifyFish.php](app/Livewire/ClassifyFish.php) - calls external ML endpoints (`/predict` and `/train_model` at `https://api.agwasuri.app`)
 
 Event payload example:
 
@@ -168,7 +178,7 @@ Event payload example:
 }
 ```
 
-See the architecture diagram in `docs/architecture.md` for a rendered Mermaid diagram and component explanations.
+See the architecture diagram in [docs/architecture.md](docs/architecture.md) for a rendered Mermaid diagram and component explanations.
 
 ## Testing
 
@@ -221,12 +231,8 @@ Contributions are welcome. Please follow these guidelines:
 -   Include screenshots and reproduction steps for UI changes.
 -   Use small, focused pull requests — maintainers will run CI (Pest tests, static analysis) before merging.
 
-See `CONTRIBUTORS.md` for project credits.
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for project credits.
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
----
-
-If you'd like, I can also add a short CONTRIBUTING.md or an ASCII/Mermaid file for the architecture diagram separately. Happy to patch those next.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
