@@ -22,6 +22,7 @@ class WaterQualityCard extends Component
     public $lastUpdated;
     public $connectionStatus = 'disconnected';
     public $overallStatus = 'Disconnected';
+    public $overallScore = 0; // Overall water quality score (0-100)
 
     // Delta properties (difference between latest and previous measurement)
     public ?float $temperatureDelta = null;
@@ -209,6 +210,7 @@ class WaterQualityCard extends Component
 
             // compute overall status after loading latest metrics
             $this->computeOverallStatus();
+            $this->calculateOverallScore();
         } else {
             $this->temperature = null;
             $this->salinity = null;
@@ -266,6 +268,98 @@ class WaterQualityCard extends Component
         }
 
         $this->overallStatus = 'BEST';
+    }
+
+    /**
+     * Calculate overall water quality score (0-100) as weighted average
+     * Weights: DO 30%, Temp 25%, pH 25%, Salinity 20%
+     */
+    protected function calculateOverallScore(): void
+    {
+        $scores = [
+            'temperature' => ['weight' => 0.25, 'score' => $this->parameterScore('temperature', $this->temperature)],
+            'dissolved_oxygen' => ['weight' => 0.30, 'score' => $this->parameterScore('dissolved_oxygen', $this->dissolved_oxygen)],
+            'ph_level' => ['weight' => 0.25, 'score' => $this->parameterScore('ph_level', $this->ph_level)],
+            'salinity' => ['weight' => 0.20, 'score' => $this->parameterScore('salinity', $this->salinity)],
+        ];
+
+        $totalScore = 0;
+        $totalWeight = 0;
+
+        foreach ($scores as $param) {
+            if ($param['score'] !== null) {
+                $totalScore += $param['score'] * $param['weight'];
+                $totalWeight += $param['weight'];
+            }
+        }
+
+        // Normalize to 0-100; default to 0 if no valid parameters
+        $this->overallScore = $totalWeight > 0 ? round($totalScore / $totalWeight) : 0;
+    }
+
+    /**
+     * Calculate individual parameter score (0-100) based on status
+     * good = 100%, warning = 70-90% (interpolated), danger = 0-69% (interpolated)
+     */
+    protected function parameterScore(string $metric, $value): ?int
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $status = $this->statusFor($metric, $value);
+
+        return match($status) {
+            'good' => 100,
+            'warning' => 80, // mid-range for warning
+            'danger' => 40,  // mid-range for danger
+            'unknown' => 0,
+            default => 0,
+        };
+    }
+
+    /**
+     * Return badge text and CSS classes for overall score display
+     */
+    public function scoreStatusBadge(): array
+    {
+        if ($this->overallScore >= 90) {
+            return [
+                'text' => 'EXCELLENT',
+                'classes' => 'bg-green-100 text-green-800',
+                'icon' => '🟢'
+            ];
+        }
+
+        if ($this->overallScore >= 70) {
+            return [
+                'text' => 'MODERATE',
+                'classes' => 'bg-yellow-100 text-yellow-800',
+                'icon' => '🟡'
+            ];
+        }
+
+        return [
+            'text' => 'CRITICAL',
+            'classes' => 'bg-red-100 text-red-800',
+            'icon' => '🔴'
+        ];
+    }
+
+    /**
+     * Return description text based on score
+     */
+    public function scoreDescription(): string
+    {
+        if ($this->overallScore >= 90) {
+            return 'Water quality is excellent. All parameters optimal.';
+        }
+
+        if ($this->overallScore >= 70) {
+            return 'Water quality is acceptable but needs monitoring.';
+        }
+
+        return 'Water quality is critical. Immediate action required.';
     }
 
     public function overallClassesForStatus(string $status): string
@@ -408,6 +502,49 @@ class WaterQualityCard extends Component
             'BAD' => 'text-yellow-700',
             'HARM' => 'text-rose-700',
             default => 'text-gray-700',
+        };
+    }
+
+    /**
+     * Return bilingual status label (Filipino / English) for a given status
+     */
+    public function bilingualStatusLabel(string $status): string
+    {
+        // Return bilingual label without emoji so rendering can use a consistent CSS dot.
+        return match(strtolower($status)) {
+            'good' => 'MABUTI / GOOD',
+            'warning' => 'BABALA / WARNING',
+            'danger' => 'MAPANGANIB / HARMFUL',
+            'unknown' => 'HINDI ALAM / UNKNOWN',
+            default => 'HINDI ALAM / UNKNOWN',
+        };
+    }
+
+    /**
+     * Return badge CSS classes for status pill styling
+     */
+    public function badgeClassForStatus(string $status): string
+    {
+        return match(strtolower($status)) {
+            'good' => 'bg-green-100 text-green-800',
+            'warning' => 'bg-yellow-100 text-yellow-800',
+            'danger' => 'bg-red-100 text-red-800',
+            'unknown' => 'bg-gray-100 text-gray-600',
+            default => 'bg-gray-100 text-gray-600',
+        };
+    }
+
+    /**
+     * Return a small dot color class for a status (used to render a simple circle)
+     */
+    public function dotClassForStatus(string $status): string
+    {
+        return match(strtolower($status)) {
+            'good' => 'bg-green-600',
+            'warning' => 'bg-yellow-600',
+            'danger' => 'bg-rose-600',
+            'unknown' => 'bg-gray-400',
+            default => 'bg-gray-400',
         };
     }
 

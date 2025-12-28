@@ -3,6 +3,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "build:theme": "tailwindcss -i resources/css/theme-export.css -o public/themes/agwasuri-theme.css --minify",
         "dev": "vite",
         "dev-start": "node ./scripts/dev-start.js",
         "dev-start:win": "pwsh ./scripts/dev-start.ps1",

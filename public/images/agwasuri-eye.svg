@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 120" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">AgwaSuri logo</title>
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#2ea83a"/>
+      <stop offset="100%" stop-color="#1B651B"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" x2="1">
+      <stop offset="0%" stop-color="#5bd85b"/>
+      <stop offset="100%" stop-color="#2ea83a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- outer eye -->
+  <path d="M10 60 C40 20, 200 20, 230 60 C200 100, 40 100, 10 60 Z" fill="url(#g1)" />
+  <!-- inner swirl -->
+  <path d="M120 60 C120 40, 160 40, 160 60 C160 80, 120 80, 120 60 Z" fill="url(#g2)" opacity="0.95" />
+  <!-- highlight "leaf" base -->
+  <path d="M20 70 C60 85, 180 85, 220 70 C190 95, 60 95, 20 70 Z" fill="#59c55a" opacity="0.9" />
+</svg>

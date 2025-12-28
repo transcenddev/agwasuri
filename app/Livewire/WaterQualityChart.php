@@ -30,7 +30,18 @@ class WaterQualityChart extends Component
     public function updateUser($userId)
     {
         $this->userId = $userId;
+        // Dispatch chart cleanup BEFORE loadData to ensure old instance is destroyed
+        $this->dispatchBrowserEvent('water-quality:destroy-chart');
+        
+        // Small delay to allow browser event to process
+        usleep(50000); // 50ms
+        
         $this->loadData();
+        // Push updated chart payload to the browser so the client can update the existing ApexCharts instance
+        $this->dispatchBrowserEvent('water-quality:chart', [
+            'chart' => $this->lineChartModelArray,
+            'initial' => $this->chartData,
+        ]);
     }
 
     #[On('date-range-updated')]
@@ -38,7 +49,14 @@ class WaterQualityChart extends Component
     {
         $this->startDate = $startDate;
         $this->endDate = $endDate;
+        // Dispatch chart cleanup BEFORE loadData
+        $this->dispatchBrowserEvent('water-quality:destroy-chart');
         $this->loadData();
+        // Notify client to refresh chart options/series after date range changed
+        $this->dispatchBrowserEvent('water-quality:chart', [
+            'chart' => $this->lineChartModelArray,
+            'initial' => $this->chartData,
+        ]);
     }
 
     #[On('echo:water-quality-data-created,WaterQualityCreated')]
@@ -124,20 +142,106 @@ class WaterQualityChart extends Component
         $query = WaterQualityData::where('user_id', $this->userId);
 
         if ($this->startDate && $this->endDate) {
-            $query->whereBetween('recorded_at', [
-                Carbon::parse($this->startDate)->startOfDay(),
-                Carbon::parse($this->endDate)->endOfDay(),
-            ]);
+            // Accept both date-only (YYYY-MM-DD) and ISO datetime strings.
+            $start = Carbon::parse($this->startDate);
+            $end = Carbon::parse($this->endDate);
+            // If inputs look like date-only strings (length <= 10), expand to full day
+            if (strlen($this->startDate) <= 10) { $start = $start->startOfDay(); }
+            if (strlen($this->endDate) <= 10) { $end = $end->endOfDay(); }
+            $query->whereBetween('recorded_at', [$start, $end]);
         } elseif ($this->startDate) {
-            $query->whereDate('recorded_at', $this->startDate);
+            // If startDate contains time component, use >= comparison; otherwise use whereDate
+            if (strlen($this->startDate) > 10) {
+                $start = Carbon::parse($this->startDate);
+                $query->where('recorded_at', '>=', $start);
+            } else {
+                $query->whereDate('recorded_at', $this->startDate);
+            }
         }
 
         // fetch a reasonable number of points for the chart (most recent first)
         $rows = $query->orderBy('recorded_at', 'desc')->limit(200)->get()->reverse()->values();
+        
+        // CRITICAL DEBUG: Log what we're fetching
+        \Log::info('WaterQualityChart loadData', [
+            'userId' => $this->userId,
+            'rowCount' => $rows->count(),
+            'hasData' => !$rows->isEmpty(),
+            'firstRow' => $rows->first() ? [
+                'recorded_at' => $rows->first()->recorded_at,
+                'temperature' => $rows->first()->temperature,
+                'ph' => $rows->first()->ph_level
+            ] : null
+        ]);
 
         if ($rows->isEmpty()) {
-            $this->chartData = ['labels' => [], 'series' => [], 'colors' => [], 'visible' => []];
-            $this->legendData = [];
+            // CRITICAL: Create valid empty chart structure to prevent undefined crashes
+            $colors = [
+                'Temperature' => '#EF4444',
+                'Salinity' => '#14B8A6',
+                'Dissolved Oxygen' => '#2563EB',
+                'pH' => '#8B5CF6',
+            ];
+
+            $this->chartData = [
+                'labels' => [],
+                'series' => [
+                    'Temperature' => [],
+                    'Salinity' => [],
+                    'Dissolved Oxygen' => [],
+                    'pH' => [],
+                ],
+                'colors' => $colors,
+                'visible' => [
+                    'Temperature' => true,
+                    'Salinity' => true,
+                    'Dissolved Oxygen' => true,
+                    'pH' => true,
+                ],
+            ];
+            $this->legendData = collect($colors)->map(function ($color, $name) {
+                return [
+                    'name' => $name,
+                    'color' => $color,
+                    'visible' => true,
+                ];
+            })->values()->all();
+            
+            // CRITICAL: Build minimal valid lineChartModelArray with empty series to prevent JS crashes
+            $this->lineChartModelArray = [
+                'jsonConfig' => [
+                    'chart' => [
+                        'id' => 'water-quality-' . ($this->userId ?? '0'),
+                        'type' => 'line',
+                        'height' => 480,
+                        'width' => '100%',
+                        'maintainAspectRatio' => false,
+                        'toolbar' => ['show' => false]
+                    ],
+                    'series' => [
+                        ['name' => 'Temperature', 'data' => []],
+                        ['name' => 'Salinity', 'data' => []],
+                        ['name' => 'Dissolved Oxygen', 'data' => []],
+                        ['name' => 'pH', 'data' => []]
+                    ],
+                    'xaxis' => ['type' => 'datetime'],
+                    'yaxis' => ['show' => true],
+                    'dataLabels' => ['enabled' => false],
+                    'stroke' => ['curve' => 'smooth', 'width' => [2.6, 1.6, 1.6, 1.6]],
+                    'markers' => ['size' => 0],
+                    'tooltip' => ['enabled' => true, 'shared' => true],
+                    'legend' => ['show' => true, 'position' => 'bottom'],
+                    'colors' => array_values($colors),
+                    'noData' => [
+                        'text' => 'No water quality data available yet',
+                    ],
+                ],
+                'meta' => [
+                    'series_names' => ['Temperature', 'Salinity', 'Dissolved Oxygen', 'pH'],
+                    'series_keys' => ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level']
+                ],
+                'colors' => array_values($colors)
+            ];
             return;
         }
 
@@ -271,18 +375,46 @@ class WaterQualityChart extends Component
         if (! isset($this->lineChartModelArray['jsonConfig']['chart']) || ! is_array($this->lineChartModelArray['jsonConfig']['chart'])) {
             $this->lineChartModelArray['jsonConfig']['chart'] = [];
         }
-        $this->lineChartModelArray['jsonConfig']['chart']['height'] = $this->lineChartModelArray['jsonConfig']['chart']['height'] ?? ($this->lineChartModelArray['chart']['height'] ?? 700);
+        
+        // CRITICAL FIX: Enforce chart dimensions EVERY time (prevents height collapse on Livewire updates)
+        $this->lineChartModelArray['jsonConfig']['chart']['height'] = 480;
+        $this->lineChartModelArray['jsonConfig']['chart']['width'] = '100%';
         $this->lineChartModelArray['jsonConfig']['chart']['id'] = $this->lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-' . ($this->userId ?? '0');
+        
+        // CRITICAL: Force aspect ratio off to prevent responsive height collapse
+        $this->lineChartModelArray['jsonConfig']['chart']['maintainAspectRatio'] = false;
+
+        // CRITICAL FIX: Ensure series data is in jsonConfig.series for ApexCharts
+        // This is the actual data that ApexCharts will render - must be populated from $series
+        $this->lineChartModelArray['jsonConfig']['series'] = [
+            ['name' => 'Temperature', 'data' => $temperatureSeries],
+            ['name' => 'Salinity', 'data' => $salinitySeries],
+            ['name' => 'Dissolved Oxygen', 'data' => $doSeries],
+            ['name' => 'pH', 'data' => $phSeries],
+        ];
+
+        // Store metadata for frontend reference
+        $this->lineChartModelArray['meta'] = [
+            'series_names' => array_keys($series),
+            'series_keys' => ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level'],
+        ];
 
         // Promote visual defaults into jsonConfig so the vendor bundle (ApexCharts) picks them up directly.
         // Colors: ensure an ordered array matching series order.
         $this->lineChartModelArray['jsonConfig']['colors'] = $this->lineChartModelArray['jsonConfig']['colors'] ?? array_values($colors);
 
-        // Stroke widths (temperature emphasized)
-        $this->lineChartModelArray['jsonConfig']['stroke'] = $this->lineChartModelArray['jsonConfig']['stroke'] ?? ['width' => [2.6, 1.6, 1.6, 1.6]];
+        // CRITICAL FIX: Stroke configuration with smooth curves (wavy lines, not straight)
+        $this->lineChartModelArray['jsonConfig']['stroke'] = $this->lineChartModelArray['jsonConfig']['stroke'] ?? [
+            'curve' => 'smooth',  // This makes lines wavy instead of straight
+            'width' => [2.6, 1.6, 1.6, 1.6]  // Temperature emphasized
+        ];
 
-        // Markers
-        $this->lineChartModelArray['jsonConfig']['markers'] = $this->lineChartModelArray['jsonConfig']['markers'] ?? ['size' => 3];
+        // CRITICAL FIX: Disable markers (no circle points on lines)
+        $this->lineChartModelArray['jsonConfig']['markers'] = $this->lineChartModelArray['jsonConfig']['markers'] ?? [
+            'size' => 0,  // Set to 0 to hide circle points completely
+            'strokeWidth' => 0,
+            'hover' => ['size' => 0]  // Also disable on hover
+        ];
 
         // Mobile / readability defaults: hide inline data labels and prefer tooltips
         $this->lineChartModelArray['jsonConfig']['dataLabels'] = $this->lineChartModelArray['jsonConfig']['dataLabels'] ?? ['enabled' => false];
@@ -312,10 +444,20 @@ class WaterQualityChart extends Component
             [
                 'breakpoint' => 640,
                 'options' => [
-                    'chart' => [ 'height' => 360 ],
+                    'chart' => [ 
+                        'height' => 360,  // Mobile height
+                        'width' => '100%',  // Enforce width on mobile too
+                        'maintainAspectRatio' => false  // CRITICAL: prevent height collapse
+                    ],
                     'legend' => [ 'position' => 'bottom', 'horizontalAlign' => 'center' ],
-                    'stroke' => [ 'width' => [2.2, 1.2, 1.2, 1.2] ],
-                    'markers' => [ 'size' => 2 ],
+                    'stroke' => [ 
+                        'curve' => 'smooth',  // Keep smooth curves on mobile
+                        'width' => [2.2, 1.2, 1.2, 1.2] 
+                    ],
+                    'markers' => [ 
+                        'size' => 0,  // Keep markers disabled on mobile
+                        'strokeWidth' => 0 
+                    ],
                     'xaxis' => [ 'labels' => ['rotate' => -45] ],
                 ],
             ],

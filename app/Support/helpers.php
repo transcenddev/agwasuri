@@ -77,6 +77,106 @@ if (! function_exists('classifyWaterParam')) {
     }
 }
 
+if (!function_exists('water_status_tokens')) {
+    /**
+     * Return shared Tailwind token classes for water status labels.
+     * Labels: BEST=emerald, GOOD=sky, BAD=amber, HARM=rose.
+     */
+    function water_status_tokens(?string $label): array
+    {
+        $key = strtoupper(trim((string) $label));
+
+        $map = [
+            'BEST' => [
+                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
+                'border' => 'border-l-4 border-emerald-500',
+                'dot' => 'bg-emerald-500',
+            ],
+            'GOOD' => [
+                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-200',
+                'border' => 'border-l-4 border-sky-500',
+                'dot' => 'bg-sky-500',
+            ],
+            'BAD' => [
+                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200',
+                'border' => 'border-l-4 border-amber-500',
+                'dot' => 'bg-amber-500',
+            ],
+            'HARM' => [
+                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200',
+                'border' => 'border-l-4 border-rose-500',
+                'dot' => 'bg-rose-500',
+            ],
+            'UNKNOWN' => [
+                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200',
+                'border' => 'border-l-4 border-gray-300',
+                'dot' => 'bg-gray-400',
+            ],
+        ];
+
+        return $map[$key] ?? $map['UNKNOWN'];
+    }
+}
+
+if (!function_exists('water_status_from_metrics')) {
+    /**
+     * Aggregate metric labels into a row status with shared tokens and culprits.
+     * Uses priority: HARM (>=2), BAD, GOOD, BEST.
+     */
+    function water_status_from_metrics(array $metricLabels): array
+    {
+        $normalized = [];
+        foreach ($metricLabels as $metric => $label) {
+            $normalized[$metric] = strtoupper(trim((string) $label));
+        }
+
+        $harmCount = collect($normalized)->filter(fn($l) => $l === 'HARM')->count();
+        $hasBad = in_array('BAD', $normalized, true);
+        $hasGood = in_array('GOOD', $normalized, true);
+        $allBest = collect($normalized)
+            ->filter(fn($l) => $l !== 'UNKNOWN')
+            ->every(fn($l) => $l === 'BEST');
+
+        if ($harmCount >= 2) {
+            $status = 'HARM';
+        } elseif ($hasBad) {
+            $status = 'BAD';
+        } elseif ($hasGood) {
+            $status = 'GOOD';
+        } elseif ($allBest) {
+            $status = 'BEST';
+        } else {
+            $status = 'UNKNOWN';
+        }
+
+        $tokens = water_status_tokens($status);
+
+        $metricNames = [
+            'temperature' => 'Temperature',
+            'salinity' => 'Salinity',
+            'dissolved_oxygen' => 'Dissolved Oxygen',
+            'ph_level' => 'pH',
+            'ph' => 'pH',
+            'do' => 'Dissolved Oxygen',
+        ];
+
+        $culprits = [];
+        if (in_array($status, ['HARM', 'BAD', 'GOOD', 'BEST'], true)) {
+            foreach ($normalized as $metric => $label) {
+                if ($label === $status) {
+                    $culprits[] = $metricNames[$metric] ?? ucfirst(str_replace('_', ' ', $metric));
+                }
+            }
+        }
+
+        return [
+            'status' => $status,
+            'tokens' => $tokens,
+            'culprits' => $culprits,
+        ];
+    }
+}
+
 if (! function_exists('map_classification_to_status')) {
     /**
      * Map a classification label (e.g. BEST, GOOD, BAD, HARM)
@@ -145,8 +245,8 @@ if (! function_exists('hex_to_rgba')) {
 
 if (! function_exists('water_quality_param_keys')) {
     /**
-     * Return canonical ordered parameter keys used throughout the app.
-     * Order: Temperature, Salinity, Dissolved Oxygen, pH Level
+    * Return canonical ordered parameter keys used throughout the app.
+    * Order: Temperature, Salinity, Dissolved Oxygen, pH
      *
      * @return array<int,string>
      */
@@ -168,7 +268,7 @@ if (! function_exists('water_quality_param_labels')) {
             'temperature' => 'Temperature (°C)',
             'salinity' => 'Salinity (ppt)',
             'dissolved_oxygen' => 'Dissolved Oxygen (mg/L)',
-            'ph_level' => 'pH Level',
+            'ph_level' => 'pH',
         ];
     }
 }
