@@ -66,7 +66,12 @@ class DatabaseSeeder extends Seeder
             'api_key' => Str::random(32),
         ]);
 
-        $this->call(\Database\Seeders\BulkUserSeeder::class);
-        $this->call(WaterQualityDataSeeder::class);
+        // Seed master fishpond operators (idempotent)
+        $this->call(\Database\Seeders\MasterFishpondOperatorsSeeder::class);
+
+        // Existing water quality data seeder (if present)
+        if (class_exists(\Database\Seeders\WaterQualityDataSeeder::class)) {
+            $this->call(WaterQualityDataSeeder::class);
+        }
     }
 }

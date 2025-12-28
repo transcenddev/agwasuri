@@ -38,6 +38,7 @@
 
 /* Minimal app-level color variables for light + minimal black/white dark mode */
 :root {
+  /* Legacy variables (keep for backward compatibility) */
   --bg: #ffffff;
   /* page background (light) */
   --text: #111827;
@@ -46,6 +47,72 @@
   /* card background (light) */
   --muted: #6b7280;
   /* gray-500 */
+
+  /* New Theme System - Agwasuri Design Tokens */
+  /* CVSU Brand Colors - Official */
+  --cvsu-brand: 120 58% 25%;
+  /* #1B651B - Official CVSU Green */
+  --cvsu-brand-rgb: 27 101 27;
+
+  /* Core Theme Colors */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 89%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 161 93% 30%;
+  --primary-foreground: 151 80% 95%;
+  --secondary: 0 0% 32%;
+  --secondary-foreground: 0 0% 98%;
+  --muted-new: 0 0% 63%;
+  --muted-foreground: 0 0% 9%;
+  --accent: 166 76% 96%;
+  --accent-foreground: 173 80% 40%;
+  --destructive: 0 72% 50%;
+  --destructive-foreground: 0 85% 97%;
+  --border: 0 0% 83%;
+  --input: 0 0% 83%;
+  --ring: 161 93% 30%;
+
+  /* Chart Colors */
+  --chart-1: 158 64% 51%;
+  --chart-2: 141 69% 58%;
+  --chart-3: 172 66% 50%;
+  --chart-4: 82 77% 55%;
+  --chart-5: 0 0% 45%;
+
+  /* Sidebar Colors */
+  --sidebar: 0 0% 98%;
+  --sidebar-foreground: 0 0% 9%;
+  --sidebar-primary: 161 93% 30%;
+  --sidebar-primary-foreground: 151 80% 95%;
+  --sidebar-accent: 0 0% 32%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 0 0% 83%;
+  --sidebar-ring: 161 93% 30%;
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+  --font-serif: 'Wulkan Display', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+
+  /* Border Radius */
+  --radius: 1rem;
+
+  /* Shadows */
+  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+
+  /* Spacing & Tracking */
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
 }
 
 .dark {
@@ -61,35 +128,105 @@
   --chart-grid: rgba(255, 255, 255, 0.06);
   --chart-tick: rgba(255, 255, 255, 0.78);
   --chart-border: rgba(255, 255, 255, 0.08);
+
+  /* New Theme System - Dark Mode */
+  /* CVSU Brand Colors - Dark Mode Adapted */
+  --cvsu-brand: 158 64% 51%;
+  /* Lighter variant for dark mode */
+  --cvsu-brand-rgb: 73 191 130;
+
+  /* Core Theme Colors - Dark Mode */
+  --background: 0 0% 9%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 14%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 25%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 158 64% 51%;
+  --primary-foreground: 165 91% 9%;
+  --secondary: 0 0% 45%;
+  --secondary-foreground: 0 0% 98%;
+  --muted-new: 0 0% 45%;
+  --muted-foreground: 0 0% 98%;
+  --accent: 178 84% 10%;
+  --accent-foreground: 172 66% 50%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 85% 97%;
+  --border: 0 0% 32%;
+  --input: 0 0% 32%;
+  --ring: 158 64% 51%;
+
+  /* Chart Colors - Dark Mode */
+  --chart-1: 156 71% 66%;
+  --chart-2: 141 76% 73%;
+  --chart-3: 170 76% 64%;
+  --chart-4: 81 84% 67%;
+  --chart-5: 0 0% 45%;
+
+  /* Sidebar Colors - Dark Mode */
+  --sidebar: 0 0% 14%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 158 64% 51%;
+  --sidebar-primary-foreground: 165 91% 9%;
+  --sidebar-accent: 172 66% 50%;
+  --sidebar-accent-foreground: 178 84% 10%;
+  --sidebar-border: 0 0% 32%;
+  --sidebar-ring: 158 64% 51%;
+
+  /* Shadows - Dark Mode */
+  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
 }
 
 /* Apply variables to page + common structural elements */
 body {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+}
+
+/* Apply theme fonts */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+}
+
+code,
+pre,
+.font-mono {
+  font-family: var(--font-mono);
 }
 
 /* Ensure the common 'white' card areas tone-down in dark mode while preserving brand color classes
    Scope these overrides to pages using the app layout (elements inside `.site-body`) so standalone
    pages (landing, marketing pages) keep their intended backgrounds. */
 .dark .site-body .bg-white {
-  background-color: var(--card-bg) !important;
+  background-color: hsl(var(--card)) !important;
 }
 
 .dark .site-body .text-gray-700,
 .dark .site-body .text-gray-800,
 .dark .site-body .text-gray-900 {
-  color: var(--text) !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 .dark .site-body .text-gray-500,
 .dark .site-body .text-gray-600 {
-  color: var(--muted) !important;
+  color: hsl(var(--muted-foreground)) !important;
 }
 
 .dark .site-body .border-gray-200 {
-  border-color: #1f2937 !important;
-  /* gray-800 */
+  border-color: hsl(var(--border)) !important;
 }
 
 /* `.hero-light` is a marker class for hero areas that should preserve their
@@ -137,8 +274,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Site-body container uses CSS variables for background/text so pages using the app layout
    get the minimal black/white dark theme while leaving standalone pages untouched. */
 .site-body {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
   min-height: 100vh;
 }
 
@@ -158,9 +295,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Wulkan Display Font Family */
 @font-face {
   font-family: 'Wulkan Display';
-  /* Prefer webfont (woff) when available; reference fonts in resources/fonts so Vite bundles them */
-  src: url('../fonts/Wulkan-Display-Medium.woff') format('woff'),
-    url('../fonts/Wulkan-Display-Medium.otf') format('opentype');
+  /* Prefer available opentype first to avoid dev-server 404s when .woff is missing */
+  src: url('../fonts/Wulkan-Display-Medium.otf') format('opentype'),
+    url('../fonts/Wulkan-Display-Medium.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -168,8 +305,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @font-face {
   font-family: 'Wulkan Display';
-  src: url('../fonts/Wulkan-Display-Bold.woff') format('woff'),
-    url('../fonts/Wulkan-Display-Bold.otf') format('opentype');
+  src: url('../fonts/Wulkan-Display-Bold.otf') format('opentype'),
+    url('../fonts/Wulkan-Display-Bold.woff') format('woff');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -177,8 +314,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @font-face {
   font-family: 'Wulkan Display';
-  src: url('../fonts/Wulkan-Display-Black.woff') format('woff'),
-    url('../fonts/Wulkan-Display-Black.otf') format('opentype');
+  src: url('../fonts/Wulkan-Display-Black.otf') format('opentype'),
+    url('../fonts/Wulkan-Display-Black.woff') format('woff');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -459,6 +596,169 @@ select.select-no-native option:checked {
 
   .accounts--table-desktop .desktop-actions {
     display: flex !important;
+  }
+}
+
+/* ============================================
+   Theme Utility Classes - Agwasuri Design System
+   ============================================ */
+@layer components {
+
+  /* CVSU Brand Utilities */
+  .bg-cvsu {
+    background-color: hsl(var(--cvsu-brand));
+  }
+
+  .text-cvsu {
+    color: hsl(var(--cvsu-brand));
+  }
+
+  .border-cvsu {
+    border-color: hsl(var(--cvsu-brand));
+  }
+
+  .ring-cvsu {
+    --tw-ring-color: hsl(var(--cvsu-brand));
+  }
+
+  /* Theme Background Utilities */
+  .bg-background {
+    background-color: hsl(var(--background));
+  }
+
+  .bg-card {
+    background-color: hsl(var(--card));
+  }
+
+  .bg-popover {
+    background-color: hsl(var(--popover));
+  }
+
+  .bg-primary {
+    background-color: hsl(var(--primary));
+  }
+
+  .bg-secondary {
+    background-color: hsl(var(--secondary));
+  }
+
+  .bg-accent {
+    background-color: hsl(var(--accent));
+  }
+
+  .bg-destructive {
+    background-color: hsl(var(--destructive));
+  }
+
+  /* Theme Text Utilities */
+  .text-foreground {
+    color: hsl(var(--foreground));
+  }
+
+  .text-card-foreground {
+    color: hsl(var(--card-foreground));
+  }
+
+  .text-primary {
+    color: hsl(var(--primary));
+  }
+
+  .text-primary-foreground {
+    color: hsl(var(--primary-foreground));
+  }
+
+  .text-muted-foreground {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .text-accent-foreground {
+    color: hsl(var(--accent-foreground));
+  }
+
+  /* Theme Border Utilities */
+  .border-theme {
+    border-color: hsl(var(--border));
+  }
+
+  .border-input {
+    border-color: hsl(var(--input));
+  }
+
+  /* Theme Ring Utilities */
+  .ring-ring {
+    --tw-ring-color: hsl(var(--ring));
+  }
+
+  /* Button Variants */
+  .btn-primary {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-secondary {
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: opacity 0.2s;
+  }
+
+  .btn-secondary:hover {
+    opacity: 0.9;
+  }
+
+  .btn-destructive {
+    background-color: hsl(var(--destructive));
+    color: hsl(var(--destructive-foreground));
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    transition: opacity 0.2s;
+  }
+
+  .btn-destructive:hover {
+    opacity: 0.9;
+  }
+
+  /* Card Component */
+  .theme-card {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Input Component */
+  .theme-input {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    border: 1px solid hsl(var(--input));
+    border-radius: calc(var(--radius) - 0.25rem);
+    padding: 0.5rem 0.75rem;
+  }
+
+  .theme-input:focus {
+    outline: none;
+    ring: 2px solid hsl(var(--ring));
+  }
+
+  /* Popover Component */
+  .theme-popover {
+    background-color: hsl(var(--popover));
+    color: hsl(var(--popover-foreground));
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-md);
   }
 }
 

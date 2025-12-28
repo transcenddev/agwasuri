@@ -21,6 +21,11 @@ class WaterQualityDataTable extends Component
 
     public ?string $startDate = null;
     public ?string $endDate = null;
+    
+    protected $queryString = [
+        'startDate' => ['as' => 'start', 'except' => ''],
+        'endDate' => ['as' => 'end', 'except' => ''],
+    ];
 
     #[On('user-selected')]
     public function updateUser($userId)
@@ -85,9 +90,17 @@ class WaterQualityDataTable extends Component
         } catch (\Throwable $e) {
             $this->userId = session('selected_user', Auth::id());
         }
+        
+        // Initialize date range from URL query params
+        if (request()->has('start')) {
+            $this->startDate = request('start');
+        }
+        if (request()->has('end')) {
+            $this->endDate = request('end');
+        }
 
         try {
-            \Log::info('WaterQualityDataTable:mount', ['initialUserId' => $this->userId]);
+            \Log::info('WaterQualityDataTable:mount', ['initialUserId' => $this->userId, 'startDate' => $this->startDate, 'endDate' => $this->endDate]);
         } catch (\Throwable $e) {}
     }
 
@@ -109,11 +122,21 @@ class WaterQualityDataTable extends Component
             $query->whereDate('recorded_at', $this->startDate);
         }
 
+        // Calculate summary statistics - clone query to avoid affecting pagination
+        $summaryQuery = clone $query;
+        $summaryStats = $summaryQuery->selectRaw('
+            AVG(temperature) as avg_temp,
+            AVG(salinity) as avg_salinity,
+            AVG(dissolved_oxygen) as avg_do,
+            AVG(ph_level) as avg_ph
+        ')->first();
+
         $water_quality_data = $query->latest('recorded_at')
             ->paginate(perPage: $this->paginate_num);
 
         // Annotate each row with a computed status using the shared classifier.
         $collection = $water_quality_data->getCollection()->transform(function ($entry) {
+            // Use classifier helper to get parameter labels, then map to unified statuses
             try {
                 $tempLabel = strtoupper(classifyWaterParam('temperature', $entry->temperature)['label'] ?? 'UNKNOWN');
             } catch (\Throwable $e) { $tempLabel = 'UNKNOWN'; }
@@ -131,30 +154,30 @@ class WaterQualityDataTable extends Component
             // Priority: harm > bad > good > best
             $labels = [$tempLabel, $phLabel, $doLabel, $salLabel];
 
-            $hasHarm = in_array('HARM', $labels, true);
+            $harmCount = collect($labels)->filter(fn($l) => $l === 'HARM')->count();
             $hasBad = in_array('BAD', $labels, true);
             $hasGood = in_array('GOOD', $labels, true);
             $allBest = collect($labels)->filter(fn($l) => $l !== 'UNKNOWN')->every(fn($l) => $l === 'BEST');
 
-            if ($hasHarm) {
-                $statusBorderClass = 'border-l-4 border-rose-500';
-                $badgeClass = 'text-rose-700 bg-rose-100';
+            if ($harmCount >= 2) {
+                $statusBorderClass = 'border-l-4 border-red-600';
+                $badgeClass = 'bg-red-100 text-red-800';
                 $statusLabel = 'HARM';
             } elseif ($hasBad) {
                 $statusBorderClass = 'border-l-4 border-yellow-500';
-                $badgeClass = 'text-yellow-700 bg-yellow-100';
+                $badgeClass = 'bg-yellow-100 text-yellow-800';
                 $statusLabel = 'BAD';
             } elseif ($hasGood) {
                 $statusBorderClass = 'border-l-4 border-blue-500';
-                $badgeClass = 'text-blue-700 bg-blue-100';
+                $badgeClass = 'bg-blue-100 text-blue-800';
                 $statusLabel = 'GOOD';
             } elseif ($allBest) {
                 $statusBorderClass = 'border-l-4 border-green-500';
-                $badgeClass = 'text-green-700 bg-green-100';
+                $badgeClass = 'bg-green-100 text-green-800';
                 $statusLabel = 'BEST';
             } else {
                 $statusBorderClass = 'border-l-4 border-gray-400';
-                $badgeClass = 'text-gray-700 bg-gray-100';
+                $badgeClass = 'bg-gray-100 text-gray-600';
                 $statusLabel = 'Unknown';
             }
 
@@ -165,10 +188,10 @@ class WaterQualityDataTable extends Component
                     return 'text-gray-600';
                 }
                 return match($lab) {
-                    'BEST' => 'text-green-600',
-                    'GOOD' => 'text-blue-600',
-                    'BAD' => 'text-yellow-600',
-                    'HARM' => 'text-rose-600',
+                    'BEST' => 'text-green-800',
+                    'GOOD' => 'text-blue-800',
+                    'BAD' => 'text-yellow-800',
+                    'HARM' => 'text-red-800',
                     default => 'text-gray-600',
                 };
             };
@@ -201,6 +224,6 @@ class WaterQualityDataTable extends Component
 
         $water_quality_data->setCollection($collection);
 
-        return \view('livewire.water-quality-data-table', compact('water_quality_data'));
+        return \view('livewire.water-quality-data-table', compact('water_quality_data', 'summaryStats'));
     }
 }

@@ -43,20 +43,53 @@
             }
         </style>
 
+        <style>
+            /* Hide ApexCharts annotation/datalabel elements inserted by vendor code */
+            .apexcharts-annotations,
+            .apexcharts-annotation,
+            .apexcharts-annotations-group,
+            .apexcharts-point-annotations,
+            .apexcharts-point-annotation,
+            .apexcharts-point-annotation-label,
+            .apexcharts-point-annotations-custom-svg,
+            .apexcharts-datalabels,
+            .apexcharts-datalabel,
+            .apexcharts-series-annotations,
+            .apexcharts-xaxis-annotations,
+            .apexcharts-yaxis-annotations,
+            .apexcharts-xaxis-annotation-label,
+            .apexcharts-yaxis-annotation-label {
+                display: none !important;
+            }
+        </style>
+
         @livewireStyles
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireChartsScripts
     </head>
-    <body class="font-sans antialiased min-h-screen">
+    <body class="font-sans antialiased min-h-screen" x-data="{ sidebarOpen: false, sidebarHovered: false, presentationMode: false }" @toggle-mobile-sidebar.window="sidebarOpen = !sidebarOpen" @toggle-compact-view.window="presentationMode = !presentationMode">
         {{-- Navigation is fixed; render it above the content wrapper so header height CSS var can be used globally --}}
         <livewire:layout.navigation />
 
-        {{-- Wrap the slot with the shared x-container so every page receives the header offset --}}
-        <x-container class="site-body">
-            <main>
-                {{ $slot }}
-            </main>
-        </x-container>
+        {{-- Sidebar (fixed on desktop, drawer on mobile) --}}
+        <div x-data="{ open: sidebarOpen }" x-init="$watch('sidebarOpen', val => open = val)">
+            @include('components.sidebar')
+        </div>
+
+        {{-- Bottom Navigation (mobile/tablet only) --}}
+        @include('components.bottom-nav')
+
+        {{-- Main content with fixed left offset for sidebar (16 = 4rem collapsed, 64 = 16rem expanded) --}}
+        <div :class="sidebarHovered ? 'lg:ml-64' : 'lg:ml-16'" class="transition-all duration-300" style="margin-top: var(--header-height);">
+            <x-container class="site-body w-full px-4 lg:px-8">
+                {{-- Top bar: pond selector, last-updated and connection status --}}
+                @include('components.topbar')
+
+                <main>
+                    {{ $slot }}
+                </main>
+            </x-container>
+        </div>
     </body>
         <!-- Livewire bridge: keep localStorage and document class in sync when Livewire toggles theme -->
         <script>

@@ -3,12 +3,10 @@
     @if(!empty($lineChartModelArray))
         {{-- Single root element for Livewire + compact header --}}
         <div class="w-full">
-            <div class="px-4 py-2 flex items-center justify-between"> {{-- header --}}
-                <div class="flex items-center gap-2">&nbsp;</div>
-            </div>
+            {{-- Legend intentionally removed for simplified UI (series toggling handled elsewhere) --}}
 
             {{-- Chart Area: render via the lightweight wrapper that consumes the serializable model array --}}
-            <div class="w-full">
+            <div class="w-full" wire:ignore wire:key="chart-container-{{ $userId }}">
                 <div class="relative">
                     @php
                         $__chartId = $lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-0';
@@ -27,52 +25,37 @@
                             $lineChartModelArray['colors'] = $__defaultColors;
                         }
 
-                        // Make temperature more visually prominent by default
-                        $__defaultStrokeWidths = [2.6, 1.6, 1.6, 1.6];
-                        if (empty($lineChartModelArray['jsonConfig']['stroke']['width'])) {
-                            $lineChartModelArray['jsonConfig']['stroke']['width'] = $__defaultStrokeWidths;
+                        // CRITICAL FIX: Ensure smooth curves and no markers (wavy lines, no circles)
+                        if (empty($lineChartModelArray['jsonConfig']['stroke'])) {
+                            $lineChartModelArray['jsonConfig']['stroke'] = [
+                                'curve' => 'smooth',
+                                'width' => [2.6, 1.6, 1.6, 1.6]
+                            ];
+                        } elseif (empty($lineChartModelArray['jsonConfig']['stroke']['curve'])) {
+                            $lineChartModelArray['jsonConfig']['stroke']['curve'] = 'smooth';
                         }
 
-                        // Small markers to help identify series points without cluttering
+                        // CRITICAL FIX: Disable markers completely (no circle points)
                         if (empty($lineChartModelArray['jsonConfig']['markers'])) {
-                            $lineChartModelArray['jsonConfig']['markers'] = ['size' => 3];
+                            $lineChartModelArray['jsonConfig']['markers'] = [
+                                'size' => 0,
+                                'strokeWidth' => 0,
+                                'hover' => ['size' => 0]
+                            ];
                         }
                     @endphp
 
-                    <div id="water-quality-chart-root" wire:ignore class="w-full p-4 max-w-content-xl mx-auto"
+                    <div id="water-quality-chart-root" wire:ignore.self class="w-full px-4 pb-2 max-w-content-xl mx-auto"
+                        style="position: relative; display: block; height: 480px;"
                         data-chart-id="{{ $__chartId }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
                         data-series-keys='@json($__seriesKeys)'
                         data-initial='@json($chartData)'
+                        data-chart-config='@json($lineChartModelArray)'
                         data-user-id="{{ request()->get('user') ?? session('selected_user', auth()->id()) }}">
-                        @livewire(\App\Livewire\LivewireChartsLineWrapper::class, ['lineChartModel' => $lineChartModelArray], key('water-quality-' . $__chartId))
-                    </div>
-                </div>
-            </div>
-        </div>
-    @else
-        {{-- Minimal header when there's no data (header intentionally omitted) --}}
-        <div class="px-4 py-2 shrink-0 flex items-center justify-between">
-            <div class="flex items-center gap-2">&nbsp;</div>
-        </div>
-
-        {{-- Even when there's no data, output the canvases so the JS initializer can find them.
-             We attach an explicit (possibly empty) chart payload so the client has a stable shape. --}}
-        @php
-            $payload = $chartData ?? ['labels' => [], 'series' => [], 'colors' => [], 'visible' => []];
-        @endphp
-
-        <div class="w-full">
-            <div class="relative">
-                <div class="w-full p-4 max-w-content-xl mx-auto">
-                    <canvas id="waterChart-main" data-chart='@json($payload)'></canvas>
-                </div>
-
-                {{-- Friendly overlay when there's no actual data to plot or when user hides all series --}}
-                <div id="chart-empty-overlay" class="absolute inset-0 flex items-center justify-center pointer-events-none hidden">
-                    <div class="bg-white/80 dark:bg-black/70 text-gray-700 dark:text-gray-200 rounded-md px-6 py-3 shadow">
-                        No series selected or no data available. Click a legend to show data.
+                        {{-- Chart will be created by inline JS below, not by vendor wrapper --}}
+                        <div id="{{ $__chartId }}" class="apexcharts-canvas-wrapper" style="min-height:480px;height:480px;width:100%;position:relative;"></div>
                     </div>
                 </div>
             </div>
@@ -85,17 +68,257 @@
     <script>
         (function(){
             const root = document.getElementById('water-quality-chart-root');
-            if (!root) return;
+            if (!root) {
+                console.error('❌ Chart root element not found!');
+                return;
+            }
 
             const chartId = root.getAttribute('data-chart-id');
             const seriesNames = JSON.parse(root.getAttribute('data-series-names') || '[]');
             const seriesKeys = JSON.parse(root.getAttribute('data-series-keys') || '[]');
+            const chartConfig = JSON.parse(root.getAttribute('data-chart-config') || '{}');
+            
+            // CRITICAL DEBUG: Log what we received from Livewire
+            console.log('📊 Chart initialization data:', {
+                chartId,
+                hasConfig: !!chartConfig,
+                hasJsonConfig: !!chartConfig.jsonConfig,
+                seriesCount: chartConfig?.jsonConfig?.series?.length,
+                firstSeriesDataLength: chartConfig?.jsonConfig?.series?.[0]?.data?.length,
+                allSeriesDataLengths: chartConfig?.jsonConfig?.series?.map(s => s.data?.length)
+            });
+
+            // CRITICAL FIX: Create the chart manually with explicit timing control
+            let chartInstance = null;
+
+            function createChart() {
+                try {
+                    // Check if ApexCharts library is loaded
+                    if (typeof ApexCharts === 'undefined' || !window.ApexCharts) {
+                        console.error('ApexCharts library not loaded! Chart cannot be initialized.');
+                        return;
+                    }
+
+                    // Use global registry to prevent double initialization
+                    window.__waterQualityChartRegistry = window.__waterQualityChartRegistry || {};
+                    
+                    if (window.__waterQualityChartRegistry[chartId]) {
+                        console.debug('Chart already exists, skipping init:', chartId);
+                        chartInstance = window.__waterQualityChartRegistry[chartId];
+                        return chartInstance;
+                    }
+                    
+                    const container = document.getElementById(chartId);
+                    if (!container) {
+                        console.error('Chart container not found:', chartId);
+                        return;
+                    }
+
+                    console.debug('Creating chart with ID:', chartId);
+                    console.debug('Container dimensions:', container.clientWidth, 'x', container.clientHeight);
+
+                    // CRITICAL: Ensure we have valid config and series structure
+                    if (!chartConfig || !chartConfig.jsonConfig) {
+                        console.error('Chart config missing', chartConfig);
+                        return;
+                    }
+                    
+                    console.debug('Chart config:', chartConfig.jsonConfig);
+
+                    // Destroy existing instance first
+                    if (chartInstance && typeof chartInstance.destroy === 'function') {
+                        chartInstance.destroy();
+                        chartInstance = null;
+                    }
+
+                    // CRITICAL: Deep clone and validate options to prevent undefined crashes
+                    const options = JSON.parse(JSON.stringify(chartConfig.jsonConfig || {}));
+                    if (!options.chart) options.chart = {};
+                    options.chart.height = 480;
+                    options.chart.width = '100%';
+                    options.chart.maintainAspectRatio = false;
+                    options.chart.id = chartId; // enforce stable id for instance lookup
+                    
+                    // CRITICAL: Ensure series is ALWAYS an array (prevents .length undefined error)
+                    if (!Array.isArray(options.series)) {
+                        options.series = [];
+                    }
+                    // Ensure each series has valid data array
+                    options.series = options.series.map(s => ({
+                        name: s?.name || 'Unknown',
+                        data: Array.isArray(s?.data) ? s.data : []
+                    }));
+                    
+                    // If no series at all, create empty placeholders for 4 parameters
+                    if (options.series.length === 0) {
+                        options.series = [
+                            { name: 'Temperature', data: [] },
+                            { name: 'Salinity', data: [] },
+                            { name: 'Dissolved Oxygen', data: [] },
+                            { name: 'pH', data: [] }
+                        ];
+                    }
+
+                    console.debug('About to create ApexCharts instance with options:', {
+                        chartId: chartId,
+                        seriesCount: options.series.length,
+                        height: options.chart.height,
+                        hasData: options.series[0]?.data?.length > 0
+                    });
+
+                    // CRITICAL FIX: Force render even if all series are empty (shows axes/grid)
+                    options.noData = {
+                        text: 'No water quality data available yet',
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        style: { fontSize: '14px', color: '#999' }
+                    };
+
+                    // Create the ApexCharts instance with validated options
+                    chartInstance = new ApexCharts(container, options);
+                    
+                    // Force immediate render to prevent blank chart
+                    chartInstance.render().then(() => {
+                        console.log('✅ Chart rendered successfully:', chartId, 'with', options.series[0]?.data?.length || 0, 'data points');
+                    }).catch(err => {
+                        console.error('❌ Chart render failed:', err);
+                    });
+
+                    // Store in global registries
+                    window.__waterQualityChartRegistry[chartId] = chartInstance;
+                    window.__waterQualityKnownChartId = window.__waterQualityKnownChartId || {};
+                    window.__waterQualityKnownChartId[chartId] = options.chart.id || chartId;
+                    
+                    if (!window.__waterQualityChartInstances) {
+                        window.__waterQualityChartInstances = {};
+                    }
+                    window.__waterQualityChartInstances[chartId] = chartInstance;
+                    window.__agwasuriCharts = window.__agwasuriCharts || {};
+                    window.__agwasuriCharts[chartId] = chartInstance;
+                    
+                    console.debug('Chart created:', chartId);
+
+                } catch (e) {
+                    console.error('WaterQualityChart: chart creation failed', e);
+                }
+            }
+
+            // CRITICAL: Wait for DOM to be ready AND Livewire to finish updating
+            function initChartWithTiming() {
+                // Use requestAnimationFrame to ensure layout is complete
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        console.debug('initChartWithTiming: About to create chart');
+                        createChart();
+                    }, 150); // Increased delay to ensure Livewire hydration completes
+                });
+            }
+
+            // Initial creation
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initChartWithTiming);
+            } else {
+                initChartWithTiming();
+            }
+
+            // CRITICAL FIX: Destroy chart instance on Livewire update to prevent stale instances
+            window.addEventListener('water-quality:destroy-chart', () => {
+                try {
+                    // Clean up global registry
+                    if (window.__waterQualityChartRegistry && window.__waterQualityChartRegistry[chartId]) {
+                        delete window.__waterQualityChartRegistry[chartId];
+                    }
+                    
+                    // Find and destroy ApexCharts instance
+                    const targetCid = (window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[chartId]) || chartId || ('apexcharts' + chartId);
+                    
+                    if (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') {
+                        const inst = window.ApexCharts.getChartByID(targetCid);
+                        if (inst && typeof inst.destroy === 'function') {
+                            inst.destroy();
+                            console.debug('Chart destroyed:', chartId);
+                        }
+                    }
+                    
+                    if (chartInstance && typeof chartInstance.destroy === 'function') {
+                        chartInstance.destroy();
+                        chartInstance = null;
+                    }
+                    
+                    // Clear cached chart ID mapping
+                    if (window.__waterQualityKnownChartId) {
+                        delete window.__waterQualityKnownChartId[chartId];
+                    }
+                    try {
+                        localStorage.removeItem('waterQualityKnownChartId:' + chartId);
+                    } catch (e) {}
+                    
+                    // Clear series state to force fresh initialization
+                    if (window.__waterQualitySeriesState) {
+                        delete window.__waterQualitySeriesState[chartId];
+                    }
+                    
+                    // DON'T recreate here - let Livewire hook handle it
+                    
+                } catch (e) {
+                    console.error('WaterQualityChart: destroy error', e);
+                }
+            });
+
+            // CRITICAL FIX: Listen for Livewire component updates and force chart re-render
+            // This handles user switches, date filters, and any Livewire state changes
+            if (window.Livewire && typeof Livewire.hook === 'function') {
+                // Hook into Livewire's commit phase to recreate chart after data updates
+                Livewire.hook('commit', ({ component, commit, respond }) => {
+                    // Only act on this specific component
+                    if (!component.el.querySelector('#water-quality-chart-root')) return;
+                    
+                    console.debug('Livewire commit detected, will recreate chart after render');
+                    
+                    // Schedule chart recreation after Livewire finishes DOM updates
+                    setTimeout(() => {
+                        const currentRoot = document.getElementById('water-quality-chart-root');
+                        if (currentRoot && currentRoot.getAttribute('data-chart-id') === chartId) {
+                            console.debug('Re-parsing chart config after Livewire update');
+                            // Re-read config from updated DOM attributes
+                            const freshConfig = JSON.parse(currentRoot.getAttribute('data-chart-config') || '{}');
+                            if (freshConfig && freshConfig.jsonConfig) {
+                                // Destroy old instance
+                                if (chartInstance && typeof chartInstance.destroy === 'function') {
+                                    chartInstance.destroy();
+                                    chartInstance = null;
+                                }
+                                delete window.__waterQualityChartRegistry[chartId];
+                                // Recreate with fresh data
+                                createChart();
+                            }
+                        }
+                    }, 200);
+                });
+            }
+            
+            // Listen for Livewire re-render and recreate chart after DOM updates
+            if (window.Livewire && typeof Livewire.hook === 'function') {
+                Livewire.hook('message.processed', (message, component) => {
+                    setTimeout(() => {
+                        const container = document.getElementById(chartId);
+                        if (container && !window.__waterQualityChartRegistry[chartId]) {
+                            console.debug('Recreating chart after Livewire update');
+                            createChart();
+                        }
+                    }, 150);
+                });
+                
+                Livewire.on('water-quality:destroy-chart', () => {
+                    window.dispatchEvent(new CustomEvent('water-quality:destroy-chart'));
+                });
+            }
 
             // Debug helper: dump ApexCharts instances and candidate ids
             try {
                 window.__waterQualityDumpInstances = window.__waterQualityDumpInstances || function(){
                     try {
-                        console.debug('waterChart: dumping ApexCharts instances...');
+                        // console.debug('waterChart: dumping ApexCharts instances...');
                         const candidateIds = [];
                         try { candidateIds.push(chartId); } catch(e){}
                         try { candidateIds.push('apexcharts' + chartId); } catch(e){}
@@ -106,14 +329,14 @@
                         } catch(e){}
                         const uniq = Array.from(new Set(candidateIds.filter(Boolean)));
                         if (!window.ApexCharts || typeof window.ApexCharts.getChartByID !== 'function') {
-                            console.debug('waterChart: ApexCharts.getChartByID not available', !!window.ApexCharts);
+                            // console.debug('waterChart: ApexCharts.getChartByID not available', !!window.ApexCharts);
                         }
                         uniq.forEach(id => {
                             try {
                                 const inst = (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') ? window.ApexCharts.getChartByID(id) : null;
-                                console.debug('waterChart: candidate', id, 'hasInstance', !!inst, inst && inst.w && inst.w.config && inst.w.config.chart && inst.w.config.chart.id ? inst.w.config.chart.id : null);
+                                // console.debug('waterChart: candidate', id, 'hasInstance', !!inst, inst && inst.w && inst.w.config && inst.w.config.chart && inst.w.config.chart.id ? inst.w.config.chart.id : null);
                             } catch (e) {
-                                console.debug('waterChart: getChartByID failed for', id, e);
+                                // console.debug('waterChart: getChartByID failed for', id, e);
                             }
                         });
                     } catch(e){}
@@ -229,16 +452,31 @@
 
             function trimAndUpdate(cid) {
                 try {
-                    // Ensure bounded length
-                    while (seriesState.categories.length > MAX_POINTS) seriesState.categories.shift();
-                    seriesState.series.forEach(s => { while (s.data.length > MAX_POINTS) s.data.shift(); });
-
-                    // Update chart categories to reflect trimmed state. We avoid
-                    // forcing a full updateSeries here because real-time appends
-                    // will be coalesced and flushed separately to reduce redraws.
-                    try { safeUpdateOptions(cid, { xaxis: { categories: seriesState.categories } }); } catch (e) {}
+                    if (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') {
+                        const inst = window.ApexCharts.getChartByID(cid);
+                        if (inst && inst.w && inst.w.config && inst.w.config.series) {
+                            const series = inst.w.config.series;
+                            // Guard against undefined
+                            if (!Array.isArray(series) || series.length === 0) {
+                                return;
+                            }
+                            
+                            const rebuilt = series.map((s, idx) => {
+                                const state = seriesState.series[idx];
+                                if (!state || !Array.isArray(state.data)) return s;
+                                
+                                if (state.data.length > MAX_POINTS) {
+                                    const trimmed = state.data.slice(-MAX_POINTS);
+                                    state.data = trimmed;
+                                }
+                                return { name: s.name, data: state.data };
+                            });
+                            
+                            inst.updateSeries(rebuilt, false);
+                        }
+                    }
                 } catch (e) {
-                    // ignore trim errors
+                    console.debug('trimAndUpdate error:', e);
                 }
             }
 
@@ -264,11 +502,15 @@
                     window.__waterQualityOptionsApplied[cid] = window.__waterQualityOptionsApplied[cid] || {};
                     const normalizedOpts = opts || {};
 
-                    // Ensure immutable visual defaults are always present unless explicitly forced off.
+                    // CRITICAL FIX: Ensure immutable visual defaults INCLUDING HEIGHT are always present
                     const immutableDefaults = {
+                        chart: { height: 540, width: '100%', maintainAspectRatio: false },  // Prevent height collapse
                         stroke: { show: true, curve: 'smooth', width: 2, lineCap: 'round' },
                         markers: { size: 0 },
-                        xaxis: { type: 'datetime' }
+                        xaxis: { type: 'datetime' },
+                        dataLabels: { enabled: false },
+                        // Ensure vendor annotations/labels are cleared so only legend/tooltips remain
+                        annotations: { yaxis: [], points: [], xaxis: [] }
                     };
 
                     // Shallow merge - caller opts override defaults where specified
@@ -279,7 +521,7 @@
                     window.ApexCharts.exec(cid, 'updateOptions', finalOpts, false, true);
                     window.__waterQualityOptionsApplied[cid][sig] = true;
                 } catch (e) {
-                    try { console.debug('waterChart: safeUpdateOptions failed', e); } catch (_) {}
+                    try { /* console.debug('waterChart: safeUpdateOptions failed', e); */ } catch (_) {}
                 }
             }
 
@@ -317,7 +559,7 @@
                                         ? state.series.map(s => ({ name: s.name, data: s.data.map(p => ({ x: p.x, y: p.y })) }))
                                         : state.series.map(s => ({ name: s.name, data: s.data.map(p => p.y) }));
                                     window.ApexCharts.exec(cid, 'updateSeries', rebuilt);
-                                    console.info('WaterQualityChart: fallback forced updateSeries for', cid, timeKey);
+                                    // console.info('WaterQualityChart: fallback forced updateSeries for', cid, timeKey);
                                 } catch (e) {
                                     console.error('WaterQualityChart: fallback updateSeries failed', e);
                                 }
@@ -389,7 +631,7 @@
                             } catch (err) {
                                 // ignore storage problems
                             }
-                            console.info('WaterQualityChart: discovered chart DOM id', found.id);
+                            // console.info('WaterQualityChart: discovered chart DOM id', found.id);
                             return;
                         }
 
@@ -397,7 +639,7 @@
                         if (attempts < MAX_ATTEMPTS) {
                             setTimeout(tryDiscover, INTERVAL_MS);
                         } else {
-                            console.debug('WaterQualityChart: discovery attempts exhausted for', chartId);
+                            // console.debug('WaterQualityChart: discovery attempts exhausted for', chartId);
                         }
                     }
 
@@ -424,7 +666,7 @@
                     coalesce.timer = setTimeout(() => {
                         try {
                             const bufLen = (coalesce.buf || []).length;
-                            console.debug('WaterQualityChart: coalesce flush running', { chartId, bufLen });
+                            // console.debug('WaterQualityChart: coalesce flush running', { chartId, bufLen });
                             if (!bufLen) {
                                 // nothing to do
                                 coalesce.timer = null;
@@ -465,7 +707,7 @@
 
                                 try {
                                     window.ApexCharts.exec(cid, 'appendData', { series: appendSeries });
-                                    console.debug('WaterQualityChart: coalesce appendData applied', { chartId: cid, bufLen });
+                                    // console.debug('WaterQualityChart: coalesce appendData applied', { chartId: cid, bufLen });
                                     // Force an immediate redraw to ensure the appended points render
                                     try { safeUpdateOptions(cid, {}); } catch (e) {}
                                     coalesce.buf = [];
@@ -512,7 +754,7 @@
                     }
                 } catch (e) {
                     // ignore pruning errors
-                    try { console.debug('waterChart: pruneAppendedMap error', e); } catch (_) {}
+                    try { /* console.debug('waterChart: pruneAppendedMap error', e); */ } catch (_) {}
                 }
             }
 
@@ -537,6 +779,63 @@
                             }
                         }
                     );
+                    // Force-disable any data labels or vendor annotations that may have
+                    // been added by bundled chart code so only legend/tooltips remain.
+                    try {
+                        safeUpdateOptions(cid, { dataLabels: { enabled: false }, annotations: { yaxis: [], points: [], xaxis: [] } }, true);
+                    } catch (e) {}
+                    // DOM-cleanup fallback: remove any leftover annotation/datalabel nodes
+                    try {
+                        function removeAnnotationNodes(targetCid){
+                            try {
+                                const container = document.getElementById(targetCid);
+                                if (!container) return;
+                                // Remove common ApexCharts annotation/datalabel groups
+                                const selectors = [
+                                    '.apexcharts-annotations',
+                                    '.apexcharts-annotations-group',
+                                    '.apexcharts-datalabels',
+                                    '.apexcharts-datalabel',
+                                    '.apexcharts-annotation',
+                                    '.apexcharts-series-annotations',
+                                    '.apexcharts-point-annotations',
+                                    '.apexcharts-point-annotation',
+                                    '.apexcharts-point-annotation-label',
+                                    '.apexcharts-point-annotations-custom-svg',
+                                    '.apexcharts-xaxis-annotations',
+                                    '.apexcharts-yaxis-annotations',
+                                    '.apexcharts-xaxis-annotation-label',
+                                    '.apexcharts-yaxis-annotation-label',
+                                ];
+
+                                // Remove explicit selectors
+                                selectors.forEach(sel => {
+                                    try {
+                                        const nodes = Array.from(container.querySelectorAll(sel));
+                                        nodes.forEach(n => { if (n && n.parentNode) n.parentNode.removeChild(n); });
+                                    } catch(e){}
+                                });
+
+                                // Broad fallback: remove any child nodes that have class names
+                                // containing 'annotation' or 'datalabel' (catch vendor naming variations)
+                                try {
+                                    const broad = Array.from(container.querySelectorAll('*')).filter(el => {
+                                        try {
+                                            const cls = el.className || '';
+                                            if (typeof cls !== 'string') return false;
+                                            const lower = cls.toLowerCase();
+                                            return lower.indexOf('annotation') !== -1 || lower.indexOf('datalabel') !== -1 || lower.indexOf('point-annotation') !== -1;
+                                        } catch(e){ return false; }
+                                    });
+                                    broad.forEach(n => { try { if (n && n.parentNode) n.parentNode.removeChild(n); } catch(e){} });
+                                } catch(e){}
+                            } catch(e){}
+                        }
+                        try { removeAnnotationNodes(cid); } catch(e){}
+                        // Try again shortly after in case vendor re-inserts nodes
+                        setTimeout(() => { try { removeAnnotationNodes(cid); } catch(e){} }, 500);
+                        setTimeout(() => { try { removeAnnotationNodes(cid); } catch(e){} }, 1200);
+                    } catch (e) {}
                     try {
                         // If our client state uses numeric timestamps, ensure chart xaxis is datetime
                         const state = window.__waterQualitySeriesState && window.__waterQualitySeriesState[chartId];
@@ -578,11 +877,11 @@
                                                                     originalExec(cid, 'updateSeries', rebuilt);
                                                                 }
                                                             } catch (innerExecErr) {
-                                                                console.debug('WaterQualityChart: exec-wrapper originalExec failed', innerExecErr);
+                                                                // console.debug('WaterQualityChart: exec-wrapper originalExec failed', innerExecErr);
                                                             }
                                                     window.__waterQualityLastForcedAt[chartId] = now;
                                                 } catch (updErr) {
-                                                    console.debug('WaterQualityChart: exec-wrapper updateSeries failed', updErr);
+                                                    // console.debug('WaterQualityChart: exec-wrapper updateSeries failed', updErr);
                                                 }
                                             }
                                         }
@@ -611,7 +910,7 @@
                         window.__waterQualityExecWrapped = true;
                     }
                 } catch (wrapErr) {
-                    console.debug('WaterQualityChart: failed to wrap ApexCharts.exec', wrapErr);
+                    // console.debug('WaterQualityChart: failed to wrap ApexCharts.exec', wrapErr);
                 }
 
                 while(queue.length){
@@ -628,7 +927,7 @@
 
                 try {
                     // DEBUG: log incoming payloads to help diagnose buffer behavior
-                    try { console.debug('WaterQualityChart.appendToChart payload', payload); } catch (e) {}
+                    try { /* console.debug('WaterQualityChart.appendToChart payload', payload); */ } catch (e) {}
                     // Build series payload expected by ApexCharts.appendData or exec appendData
                     // Build series payload. Use the same x format as the initial chart labels
                     // (short time string 'HH:mm') because the chart is rendered with category labels.
@@ -637,9 +936,9 @@
                     // Use seconds resolution (HH:mm:ss) as fallback label for category charts
                     const timeLabel = pad(dt.getHours()) + ':' + pad(dt.getMinutes()) + ':' + pad(dt.getSeconds());
 
-                    // Detect whether our series state uses datetime point objects
+                    // Detect whether our series state uses datetime point objects (with null-safe access)
                     // Accept numeric timestamps or ISO strings with 'T'
-                    const isDatetimeMode = !!(seriesState.series && seriesState.series[0] && seriesState.series[0].data && seriesState.series[0].data.length && (typeof seriesState.series[0].data[0].x === 'number' || (typeof seriesState.series[0].data[0].x === 'string' && seriesState.series[0].data[0].x.indexOf('T') !== -1)));
+                    const isDatetimeMode = !!(seriesState?.series?.[0]?.data?.length && (typeof seriesState.series[0].data[0]?.x === 'number' || (typeof seriesState.series[0].data[0]?.x === 'string' && seriesState.series[0].data[0].x.indexOf('T') !== -1)));
                     const parsedTs = Date.parse(payload.recorded_at);
                     const numericTs = Number.isFinite(parsedTs) ? parsedTs : payload.recorded_at;
                     const timeKey = isDatetimeMode ? numericTs : timeLabel;
@@ -667,7 +966,7 @@
                             // Read existing category labels from the chart DOM (last resort)
                             let existingCategories = [];
                                 } catch (e) {
-                                    console.debug('WaterQualityChart: forced redraw updateOptions failed', e);
+                                    // console.debug('WaterQualityChart: forced redraw updateOptions failed', e);
                                 }
 
                                 // Attempt direct instance updateSeries (preferred over ApexCharts.exec)
@@ -707,11 +1006,11 @@
                                                 console.log('✅ Direct instance updateSeries called', { chartId: inst.w && inst.w.config && inst.w.config.chart && inst.w.config.chart.id });
                                             }
                                         } catch(e) {
-                                            console.debug('waterChart: direct instance.updateSeries threw', e);
-                                            try { if (typeof inst.render === 'function') { inst.render(); console.info('waterChart: direct instance.render() called as fallback'); } } catch(e) {}
+                                            // console.debug('waterChart: direct instance.updateSeries threw', e);
+                                            try { if (typeof inst.render === 'function') { inst.render(); /* console.info('waterChart: direct instance.render() called as fallback'); */ } } catch(e) {}
                                         }
                                     } else {
-                                        console.debug('waterChart: no ApexCharts instance found for direct update', { tried: targetCid, known: window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[cidAttr] });
+                                        // console.debug('waterChart: no ApexCharts instance found for direct update', { tried: targetCid, known: window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[cidAttr] });
                                     }
                             try {
                                 const labelNodes = Array.from(document.querySelectorAll('#' + chartId + ' .apexcharts-xaxis-texts-g text'));
@@ -752,15 +1051,15 @@
                                             window.__waterQualityKnownChartId[chartId] = cid;
                                             try { localStorage.setItem('waterQualityKnownChartId:' + chartId, cid); } catch (e) {}
 
-                                            console.info('ApexCharts.exec appendData succeeded for', cid, { timeKey, isDatetimeMode, numericTs: typeof numericTs !== 'undefined' ? numericTs : null });
+                                            // console.info('ApexCharts.exec appendData succeeded for', cid, { timeKey, isDatetimeMode, numericTs: typeof numericTs !== 'undefined' ? numericTs : null });
 
                                             try { appendedSet.add(timeKey); } catch (err) {}
                                             try {
                                                 if (!payload.__replay) {
-                                                    try { console.debug('WaterQualityChart: buffering payload for', chartId, timeLabel); } catch (e) {}
+                                                    try { /* console.debug('WaterQualityChart: buffering payload for', chartId, timeLabel); */ } catch (e) {}
                                                     appendBuffer.push(payload);
                                                     if (appendBuffer.length > MAX_BUFFER) appendBuffer.shift();
-                                                    try { console.debug('WaterQualityChart: buffer length', chartId, appendBuffer.length); } catch (e) {}
+                                                    try { /* console.debug('WaterQualityChart: buffer length', chartId, appendBuffer.length); */ } catch (e) {}
 
                                                     // Update client-owned series state and trim if needed
                                                     try {
@@ -940,7 +1239,7 @@
                                     for (const cid of candidates) {
                                         try {
                                             window.ApexCharts.exec(cid, 'appendData', { series });
-                                            console.info('ApexCharts.exec appendData succeeded for', cid, { timeKey, isDatetimeMode, numericTs: typeof numericTs !== 'undefined' ? numericTs : null });
+                                            // console.info('ApexCharts.exec appendData succeeded for', cid, { timeKey, isDatetimeMode, numericTs: typeof numericTs !== 'undefined' ? numericTs : null });
 
                                             // Persist discovered mapping for faster targeting next time
                                             try { window.__waterQualityKnownChartId[chartId] = cid; try { localStorage.setItem('waterQualityKnownChartId:' + chartId, cid); } catch (e) {} } catch (err) {}
@@ -1025,7 +1324,7 @@
                                                         const comp = window.Livewire.find(lwId);
                                                         if (comp && typeof comp.refresh === 'function') {
                                                             comp.refresh();
-                                                            console.info('WaterQualityChart: requested Livewire refresh for', lwId);
+                                                            // console.info('WaterQualityChart: requested Livewire refresh for', lwId);
                                                             window.__waterQualityFailureCount[chartId] = 0;
                                                             return;
                                                         }
@@ -1080,7 +1379,7 @@
                                     }
                                 } catch (e) {}
 
-                                console.info('WaterQualityChart: fallback updateSeries/updateOptions applied for', fallbackCid);
+                                // console.info('WaterQualityChart: fallback updateSeries/updateOptions applied for', fallbackCid);
                                 return;
                             } catch (e) {
                                 // ignore fallback errors and continue
@@ -1161,7 +1460,12 @@
 
                 const located = locateChartInstanceByLogicalId(logicalId);
                 if (!located) {
-                    console.error('waterChart: Chart not found for logical id:', logicalId);
+                    // Chart instance not found - this can happen legitimately during destroy/recreate cycles
+                    // Only log error if chart container exists (otherwise it's expected during teardown)
+                    const container = document.getElementById(logicalId);
+                    if (container) {
+                        console.warn('waterChart: Chart instance not ready for logical id:', logicalId, '- will retry on next event');
+                    }
                     return;
                 }
 
@@ -1253,6 +1557,79 @@
     </script>
 
             <!-- debug/test UI removed -->
+
+            <script>
+                // Auto-adjust ApexCharts height with debouncing (prevents infinite loops)
+                (function(){
+                    const root = document.getElementById('water-quality-chart-root');
+                    if (!root) return;
+                    const chartId = root.getAttribute('data-chart-id');
+                    
+                    // CRITICAL: Use global registry to prevent multiple instances running simultaneously
+                    window.__waterQualityHeightAdjuster = window.__waterQualityHeightAdjuster || {};
+                    
+                    // If already initialized for this chart, skip
+                    if (window.__waterQualityHeightAdjuster[chartId]) {
+                        console.debug('Height adjuster already running for:', chartId);
+                        return;
+                    }
+                    
+                    let adjusting = false;
+                    let lastAdjustTime = 0;
+                    const ADJUST_INTERVAL = 2000;
+                    
+                    function computeAndApply(){
+                        const now = Date.now();
+                        if (adjusting || (now - lastAdjustTime < ADJUST_INTERVAL)) return;
+                        
+                        // Check if root still exists in DOM (prevents execution after component unmount)
+                        if (!document.getElementById('water-quality-chart-root')) {
+                            console.debug('Root gone, stopping height adjuster');
+                            return;
+                        }
+                        
+                        adjusting = true;
+                        lastAdjustTime = now;
+                        
+                        try {
+                            const targetCid = (window.__waterQualityKnownChartId && window.__waterQualityKnownChartId[chartId]) || chartId;
+                            
+                            if (window.ApexCharts && typeof window.ApexCharts.getChartByID === 'function') {
+                                const instance = window.ApexCharts.getChartByID(targetCid);
+                                if (instance) {
+                                    const parent = root.parentElement || root;
+                                    const avail = parent.clientHeight || root.clientHeight || 420;
+                                    const offset = 32;
+                                    let target = Math.round(avail - offset);
+                                    if (target < 360) target = 360;
+                                    if (target > 480) target = 480;
+                                    instance.updateOptions({ chart: { height: target } }, false, false);
+                                }
+                            }
+                        } catch (e) { 
+                            console.debug('computeAndApply error:', e);
+                        } finally {
+                            adjusting = false;
+                        }
+                    }
+                    
+                    const debounce = (fn, t=200) => { let id; return () => { clearTimeout(id); id = setTimeout(fn, t); }; };
+                    const debouncedCompute = debounce(computeAndApply, 250);
+                    
+                    // Store listener reference for cleanup
+                    window.__waterQualityHeightAdjuster[chartId] = {
+                        active: true,
+                        listener: debouncedCompute
+                    };
+                    
+                    window.addEventListener('resize', debouncedCompute);
+                    
+                    // Run only if DOM is ready (no DOMContentLoaded listener needed - inline script runs after DOM)
+                    if (document.readyState !== 'loading') {
+                        setTimeout(computeAndApply, 100);
+                    }
+                })();
+            </script>
 
             <!-- Screen-reader live region for reset announcements -->
             <span id="chart-reset-live" class="sr-only" aria-live="polite" aria-atomic="true"></span>

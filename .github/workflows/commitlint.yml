@@ -1,15 +1,50 @@
 name: Commit lint
-on: [pull_request]
+on:
+  pull_request:
+
 jobs:
   commitlint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+
       - name: Install dependencies
         run: npm ci
-      - name: Run commitlint
-        run: npx commitlint --from=origin/main --to=HEAD
+
+      - name: Fetch PR refs (base + head)
+        run: |
+          git fetch --no-tags --prune origin \
+            +refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }} \
+            +refs/pull/${{ github.event.pull_request.number }}/head:refs/remotes/origin/pr/${{ github.event.pull_request.number }}
+
+      - name: Compute merge-base
+        id: mb
+        run: |
+          # Try to compute the merge base between the target branch and the PR head.
+          MB=$(git merge-base origin/${{ github.event.pull_request.base.ref }} refs/remotes/origin/pr/${{ github.event.pull_request.number }} || true)
+          if [ -z "$MB" ]; then
+            # Fallback: use the tip of the base branch if merge-base could not be computed
+            echo "merge-base not found; falling back to origin/${{ github.event.pull_request.base.ref }}"
+            MB=$(git rev-parse origin/${{ github.event.pull_request.base.ref }})
+          fi
+          echo "mb=$MB" >> "$GITHUB_OUTPUT"
+
+      - name: Debug git range
+        run: |
+          echo "merge-base: ${{ steps.mb.outputs.mb }}"
+          echo "PR head sha: $GITHUB_SHA"
+          echo "Showing commits between merge-base and head (first 10):"
+          git --no-pager log --oneline ${{ steps.mb.outputs.mb }}..$GITHUB_SHA | sed -n '1,10p' || true
+
+      - name: Run commitlint (commits in PR only)
+        run: |
+          echo "Running commitlint from ${{ steps.mb.outputs.mb }} to $GITHUB_SHA"
+          npx commitlint --from ${{ steps.mb.outputs.mb }} --to $GITHUB_SHA

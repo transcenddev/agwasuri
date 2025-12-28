@@ -1,15 +1,77 @@
 <x-card>
+    {{-- Stat Cards Row --}}
+    @isset($totalUsers)
+        <div class="px-6 pt-6 pb-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {{-- Total Users --}}
+                <div class="bg-gradient-to-br from-cvsu-50 to-white dark:from-cvsu-900/20 dark:to-gray-800 rounded-lg p-4 border border-cvsu-100 dark:border-cvsu-800">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-cvsu-100 dark:bg-cvsu-800 rounded-lg">
+                            <svg class="h-6 w-6 text-cvsu-600 dark:text-cvsu-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalUsers }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Total Users</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Farmers --}}
+                <div class="bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-gray-800 rounded-lg p-4 border border-green-100 dark:border-green-800">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-green-100 dark:bg-green-800 rounded-lg">
+                            <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $regularCount }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Farmers</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Admins --}}
+                <div class="bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-gray-800 rounded-lg p-4 border border-purple-100 dark:border-purple-800">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
+                            <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $adminCount }}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Admins</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Active Today --}}
+                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
+                            <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white">--</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Active Today</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endisset
+
     <x-slot name="header">
         <x-card-header>
             <x-slot name="title">
                 <div class="flex-1">
                     <h1 class="text-lg font-semibold text-gray-900">Account Management</h1>
                     <p class="text-sm text-gray-500 mt-1">Manage accounts, roles, and API keys</p>
-                    @isset($totalUsers)
-                        <div class="text-xs text-gray-500 mt-2">
-                            {{ $totalUsers }} users · {{ $adminCount }} {{ $adminCount == 1 ? 'admin' : 'admins' }} · {{ $regularCount }} {{ $regularCount == 1 ? 'farmer' : 'farmers' }}
-                        </div>
-                    @endisset
                 </div>
             </x-slot>
 
@@ -253,20 +315,33 @@
                             </td>
                             <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-2 text-sm font-medium text-center">
                                 {{-- Primary inline actions (desktop) --}}
-                                <div class="hidden desktop-actions items-center space-x-2">
-                                    <button wire:click="showDetails({{ $user->user_id }})" title="View details" aria-label="View details" class="action-icon text-cvsu-600 hover:text-cvsu-700">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        <span class="sr-only">Details</span>
+                                <div class="hidden desktop-actions items-center justify-center space-x-1">
+                                    <button wire:click="showDetails({{ $user->user_id }})" 
+                                        title="View details" 
+                                        aria-label="View details for {{ $user->first_name }} {{ $user->last_name }}" 
+                                        class="inline-flex items-center justify-center p-2 rounded-md text-cvsu-600 hover:text-cvsu-700 hover:bg-cvsu-50 dark:hover:bg-cvsu-900/20 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
                                     </button>
 
-                                    <button wire:click="editUser({{ $user->user_id }})" title="Edit user" aria-label="Edit user" class="action-icon text-gray-600 hover:text-gray-800">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/></svg>
-                                        <span class="sr-only">Edit</span>
+                                    <button wire:click="editUser({{ $user->user_id }})" 
+                                        title="Edit user" 
+                                        aria-label="Edit {{ $user->first_name }} {{ $user->last_name }}" 
+                                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/>
+                                        </svg>
                                     </button>
 
-                                    <button wire:click="confirmDelete({{ $user->user_id }})" title="Delete user" aria-label="Delete user" class="action-icon text-red-600 hover:text-red-700">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                        <span class="sr-only">Delete</span>
+                                    <button wire:click="confirmDelete({{ $user->user_id }})" 
+                                        title="Delete user" 
+                                        aria-label="Delete {{ $user->first_name }} {{ $user->last_name }}" 
+                                        class="inline-flex items-center justify-center p-2 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
                                     </button>
                                 </div>
 

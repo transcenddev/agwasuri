@@ -326,6 +326,163 @@ class ClassifyFish extends Component
         }
     }
 
+    /**
+     * Resolve a species image filename from a species name returned by the model.
+     * Returns the filename (e.g. 'tilapia.png') or null when not found.
+     */
+    public function getSpeciesImage(string $speciesName): ?string
+    {
+        // Discover available species images
+        $speciesFiles = glob(public_path('assets/species/*.{png,jpg,jpeg,svg,gif}', GLOB_BRACE)) ?: [];
+        $speciesMap = [];
+        foreach ($speciesFiles as $file) {
+            $filename = basename($file);
+            $base = pathinfo($file, PATHINFO_FILENAME);
+            $key = strtolower(preg_replace('/[^a-z0-9]+/', '', $base));
+            $speciesMap[$key] = $filename;
+        }
+
+        // Alias map for common synonyms (map normalized keys to actual filenames)
+        $aliasMap = [
+            'tilapia' => $speciesMap['tilapia'] ?? 'tilapia.png',
+            'aquaticchicken' => $speciesMap['tilapia'] ?? 'tilapia.png',
+            'oreochromisniloticus' => $speciesMap['tilapia'] ?? 'tilapia.png',
+            'bangus' => $speciesMap['bangus'] ?? 'bangus.png',
+            'milkfish' => $speciesMap['bangus'] ?? 'bangus.png',
+            'sugpo' => $speciesMap['shrimp'] ?? 'shrimp.png',
+            'prawn' => $speciesMap['shrimp'] ?? 'shrimp.png',
+            'shrimp' => $speciesMap['shrimp'] ?? 'shrimp.png',
+            'alimango' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
+            'mudcrab' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
+            'catfish' => $speciesMap['catfish'] ?? 'catfish.png',
+            'pangasius' => $speciesMap['catfish'] ?? 'catfish.png',
+        ];
+
+        // Helper: normalize (remove non-alnum and lowercase)
+        $normalize = function ($s) {
+            return strtolower(preg_replace('/[^a-z0-9]+/', '', trim($s)));
+        };
+
+        // Primary name: text before parentheses
+        $parts = explode('(', $speciesName);
+        $primary = $normalize($parts[0] ?? $speciesName);
+        $fullNormalized = $normalize($speciesName);
+
+        // Strategy 1: alias map by primary name
+        if (isset($aliasMap[$primary])) {
+            return $aliasMap[$primary];
+        }
+
+        // Strategy 2: alias map by full normalized
+        if (isset($aliasMap[$fullNormalized])) {
+            return $aliasMap[$fullNormalized];
+        }
+
+        // Strategy 3: direct match to discovered filenames
+        if (isset($speciesMap[$primary])) {
+            return $speciesMap[$primary];
+        }
+
+        // Strategy 4: substring matching
+        foreach ($speciesMap as $k => $filename) {
+            if (strpos($primary, $k) !== false || strpos($k, $primary) !== false) {
+                return $filename;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get water quality status with bilingual badge and color
+     */
+    public function getWaterQualityStatus(string $parameter, float $value): array
+    {
+        $status = ['badge' => 'OKAY', 'badgeTl' => 'OKAY', 'color' => 'gray', 'emoji' => '⚪'];
+
+        switch ($parameter) {
+            case 'temperature':
+                if ($value >= 28 && $value <= 32) {
+                    $status = ['badge' => 'GOOD', 'badgeTl' => 'MABUTI', 'color' => 'green', 'emoji' => '🟢'];
+                } elseif (($value >= 25 && $value < 28) || ($value > 32 && $value <= 35)) {
+                    $status = ['badge' => 'MODERATE', 'badgeTl' => 'KATAMTAMAN', 'color' => 'yellow', 'emoji' => '🟡'];
+                } else {
+                    $status = ['badge' => 'POOR', 'badgeTl' => 'HINDI MAGANDA', 'color' => 'red', 'emoji' => '🔴'];
+                }
+                break;
+
+            case 'salinity':
+                if ($value >= 15 && $value <= 25) {
+                    $status = ['badge' => 'GOOD', 'badgeTl' => 'MABUTI', 'color' => 'green', 'emoji' => '🟢'];
+                } elseif (($value >= 10 && $value < 15) || ($value > 25 && $value <= 30)) {
+                    $status = ['badge' => 'MODERATE', 'badgeTl' => 'KATAMTAMAN', 'color' => 'yellow', 'emoji' => '🟡'];
+                } else {
+                    $status = ['badge' => 'POOR', 'badgeTl' => 'HINDI MAGANDA', 'color' => 'red', 'emoji' => '🔴'];
+                }
+                break;
+
+            case 'dissolved_oxygen':
+                if ($value > 5) {
+                    $status = ['badge' => 'GOOD', 'badgeTl' => 'MABUTI', 'color' => 'green', 'emoji' => '🟢'];
+                } elseif ($value >= 3 && $value <= 5) {
+                    $status = ['badge' => 'MODERATE', 'badgeTl' => 'KATAMTAMAN', 'color' => 'yellow', 'emoji' => '🟡'];
+                } else {
+                    $status = ['badge' => 'LOW', 'badgeTl' => 'MABABA', 'color' => 'red', 'emoji' => '🔴'];
+                }
+                break;
+
+            case 'ph_level':
+                if ($value >= 7 && $value <= 8.5) {
+                    $status = ['badge' => 'GOOD', 'badgeTl' => 'MABUTI', 'color' => 'green', 'emoji' => '🟢'];
+                } elseif (($value >= 6.5 && $value < 7) || ($value > 8.5 && $value <= 9)) {
+                    $status = ['badge' => 'MODERATE', 'badgeTl' => 'KATAMTAMAN', 'color' => 'yellow', 'emoji' => '🟡'];
+                } else {
+                    $status = ['badge' => 'POOR', 'badgeTl' => 'HINDI MAGANDA', 'color' => 'red', 'emoji' => '🔴'];
+                }
+                break;
+        }
+
+        return $status;
+    }
+
+    /**
+     * Get confidence level description
+     */
+    public function getConfidenceLevel(float $percentage): array
+    {
+        if ($percentage >= 80) {
+            return [
+                'text' => 'HIGH CONFIDENCE',
+                'textTl' => 'MATAAS ANG CONFIDENCE',
+                'color' => 'green',
+                'emoji' => '🟢'
+            ];
+        } elseif ($percentage >= 60) {
+            return [
+                'text' => 'MODERATE CONFIDENCE',
+                'textTl' => 'KATAMTAMANG CONFIDENCE',
+                'color' => 'yellow',
+                'emoji' => '🟡'
+            ];
+        } else {
+            return [
+                'text' => 'LOW CONFIDENCE',
+                'textTl' => 'MABABANG CONFIDENCE',
+                'color' => 'red',
+                'emoji' => '🔴'
+            ];
+        }
+    }
+
+    /**
+     * Reset prediction to show empty state
+     */
+    public function resetPrediction()
+    {
+        $this->resetState();
+        Log::info('ClassifyFish: Prediction reset by user.');
+    }
+
     public function render()
     {
         return view('livewire.classify-fish', [

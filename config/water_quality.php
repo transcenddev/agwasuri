@@ -57,4 +57,22 @@ return [
         'ph' => [6.5, 8.5],
         'salinity_ppt' => [7.0, 25.0],
     ],
+    // UI status -> CSS class mapping for badges, values and row borders
+    'status_map' => [
+        'GOOD' => [
+            'badge' => 'text-green-700 bg-green-50',
+            'value' => 'text-green-700',
+            'border' => 'border-l-4 border-green-100',
+        ],
+        'BAD' => [
+            'badge' => 'text-amber-700 bg-amber-50',
+            'value' => 'text-amber-600',
+            'border' => 'border-l-4 border-amber-100',
+        ],
+        'HARMFUL' => [
+            'badge' => 'text-red-700 bg-red-50',
+            'value' => 'text-red-700 font-semibold',
+            'border' => 'border-l-4 border-red-200',
+        ],
+    ],
 ];
