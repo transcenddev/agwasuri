@@ -173,7 +173,7 @@
     } else {
         // Defensive: if Livewire isn't available yet, attempt a global hook later
         console.debug("waterQualityInit: Livewire not present at init time");
-     }
+    }
 
     // Expose helper for manual invocation/debugging
     window.waterQualityInit = function (root) {
@@ -437,6 +437,47 @@ try {
                         chartId,
                         e
                     );
+
+                    // Fallback: if update fails (e.g., ApexCharts internal resetSeries on null), destroy and recreate
+                    try {
+                        chartInstance.destroy();
+                    } catch (destroyErr) {
+                        console.debug(
+                            "waterQualityInit: destroy after update failure",
+                            destroyErr
+                        );
+                    }
+                    try {
+                        const container = document.getElementById(chartId);
+                        if (container) {
+                            if (container.querySelector(".apexcharts-canvas")) {
+                                container.innerHTML = "";
+                            }
+                            const inst = new ApexCharts(container, cfg);
+                            inst.render();
+                            window.__agwasuriCharts[chartId] = inst;
+                            if (!window.__waterQualityChartInstances) {
+                                window.__waterQualityChartInstances = {};
+                            }
+                            window.__waterQualityChartInstances[chartId] = inst;
+                            window.__waterQualityKnownChartId =
+                                window.__waterQualityKnownChartId || {};
+                            window.__waterQualityKnownChartId[chartId] =
+                                cfg.chart && cfg.chart.id
+                                    ? cfg.chart.id
+                                    : chartId;
+                            console.debug(
+                                "waterQualityInit: recreated chart after update failure",
+                                chartId
+                            );
+                        }
+                    } catch (recreateErr) {
+                        console.error(
+                            "waterQualityInit: recreate failed",
+                            chartId,
+                            recreateErr
+                        );
+                    }
                 }
                 return;
             }
