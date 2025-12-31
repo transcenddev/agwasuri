@@ -201,9 +201,27 @@
                         <input wire:model.live.debounce.300ms="filterSpecies" type="text" id="filterSpecies" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="Filter by species...">
                     </div>
 
-                   <div class="md:col-span-2 lg:col-span-3 flex justify-center">
-                       <button wire:click="resetFilters" class="rounded bg-cvsu-200 px-4 py-2 text-sm font-medium text-cvsu-700 hover:bg-cvsu-300">Reset Filters</button>
-                   </div>
+                       <div class="md:col-span-2 lg:col-span-3 flex justify-center">
+                           @if($this->anyFilterActive)
+                               <button wire:click="resetFilters" class="rounded bg-cvsu-200 px-4 py-2 text-sm font-medium text-cvsu-700 hover:bg-cvsu-300">Reset Filters</button>
+                           @endif
+
+                           {{-- DEBUG: hidden filter state for DOM inspection (remove after debugging) --}}
+                           <pre class="sr-only" id="filters-debug">{!! json_encode([
+                               'anyFilterActive' => $this->anyFilterActive,
+                               'filterName' => $this->filterName,
+                               'filterEmail' => $this->filterEmail,
+                               'filterAccountType' => $this->filterAccountType,
+                               'filterBarangay' => $this->filterBarangay,
+                               'filterMunicipality' => $this->filterMunicipality,
+                               'filterProvince' => $this->filterProvince,
+                               'filterWaterType' => $this->filterWaterType,
+                               'filterSpecies' => $this->filterSpecies,
+                               'filterFishpondName' => $this->filterFishpondName,
+                           ]) !!}</pre>
+                       </div>
+                   
+                                        
                 </div>
             </div>
         @endif
@@ -316,8 +334,9 @@
                             <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-2 text-sm font-medium text-center">
                                 {{-- Primary inline actions (desktop) --}}
                                 <div class="hidden desktop-actions items-center justify-center space-x-1">
-                                    <button wire:click="showDetails({{ $user->user_id }})" 
+                                    <button type="button" wire:click="openUserDetails({{ $user->user_id }})" 
                                         title="View details" 
+        
                                         aria-label="View details for {{ $user->first_name }} {{ $user->last_name }}" 
                                         class="inline-flex items-center justify-center p-2 rounded-md text-cvsu-600 hover:text-cvsu-700 hover:bg-cvsu-50 dark:hover:bg-cvsu-900/20 transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -346,7 +365,7 @@
                                 </div>
 
                                 {{-- Hidden per-row Livewire hooks used as a robust fallback when global Livewire.emit is not available --}}
-                                <button id="user-action-edit-{{ $user->user_id }}" wire:click="showDetails({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
+                                <button id="user-action-edit-{{ $user->user_id }}" wire:click="openUserDetails({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
                                 <button id="user-action-edit-user-{{ $user->user_id }}" wire:click="editUser({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
                                 <button id="user-action-delete-{{ $user->user_id }}" wire:click="confirmDelete({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
 
@@ -408,7 +427,7 @@
                                     </button>
                                 </div>
                                 {{-- Hidden hooks for mobile actions fallback (same ids as desktop fallback) --}}
-                                <button id="user-action-edit-{{ $user->user_id }}" wire:click="showDetails({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
+                                <button id="user-action-edit-{{ $user->user_id }}" wire:click="openUserDetails({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
                                 <button id="user-action-edit-user-{{ $user->user_id }}" wire:click="editUser({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
                                 <button id="user-action-delete-{{ $user->user_id }}" wire:click="confirmDelete({{ $user->user_id }})" type="button" class="hidden" aria-hidden="true"></button>
                             </div>
@@ -708,7 +727,19 @@
 
         {{-- Details Modal --}}
     @if($selectedUser)
-        <div x-data @keydown.escape.window="$wire.call('closeDetails')" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        @php
+            $modalId = 'user-details-' . ($selectedUser->user_id ?? '');
+            $locationParts = array_filter([
+                $selectedUser->barangay,
+                $selectedUser->municipality,
+                $selectedUser->province,
+            ], fn($v) => filled($v));
+            $locationText = $locationParts ? implode(', ', $locationParts) : 'Not set';
+            $speciesValue = is_array($selectedUser->species_cultured)
+                ? implode(', ', array_filter($selectedUser->species_cultured))
+                : (filled($selectedUser->species_cultured) ? $selectedUser->species_cultured : 'Not set');
+        @endphp
+        <div id="{{ $modalId }}" x-data @keydown.escape.window="$wire.call('closeDetails')" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="closeDetails"></div>
                 <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
@@ -720,50 +751,69 @@
                                 <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                     <div>
                                         <div class="text-xs text-gray-500">ID</div>
-                                        <div class="font-medium">{{ $selectedUser->user_id }}</div>
+                                        <div class="font-medium">{{ $selectedUser->user_id ?? 'Not set' }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Full Name</div>
-                                        <div class="font-medium">{{ $selectedUser->first_name }} {{ $selectedUser->last_name }}</div>
+                                        <div class="font-medium">{{ trim(($selectedUser->first_name ?? '') . ' ' . ($selectedUser->last_name ?? '')) ?: 'Not set' }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Email</div>
-                                        <div class="font-medium">{{ $selectedUser->email }}</div>
+                                        <div class="font-medium">{{ $selectedUser->email ?? 'Not set' }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Account Type</div>
-                                        <div class="font-medium">{{ $selectedUser->account_type }}</div>
+                                        <div class="font-medium">{{ $selectedUser->account_type ?? 'Not set' }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Fishpond Name</div>
-                                        <div class="font-medium">{{ $selectedUser->fishpond_name }}</div>
+                                        <div class="font-medium">{{ $selectedUser->fishpond_name ?? 'Not set' }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Location</div>
-                                        <div class="font-medium">{{ $selectedUser->barangay }} {{ $selectedUser->municipality ? ', ' . $selectedUser->municipality : '' }}{{ $selectedUser->province ? ', ' . $selectedUser->province : '' }}</div>
+                                        <div class="font-medium">{{ $locationText }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Fishpond Area</div>
-                                        <div class="font-medium">{{ $selectedUser->total_fishpond_area }}</div>
+                                        <div class="font-medium">{{ isset($selectedUser->total_fishpond_area) ? $selectedUser->total_fishpond_area : 'Not set' }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Species Cultured</div>
-                                        <div class="font-medium">{{ is_array($selectedUser->species_cultured) ? implode(', ', $selectedUser->species_cultured) : $selectedUser->species_cultured }}</div>
+                                        <div class="font-medium">{{ $speciesValue }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Water Type</div>
-                                        <div class="font-medium">{{ $selectedUser->water_type }}</div>
+                                        <div class="font-medium">{{ $selectedUser->water_type ?? 'Not set' }}</div>
                                     </div>
-                                    <div class="sm:col-span-2">
-                                        <div class="text-xs text-gray-500">API Key</div>
-                                        <div class="flex items-center space-x-2">
-                                            <div id="api-key-text" class="font-mono text-sm">{{ $selectedUser->api_key ? '********' : '' }}</div>
+                                     <div class="sm:col-span-2">
+                                         <div class="text-xs text-gray-500">API Key</div>
+                                         <div
+                                            class="flex items-center space-x-2"
+                                            x-data="{
+                                                key: {{ json_encode($selectedUser->api_key ?? '') }},
+                                                masked: true,
+                                                get displayKey(){ return this.key ? (this.masked ? '********' : this.key) : 'Not set'; },
+                                                toggle(){ if(!this.key) return; this.masked = !this.masked; },
+                                                async copy(){
+                                                    if(!this.key) return;
+                                                    const val = this.key;
+                                                    try { await navigator.clipboard.writeText(val); this.copied = true; setTimeout(()=> this.copied=false, 1500); }
+                                                    catch(e){
+                                                        const ta = document.createElement('textarea');
+                                                        ta.value = val; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+                                                        this.copied = true; setTimeout(()=> this.copied=false, 1500);
+                                                    }
+                                                },
+                                                copied:false,
+                                            }"
+                                         >
+                                            <div class="font-mono text-sm" x-text="displayKey"></div>
                                             @if($selectedUser->api_key)
-                                                <button type="button" id="reveal-api" class="text-sm text-cvsu-600 hover:underline">Reveal</button>
-                                                <button type="button" id="copy-api" class="text-sm text-gray-700">Copy</button>
+                                                <button type="button" class="text-sm text-cvsu-600 hover:underline" @click="toggle" x-text="masked ? 'Reveal' : 'Hide'"></button>
+                                                <button type="button" class="text-sm text-gray-700" @click="copy" x-text="copied ? 'Copied' : 'Copy'"></button>
                                             @endif
-                                        </div>
-                                    </div>
+                                         </div>
+                                     </div>
                                 </div>
                             </div>
                         </div>
@@ -775,35 +825,8 @@
             </div>
         </div>
 
-        <script>
-        document.addEventListener('alpine:init', () => {});
-        // Simple copy/reveal handlers for modal (only when modal exists)
-        (function(){
-            const reveal = document.getElementById('reveal-api');
-            const copyBtn = document.getElementById('copy-api');
-            const textEl = document.getElementById('api-key-text');
-            if (reveal && textEl) {
-                reveal.addEventListener('click', function(){
-                    textEl.textContent = '{{ $selectedUser->api_key }}';
-                    this.style.display = 'none';
-                });
-            }
-            if (copyBtn && textEl) {
-                copyBtn.addEventListener('click', function(){
-                    const text = textEl.textContent;
-                    navigator.clipboard?.writeText(text).then(()=>{
-                        this.textContent = 'Copied';
-                        setTimeout(()=> this.textContent = 'Copy', 1500);
-                    }).catch(()=>{
-                        // fallback
-                        const ta = document.createElement('textarea');
-                        ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
-                    });
-                });
-            }
-        })();
-        </script>
     @endif
+
 
     </div>
 </x-card>

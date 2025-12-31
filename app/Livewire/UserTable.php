@@ -10,6 +10,7 @@ use Illuminate\Database\QueryException;
 use Livewire\Component;
 use Livewire\WithPagination; // Make sure this is used
 use PDOException;
+use Livewire\Attributes\Computed;
 
 class UserTable extends Component
 {
@@ -41,6 +42,20 @@ class UserTable extends Component
     public $filterWaterType = '';
     public $filterSpecies = '';
     public $filterFishpondName = ''; // Added: Filter for Fishpond Name
+
+     // Computed property: true if any filter is active
+    public function getAnyFilterActiveProperty(): bool
+    {
+        return !empty($this->filterName)
+            || !empty($this->filterEmail)
+            || !empty($this->filterAccountType)
+            || !empty($this->filterBarangay)
+            || !empty($this->filterMunicipality)
+            || !empty($this->filterProvince)
+            || !empty($this->filterWaterType)
+            || !empty($this->filterSpecies)
+            || !empty($this->filterFishpondName);
+    }
 
     protected $listeners = [
         'userSaved' => 'handleUserSaved',
@@ -155,9 +170,15 @@ class UserTable extends Component
     }
 
     // Show details modal for a specific user
-    public function showDetails($userId)
+    public function openUserDetails($userId): void
     {
         $this->selectedUser = User::find($userId);
+    }
+
+    // Backward compatibility for existing wire:click handlers
+    public function showDetails($userId): void
+    {
+        $this->openUserDetails($userId);
     }
 
     // Close details modal
