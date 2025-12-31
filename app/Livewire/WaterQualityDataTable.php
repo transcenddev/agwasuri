@@ -131,7 +131,10 @@ class WaterQualityDataTable extends Component
             AVG(ph_level) as avg_ph
         ')->first();
 
-        $water_quality_data = $query->latest('recorded_at')
+        // Deterministic ordering to match dashboard preview: newest by recorded_at, then by id
+        $water_quality_data = $query
+            ->orderByDesc('recorded_at')
+            ->orderByDesc('id')
             ->paginate(perPage: $this->paginate_num);
 
         // Annotate each row with a computed status using the shared classifier.

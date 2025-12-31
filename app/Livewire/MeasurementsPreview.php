@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\WaterQualityData;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -28,7 +29,11 @@ class MeasurementsPreview extends Component
 
     public function mount($userId = null): void
     {
-        $this->userId = $userId ?? auth()->user()->user_id ?? null;
+        // Align default user selection with historical table: prefer explicit param, then session-selected, then auth user
+        $this->userId = $userId
+            ?? session('selected_user')
+            ?? optional(Auth::user())->user_id
+            ?? null;
     }
 
     public function render()
@@ -38,7 +43,12 @@ class MeasurementsPreview extends Component
             $query->where('user_id', $this->userId);
         }
 
-        $items = $query->orderBy('recorded_at', 'desc')->limit(5)->get();
+        // Match ordering with historical page: latest by recorded_at, tie-break by id
+        $items = $query
+            ->orderByDesc('recorded_at')
+            ->orderByDesc('id')
+            ->limit(5)
+            ->get();
 
         $this->items = $items->map(function ($r) {
             $labels = $this->metricLabels($r);
