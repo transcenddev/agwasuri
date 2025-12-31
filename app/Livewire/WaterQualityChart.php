@@ -47,8 +47,15 @@ class WaterQualityChart extends Component
     #[On('date-range-updated')]
     public function updateDateRange(?string $startDate, ?string $endDate)
     {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
+        // Normalize payload from both Livewire dispatch (named params) and browser CustomEvent detail arrays
+        if (is_array($startDate) && $endDate === null) {
+            $payload = $startDate['detail'] ?? $startDate;
+            $startDate = $payload['startDate'] ?? $payload['start'] ?? $payload[0] ?? null;
+            $endDate = $payload['endDate'] ?? $payload['end'] ?? $payload[1] ?? null;
+        }
+
+        $this->startDate = $startDate ?: null;
+        $this->endDate = $endDate ?: null;
         // Dispatch chart cleanup BEFORE loadData
         $this->dispatchBrowserEvent('water-quality:destroy-chart');
         $this->loadData();

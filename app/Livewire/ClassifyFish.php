@@ -46,6 +46,13 @@ class ClassifyFish extends Component
     #[On('date-range-updated')]
     public function updateDates($startDate, $endDate)
     {
+        // Normalize payload from Livewire dispatch (named params) or browser CustomEvent detail arrays
+        if (is_array($startDate) && $endDate === null) {
+            $payload = $startDate['detail'] ?? $startDate;
+            $startDate = $payload['startDate'] ?? $payload['start'] ?? $payload[0] ?? null;
+            $endDate = $payload['endDate'] ?? $payload['end'] ?? $payload[1] ?? null;
+        }
+
         Log::info('ClassifyFish: Date range updated.', ['start' => $startDate, 'end' => $endDate]);
         $this->startDate = $startDate ?: null;
         $this->endDate = $endDate ?: null;

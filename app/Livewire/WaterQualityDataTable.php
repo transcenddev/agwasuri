@@ -42,8 +42,15 @@ class WaterQualityDataTable extends Component
     #[On('date-range-updated')]
     public function updateDateRange(?string $startDate, ?string $endDate)
     {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
+        // Handle CustomEvent detail arrays as well as named parameters
+        if (is_array($startDate) && $endDate === null) {
+            $payload = $startDate['detail'] ?? $startDate;
+            $startDate = $payload['startDate'] ?? $payload['start'] ?? $payload[0] ?? null;
+            $endDate = $payload['endDate'] ?? $payload['end'] ?? $payload[1] ?? null;
+        }
+
+        $this->startDate = $startDate ?: null;
+        $this->endDate = $endDate ?: null;
         $this->resetPage();
     }
 
