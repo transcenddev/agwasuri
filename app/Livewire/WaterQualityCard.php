@@ -316,10 +316,11 @@ class WaterQualityCard extends Component
 
         $status = $this->statusFor($metric, $value);
 
+        // Map config-based labels (best/good/bad/harm/unknown) into scoring buckets
         return match($status) {
-            'good' => 100,
-            'warning' => 80, // mid-range for warning
-            'danger' => 40,  // mid-range for danger
+            'best', 'good' => 100,
+            'bad' => 80,   // warning bucket
+            'harm' => 40,  // danger bucket
             'unknown' => 0,
             default => 0,
         };
@@ -390,34 +391,25 @@ class WaterQualityCard extends Component
             return 'unknown';
         }
 
-        switch ($metric) {
-            case 'temperature':
-                // good: 24-30, warning: 20-24 or 30-34, danger: otherwise
-                if ($value >= 24 && $value <= 30) return 'good';
-                if (($value >= 20 && $value < 24) || ($value > 30 && $value <= 34)) return 'warning';
-                return 'danger';
+        // Map friendly metric names to classifier keys used in config/water_quality.php
+        $map = [
+            'temperature' => 'temperature',
+            'salinity' => 'salinity',
+            'dissolved_oxygen' => 'dissolved_oxygen',
+            'ph_level' => 'ph',
+        ];
 
-            case 'salinity':
-                // salinity in ppt: good <=35, warning 35-50, danger >50
-                if ($value <= 35) return 'good';
-                if ($value > 35 && $value <= 50) return 'warning';
-                return 'danger';
+        $key = $map[$metric] ?? $metric;
+        $classification = classifyWaterParam($key, $value);
+        $label = strtoupper($classification['label'] ?? 'UNKNOWN');
 
-            case 'dissolved_oxygen':
-                // mg/L: good >=5, warning 3-5, danger <3
-                if ($value >= 5) return 'good';
-                if ($value >= 3 && $value < 5) return 'warning';
-                return 'danger';
-
-            case 'ph_level':
-                // pH: good 6.5-8.5, warning 6.0-6.5 or 8.5-9.0, danger otherwise
-                if ($value >= 6.5 && $value <= 8.5) return 'good';
-                if (($value >= 6.0 && $value < 6.5) || ($value > 8.5 && $value <= 9.0)) return 'warning';
-                return 'danger';
-
-            default:
-                return 'unknown';
-        }
+        return match ($label) {
+            'BEST' => 'best',
+            'GOOD' => 'good',
+            'BAD' => 'bad',
+            'HARM' => 'harm',
+            default => 'unknown',
+        };
     }
 
     public function classesForStatus(string $status): string
