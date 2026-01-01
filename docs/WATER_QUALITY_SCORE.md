@@ -22,7 +22,16 @@ For scoring, `WaterQualityCard::statusFor()` now defers to `classifyWaterParam()
 -   `harm`
 -   `unknown`
 
-This ensures the KPI card uses the same ranges as the classification tables in `WATER_QUALITY_SCALES.md` and `config/water_quality.php`.
+This ensures the KPI card uses the same ranges as the classification tables in `WATER_QUALITY_SCALES.md` and `config/water_quality.php` for pH, Temperature, Salinity, and DO.
+
+**Dissolved oxygen band nuance (non-overlapping):**
+
+-   Harm: < 3.75 mg/L
+-   Bad: 3.75–4.99 mg/L
+-   Good: 5.00–6.12 mg/L
+-   Best: ≥ 6.13 mg/L
+
+Rationale: keeping `Best` at 6.13+ avoids overlapping the `Good` band. If you prefer `Best` starting at 5.00, rework the DO bands to keep them non-overlapping.
 
 ## 3) Per-parameter numeric score mapping
 
