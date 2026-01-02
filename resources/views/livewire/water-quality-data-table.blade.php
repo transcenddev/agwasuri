@@ -73,6 +73,7 @@
                             <thead>
                                 <tr>
                                     <th class="sticky top-0 z-10 w-56 px-6 py-3 text-sm font-medium text-left text-gray-700 bg-white border-b border-gray-100">Recorded At</th>
+                                    <th class="sticky top-0 z-10 px-4 py-3 text-sm font-medium text-center text-gray-700 bg-white border-b border-gray-100">Status</th>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-temperature)">Temperature (°C)</th>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-salinity)">Salinity (ppt)</th>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</th>
@@ -113,7 +114,18 @@
                                         @endphp
 
                                         <tr class="bg-white odd:bg-white even:bg-gray-50 hover:bg-gray-100">
-                                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700 {{ $statusBorderClass }}">{{ $entry->recorded_at }} @if($culprit) <span class="ml-2 text-xs text-gray-500">{{ $worst }}: {{ ucfirst(str_replace('_',' ',$culprit)) }}</span>@endif</td>
+                                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700 {{ $statusBorderClass }}">{{ $entry->recorded_at }}</td>
+                                            <td class="px-4 py-3 text-center">
+                                                <div x-data="{ open:false }" class="inline-block relative" @mouseenter="open=true" @mouseleave="open=false" @focusin="open=true" @focusout="open=false">
+                                                    <span tabindex="0" class="inline-flex items-center {{ $pill($worst) }}">{{ $worst }}</span>
+                                                    @if($culprit)
+                                                        <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
+                                                            <div class="font-medium mb-1">Cause</div>
+                                                            <div>{{ $worst }}: {{ ucfirst(str_replace('_',' ',$culprit)) }}</div>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </td>
                                             <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->temperature !== null ? number_format($entry->temperature, 2) : '-' }} <span class="{{ $pill($tempLabel) }}">{{ $tempLabel }}</span></td>
                                             <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->salinity !== null ? number_format($entry->salinity, 2) : '-' }} <span class="{{ $pill($salLabel) }}">{{ $salLabel }}</span></td>
                                             <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->dissolved_oxygen !== null ? number_format($entry->dissolved_oxygen, 2) : '-' }} <span class="{{ $pill($doLabel) }}">{{ $doLabel }}</span></td>
@@ -157,8 +169,18 @@
                     <div class="bg-white border rounded-md p-3 hover:bg-gray-50 {{ $statusClass }}">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
-                                <span class="inline-flex items-center {{ $pill($worst) }}">{{ $worst }}</span>
-                                <div class="text-sm font-medium text-gray-700">{{ $entry->recorded_at }} @if($culprit)<span class="ml-2 text-xs text-gray-500">{{ $worst }}: {{ ucfirst(str_replace('_',' ',$culprit)) }}</span>@endif</div>
+                                <div x-data="{ open:false }" class="relative inline-block" @click.outside="open=false">
+                                    <button @click="open = !open" class="inline-flex items-center {{ $pill($worst) }}">
+                                        {{ $worst }}
+                                    </button>
+                                    @if($culprit)
+                                        <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
+                                            <div class="font-medium mb-1">Cause</div>
+                                            <div>{{ $worst }}: {{ ucfirst(str_replace('_',' ',$culprit)) }}</div>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="text-sm font-medium text-gray-700">{{ $entry->recorded_at }}</div>
                             </div>
 
                             <div class="text-sm text-gray-500 md:hidden">&nbsp;</div>
