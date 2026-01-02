@@ -33,6 +33,21 @@
                         @foreach($items as $row)
                             @php
                                 $s = strtoupper($row->ui_status ?? 'GOOD');
+                                $labels = [
+                                    'temperature' => strtoupper($row->tempLabel ?? 'UNKNOWN'),
+                                    'salinity' => strtoupper($row->salLabel ?? 'UNKNOWN'),
+                                    'dissolved_oxygen' => strtoupper($row->doLabel ?? 'UNKNOWN'),
+                                    'ph' => strtoupper($row->phLabel ?? 'UNKNOWN'),
+                                ];
+                                $priority = ['HARM' => 4, 'BAD' => 3, 'GOOD' => 2, 'BEST' => 1, 'UNKNOWN' => 0];
+                                $worst = 'UNKNOWN'; $worstScore = 0; $culprit = null;
+                                foreach($labels as $k => $v) {
+                                    $score = $priority[$v] ?? 0;
+                                    if ($score > $worstScore) { $worstScore = $score; $worst = $v; $culprit = $k; }
+                                }
+                                $culpritName = $culprit ? ucfirst(str_replace('_',' ',$culprit)) : null;
+                                $causeText = $culpritName ? ($worst . ': ' . $culpritName) : null;
+
                                 $borderMap = [
                                     'BEST' => 'border-l-4 border-emerald-200',
                                     'GOOD' => 'border-l-4 border-sky-200',
@@ -54,10 +69,10 @@
                                 <td class="px-4 py-3 text-sm text-gray-700 text-center">
                                     <div x-data="{ open:false }" class="inline-block relative" @mouseenter="open=true" @mouseleave="open=false" @focusin="open=true" @focusout="open=false">
                                         <span tabindex="0" class="{{ $pill($s) }}">{{ $s }}</span>
-                                        @if(!empty($row->culpritsText))
-                                            <div x-show="open" x-cloak class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-sm text-xs text-gray-700 p-2 z-50">
-                                                <div class="font-medium mb-1">Causes:</div>
-                                                <div>{{ $row->culpritsText }}</div>
+                                        @if($causeText)
+                                            <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
+                                                <div class="font-medium mb-1">Cause</div>
+                                                <div>{{ $causeText }}</div>
                                             </div>
                                         @endif
                                     </div>
@@ -103,10 +118,10 @@
                                     <button @click="open = !open" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $pill($s) }}">
                                         {{ $s }}
                                     </button>
-                                    @if(!empty($row->culpritsText))
-                                        <div x-show="open" x-cloak class="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded shadow-sm text-xs text-gray-700 p-2 z-50">
-                                            <div class="font-medium mb-1">Causes:</div>
-                                            <div>{{ $row->culpritsText }}</div>
+                                    @if($causeText)
+                                        <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
+                                            <div class="font-medium mb-1">Cause</div>
+                                            <div>{{ $causeText }}</div>
                                         </div>
                                     @endif
                                 </div>
