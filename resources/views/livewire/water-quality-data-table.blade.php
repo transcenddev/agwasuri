@@ -216,7 +216,7 @@
                     @if(!empty($startDate) || !empty($endDate))
                         <div class="text-lg font-semibold text-gray-700">No records for this user in the selected date range.</div>
                         <div class="mt-3">
-                            <button wire:click="$emit('clear-filters')" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm bg-white text-gray-700 hover:bg-gray-50">
+                            <button wire:click="$dispatch('clear-filters')" type="button" class="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm bg-white text-gray-700 hover:bg-gray-50">
                                 Clear filters
                             </button>
                         </div>

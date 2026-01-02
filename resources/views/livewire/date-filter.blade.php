@@ -13,28 +13,48 @@
 
             {{-- Conditionally show inputs OR "No Data" message *for the current user context* --}}
             @if($minAllowedDate !== null)
-                {{-- Start Date Group --}}
-                <div class="flex flex-col w-full gap-2 md:w-auto md:flex-1">
-                    <label for="startDate" class="text-sm font-medium text-gray-700">Start Date</label>
-                    <input type="date" id="startDate"
-                           wire:model.defer="startDate"
-                           class="block w-full h-12 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                           min="{{ $minAllowedDate }}"
-                           max="{{ $endDate ?? $maxAllowedDate }}"
-                           @if($currentUserId === null) disabled @endif
-                           >
+                <div class="flex flex-col w-full gap-3 md:flex-1 md:min-w-[220px]">
+                    {{-- Start Date/Time --}}
+                    <div class="flex flex-col gap-2">
+                        <label for="startDate" class="text-sm font-medium text-gray-700">Start Date</label>
+                        <input type="date" id="startDate"
+                               wire:model.defer="startDate"
+                               class="block w-full h-12 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                               min="{{ $minAllowedDate }}"
+                               max="{{ $endDate ?? $maxAllowedDate }}"
+                               @if($currentUserId === null) disabled @endif
+                        >
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label for="startTime" class="text-sm font-medium text-gray-700">Start Time</label>
+                        <input type="time" id="startTime"
+                               wire:model.defer="startTime"
+                               class="block w-full h-12 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                               @if($currentUserId === null) disabled @endif
+                        >
+                    </div>
                 </div>
 
-                {{-- End Date Group --}}
-                <div class="flex flex-col w-full gap-2 md:w-auto md:flex-1">
-                    <label for="endDate" class="text-sm font-medium text-gray-700">End Date</label>
-                    <input type="date" id="endDate"
-                           wire:model.defer="endDate"
-                           class="block w-full h-12 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                           min="{{ $startDate ?? $minAllowedDate }}"
-                           max="{{ $maxAllowedDate }}"
-                           @if($currentUserId === null) disabled @endif
-                           >
+                <div class="flex flex-col w-full gap-3 md:flex-1 md:min-w-[220px]">
+                    {{-- End Date/Time --}}
+                    <div class="flex flex-col gap-2">
+                        <label for="endDate" class="text-sm font-medium text-gray-700">End Date</label>
+                        <input type="date" id="endDate"
+                               wire:model.defer="endDate"
+                               class="block w-full h-12 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                               min="{{ $startDate ?? $minAllowedDate }}"
+                               max="{{ $maxAllowedDate }}"
+                               @if($currentUserId === null) disabled @endif
+                        >
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label for="endTime" class="text-sm font-medium text-gray-700">End Time</label>
+                        <input type="time" id="endTime"
+                               wire:model.defer="endTime"
+                               class="block w-full h-12 px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                               @if($currentUserId === null) disabled @endif
+                        >
+                    </div>
                 </div>
 
                 {{-- Action buttons (Apply / Clear) --}}
