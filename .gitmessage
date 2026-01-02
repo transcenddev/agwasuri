@@ -1,0 +1,6 @@
+refactor(data-table): move cause to tooltip on status badge
+
+- Remove inline cause text from Recorded At column for cleaner layout
+- Add hover/focus tooltip on Status badge showing cause (desktop)
+- Add click tooltip on Status badge for mobile
+- Consistent with Recent Measurements tooltip behavior
