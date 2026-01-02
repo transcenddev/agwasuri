@@ -80,6 +80,12 @@
                     {{-- Search + actions wrapper: on mobile stack vertically, on tablet wrap, on desktop align horizontally --}}
                     <div class="w-full md:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-2 gap-2 md:gap-0">
                         <div x-data="{ q: @entangle('filterName') }">
+                            <style>
+                                /* Hide native search clear to avoid double “x” while keeping custom clear button */
+                                .no-native-clear::-webkit-search-cancel-button { display: none; }
+                                .no-native-clear::-webkit-search-decoration { display: none; }
+                                .no-native-clear::-ms-clear { display: none; width: 0; height: 0; }
+                            </style>
                             <div class="relative inline-flex items-center">
                                 <input
                                     x-ref="search"
@@ -88,7 +94,7 @@
                                     type="search"
                                     wire:model.live="filterName"
                                     placeholder="Search name, email, pond, location"
-                                    class="w-full md:w-64 rounded-md border border-cvsu-200 px-3 py-2 pr-10 text-sm focus:border-cvsu-600 focus:ring-cvsu-300 focus:outline-none"
+                                    class="no-native-clear w-full md:w-64 rounded-md border border-cvsu-200 px-3 py-2 pr-10 text-sm focus:border-cvsu-600 focus:ring-cvsu-300 focus:outline-none"
                                     aria-label="Search users"
                                 />
 
