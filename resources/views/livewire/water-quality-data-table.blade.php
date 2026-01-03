@@ -72,64 +72,73 @@
                         <table class="w-full min-w-0 text-left border-collapse">
                             <thead>
                                 <tr>
-                                    <th class="sticky top-0 z-10 w-56 px-6 py-3 text-sm font-medium text-left text-gray-700 bg-white border-b border-gray-100">Recorded At</th>
+                                    <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-left text-gray-700 bg-white border-b border-gray-100">Recorded At</th>
                                     <th class="sticky top-0 z-10 px-4 py-3 text-sm font-medium text-center text-gray-700 bg-white border-b border-gray-100">Status</th>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-temperature)">Temperature (°C)</th>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-salinity)">Salinity (ppt)</th>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</th>
-                                    <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-ph)">pH Level</th>
+                                    <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-ph)">pH</th>
                                 </tr>
                             </thead>
 
                             <tbody class="divide-y divide-gray-100">
                                 @foreach ($water_quality_data as $entry)
                                     @php
-                                            // extract per-metric labels from formatted strings (existing format: "value (LABEL)")
-                                            preg_match('/\((.+?)\)/', $entry->tempFormatted ?? '', $mTemp); $tempLabel = strtoupper($mTemp[1] ?? 'UNKNOWN');
-                                            preg_match('/\((.+?)\)/', $entry->salFormatted ?? '', $mSal); $salLabel = strtoupper($mSal[1] ?? 'UNKNOWN');
-                                            preg_match('/\((.+?)\)/', $entry->doFormatted ?? '', $mDo); $doLabel = strtoupper($mDo[1] ?? 'UNKNOWN');
-                                            preg_match('/\((.+?)\)/', $entry->phFormatted ?? '', $mPh); $phLabel = strtoupper($mPh[1] ?? 'UNKNOWN');
+                                        // Extract metric labels from formatted strings and normalize
+                                        preg_match('/\((.+?)\)/', $entry->tempFormatted ?? '', $mTemp); $tempLabel = strtoupper($mTemp[1] ?? 'UNKNOWN');
+                                        preg_match('/\((.+?)\)/', $entry->salFormatted ?? '', $mSal); $salLabel = strtoupper($mSal[1] ?? 'UNKNOWN');
+                                        preg_match('/\((.+?)\)/', $entry->doFormatted ?? '', $mDo); $doLabel = strtoupper($mDo[1] ?? 'UNKNOWN');
+                                        preg_match('/\((.+?)\)/', $entry->phFormatted ?? '', $mPh); $phLabel = strtoupper($mPh[1] ?? 'UNKNOWN');
 
-                                            // determine worst status and culprit (priority HARM > BAD > GOOD > BEST)
-                                            $labels = ['temperature' => $tempLabel, 'salinity' => $salLabel, 'dissolved_oxygen' => $doLabel, 'ph' => $phLabel];
-                                            $priority = ['HARM' => 4, 'BAD' => 3, 'GOOD' => 2, 'BEST' => 1, 'UNKNOWN' => 0];
-                                            $worst = 'UNKNOWN'; $worstScore = 0; $culprit = null;
-                                            foreach($labels as $k => $v) {
-                                                $score = $priority[$v] ?? 0;
-                                                if ($score > $worstScore) { $worstScore = $score; $worst = $v; $culprit = $k; }
-                                            }
+                                        // Use shared helper to align with dashboard card rule
+                                        $rowStatus = water_status_from_metrics([
+                                            'temperature' => $tempLabel,
+                                            'salinity' => $salLabel,
+                                            'dissolved_oxygen' => $doLabel,
+                                            'ph' => $phLabel,
+                                        ]);
 
-                                            $borderMap = ['BEST' => 'border-l-4 border-emerald-200', 'GOOD' => 'border-l-4 border-sky-200', 'BAD' => 'border-l-4 border-amber-200', 'HARM' => 'border-l-4 border-rose-200', 'UNKNOWN' => 'border-l-4 border-gray-200'];
-                                            $statusBorderClass = $borderMap[$worst] ?? 'border-l-4 border-gray-200';
+                                        $worst = $rowStatus['status'] ?? 'UNKNOWN';
+                                        $statusTokens = $rowStatus['tokens'] ?? water_status_tokens('UNKNOWN');
+                                        $culprit = $rowStatus['culprits'][0] ?? null;
 
-                                            $pill = function($label) {
-                                                return match($label) {
-                                                    'BEST' => 'text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                                    'GOOD' => 'text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                                    'BAD' => 'text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                                    'HARM' => 'text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                                    default => 'text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                                };
-                                            };
-                                        @endphp
+                                        // Simpler border classes matching Recent Measurements
+                                        $borderMap = [
+                                            'BEST' => 'border-l-4 border-emerald-200',
+                                            'GOOD' => 'border-l-4 border-sky-200',
+                                            'BAD' => 'border-l-4 border-amber-200',
+                                            'HARM' => 'border-l-4 border-rose-200',
+                                            'UNKNOWN' => 'border-l-4 border-gray-100',
+                                        ];
+                                        $rowBorder = $borderMap[$worst] ?? 'border-l-4 border-gray-100';
+
+                                        // Simpler pill classes matching Recent Measurements
+                                        $pill = fn($label) => match(strtoupper($label)) {
+                                            'BEST' => 'text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                                            'GOOD' => 'text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                                            'BAD' => 'text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                                            'HARM' => 'text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                                            default => 'text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                                        };
+                                    @endphp
 
                                         <tr class="bg-white odd:bg-white even:bg-gray-50 hover:bg-gray-100">
-                                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700 {{ $statusBorderClass }}">{{ $entry->recorded_at }}</td>
+                                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700 {{ $rowBorder }}">{{ $entry->recorded_at }}</td>
                                             <td class="px-4 py-3 text-center">
                                                 <div x-data="{ open:false }" class="inline-block relative" @mouseenter="open=true" @mouseleave="open=false" @focusin="open=true" @focusout="open=false">
-                                                    <span tabindex="0" class="inline-flex items-center {{ $pill($worst) }}">{{ $worst }}</span>
+                                                    <span tabindex="0" class="{{ $pill($worst) }}">{{ $worst }}</span>
                                                     @if($culprit)
                                                         <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
                                                             <div class="font-medium mb-1">Cause</div>
-                                                            <div>{{ $worst }}: {{ ucfirst(str_replace('_',' ',$culprit)) }}</div>
+                                                            <div>{{ $worst }}: {{ $culprit }}</div>
                                                         </div>
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->temperature !== null ? number_format($entry->temperature, 2) : '-' }} <span class="{{ $pill($tempLabel) }}">{{ $tempLabel }}</span></td>
-                                            <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->salinity !== null ? number_format($entry->salinity, 2) : '-' }} <span class="{{ $pill($salLabel) }}">{{ $salLabel }}</span></td>
-                                            <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->dissolved_oxygen !== null ? number_format($entry->dissolved_oxygen, 2) : '-' }} <span class="{{ $pill($doLabel) }}">{{ $doLabel }}</span></td>
-                                            <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->ph_level !== null ? number_format($entry->ph_level, 2) : '-' }} <span class="{{ $pill($phLabel) }}">{{ $phLabel }}</span></td>
+                                            <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->temperature !== null ? number_format($entry->temperature, 2) : '-' }} <span class="ml-2 {{ $pill($tempLabel) }}">{{ $tempLabel }}</span></td>
+                                            <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->salinity !== null ? number_format($entry->salinity, 2) : '-' }} <span class="ml-2 {{ $pill($salLabel) }}">{{ $salLabel }}</span></td>
+                                            <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->dissolved_oxygen !== null ? number_format($entry->dissolved_oxygen, 2) : '-' }} <span class="ml-2 {{ $pill($doLabel) }}">{{ $doLabel }}</span></td>
+                                            <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->ph_level !== null ? number_format($entry->ph_level, 2) : '-' }} <span class="ml-2 {{ $pill($phLabel) }}">{{ $phLabel }}</span></td>
                                         </tr>
                                 @endforeach
                             </tbody>
@@ -142,21 +151,34 @@
             <div class="block space-y-3 lg:hidden">
                 @foreach ($water_quality_data as $entry)
                     @php
-                        // extract labels
+                        // Extract labels and apply shared row-status helper
                         preg_match('/\((.+?)\)/', $entry->tempFormatted ?? '', $mTemp); $tempLabel = strtoupper($mTemp[1] ?? 'UNKNOWN');
                         preg_match('/\((.+?)\)/', $entry->salFormatted ?? '', $mSal); $salLabel = strtoupper($mSal[1] ?? 'UNKNOWN');
                         preg_match('/\((.+?)\)/', $entry->doFormatted ?? '', $mDo); $doLabel = strtoupper($mDo[1] ?? 'UNKNOWN');
                         preg_match('/\((.+?)\)/', $entry->phFormatted ?? '', $mPh); $phLabel = strtoupper($mPh[1] ?? 'UNKNOWN');
 
-                        $labels = ['temperature' => $tempLabel, 'salinity' => $salLabel, 'dissolved_oxygen' => $doLabel, 'ph' => $phLabel];
-                        $priority = ['HARM' => 4, 'BAD' => 3, 'GOOD' => 2, 'BEST' => 1, 'UNKNOWN' => 0];
-                        $worst = 'UNKNOWN'; $worstScore = 0; $culprit = null;
-                        foreach($labels as $k => $v) { $score = $priority[$v] ?? 0; if ($score > $worstScore) { $worstScore = $score; $worst = $v; $culprit = $k; } }
-                        $borderMap = ['BEST' => 'border-l-4 border-emerald-200', 'GOOD' => 'border-l-4 border-sky-200', 'BAD' => 'border-l-4 border-amber-200', 'HARM' => 'border-l-4 border-rose-200', 'UNKNOWN' => 'border-l-4 border-gray-200'];
-                        $statusClass = ($borderMap[$worst] ?? 'border-l-4 border-gray-200') . ' bg-white';
+                        $rowStatus = water_status_from_metrics([
+                            'temperature' => $tempLabel,
+                            'salinity' => $salLabel,
+                            'dissolved_oxygen' => $doLabel,
+                            'ph' => $phLabel,
+                        ]);
+
+                        $worst = $rowStatus['status'] ?? 'UNKNOWN';
+                        $culprit = $rowStatus['culprits'][0] ?? null;
+
+                        // Simpler border matching Recent Measurements
+                        $borderMap = [
+                            'BEST' => 'border-l-4 border-emerald-200',
+                            'GOOD' => 'border-l-4 border-sky-200',
+                            'BAD' => 'border-l-4 border-amber-200',
+                            'HARM' => 'border-l-4 border-rose-200',
+                            'UNKNOWN' => 'border-l-4 border-gray-100',
+                        ];
+                        $rowBorder = $borderMap[$worst] ?? 'border-l-4 border-gray-100';
 
                         $pill = function($label) {
-                            return match($label) {
+                            return match(strtoupper($label)) {
                                 'BEST' => 'text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
                                 'GOOD' => 'text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
                                 'BAD' => 'text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
@@ -166,7 +188,7 @@
                         };
                     @endphp
 
-                    <div class="bg-white border rounded-md p-3 hover:bg-gray-50 {{ $statusClass }}">
+                    <div class="bg-white border rounded-md p-3 hover:bg-gray-50 {{ $rowBorder }}">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <div x-data="{ open:false }" class="relative inline-block" @click.outside="open=false">
@@ -176,35 +198,45 @@
                                     @if($culprit)
                                         <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
                                             <div class="font-medium mb-1">Cause</div>
-                                            <div>{{ $worst }}: {{ ucfirst(str_replace('_',' ',$culprit)) }}</div>
+                                            <div>{{ $worst }}: {{ $culprit }}</div>
                                         </div>
                                     @endif
                                 </div>
                                 <div class="text-sm font-medium text-gray-700">{{ $entry->recorded_at }}</div>
                             </div>
-
-                            <div class="text-sm text-gray-500 md:hidden">&nbsp;</div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3 mt-2 text-sm text-gray-700">
+                        <div class="mt-2 grid grid-cols-2 gap-3 text-sm text-gray-700">
                             <div class="truncate">
-                                <div class="flex items-center gap-2 text-xs text-gray-500"> <span>🌡️</span> <span style="color: var(--wq-series-temperature)">Temperature (°C)</span></div>
-                                <div class="font-semibold text-gray-700">{{ $entry->temperature !== null ? number_format($entry->temperature, 2) : '-' }} <span class="{{ $pill($tempLabel) }}">{{ $tempLabel }}</span></div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🌡️</span> <span>Temperature (°C)</span></div>
+                                <div class="font-semibold">
+                                    <span class="text-gray-800">{{ $entry->temperature !== null ? number_format($entry->temperature, 2) : '-' }}</span>
+                                    <span class="ml-2 {{ $pill($tempLabel) }}">{{ $tempLabel }}</span>
+                                </div>
                             </div>
 
                             <div class="truncate">
-                                <div class="flex items-center gap-2 text-xs text-gray-500"> <span>🧂</span> <span style="color: var(--wq-series-salinity)">Salinity (ppt)</span></div>
-                                <div class="font-semibold text-gray-700">{{ $entry->salinity !== null ? number_format($entry->salinity, 2) : '-' }} <span class="{{ $pill($salLabel) }}">{{ $salLabel }}</span></div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧂</span> <span>Salinity (ppt)</span></div>
+                                <div class="font-semibold">
+                                    <span class="text-gray-800">{{ $entry->salinity !== null ? number_format($entry->salinity, 2) : '-' }}</span>
+                                    <span class="ml-2 {{ $pill($salLabel) }}">{{ $salLabel }}</span>
+                                </div>
                             </div>
 
                             <div class="truncate">
-                                <div class="flex items-center gap-2 text-xs text-gray-500"> <span>💧</span> <span style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</span></div>
-                                <div class="font-semibold text-gray-700">{{ $entry->dissolved_oxygen !== null ? number_format($entry->dissolved_oxygen, 2) : '-' }} <span class="{{ $pill($doLabel) }}">{{ $doLabel }}</span></div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>💧</span> <span>Dissolved Oxygen (mg/L)</span></div>
+                                <div class="font-semibold">
+                                    <span class="text-gray-800">{{ $entry->dissolved_oxygen !== null ? number_format($entry->dissolved_oxygen, 2) : '-' }}</span>
+                                    <span class="ml-2 {{ $pill($doLabel) }}">{{ $doLabel }}</span>
+                                </div>
                             </div>
 
                             <div class="truncate">
-                                <div class="flex items-center gap-2 text-xs text-gray-500"> <span>🧪</span> <span style="color: var(--wq-series-ph)">pH Level</span></div>
-                                <div class="font-semibold text-gray-700">{{ $entry->ph_level !== null ? number_format($entry->ph_level, 2) : '-' }} <span class="{{ $pill($phLabel) }}">{{ $phLabel }}</span></div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2"> <span>🧪</span> <span>pH</span></div>
+                                <div class="font-semibold">
+                                    <span class="text-gray-800">{{ $entry->ph_level !== null ? number_format($entry->ph_level, 2) : '-' }}</span>
+                                    <span class="ml-2 {{ $pill($phLabel) }}">{{ $phLabel }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
