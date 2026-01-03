@@ -265,12 +265,13 @@ class WaterQualityCard extends Component
         $statuses[] = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
         $statuses[] = $this->statusFor('ph_level', $this->ph_level);
 
-        $harmCount = collect($statuses)->filter(fn($s) => $s === 'harm')->count();
+        $hasHarm = in_array('harm', $statuses, true);
         $hasBad = in_array('bad', $statuses, true);
         $hasGood = in_array('good', $statuses, true);
         $allBest = collect($statuses)->filter(fn($s) => $s !== 'unknown')->every(fn($s) => $s === 'best');
 
-        if ($harmCount >= 2) {
+        // Worst-parameter-wins: any HARM downgrades overall to HARM.
+        if ($hasHarm) {
             $this->overallStatus = 'HARM';
             return;
         }

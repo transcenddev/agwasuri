@@ -212,15 +212,14 @@ class WaterQualityDataTable extends Component
             } catch (\Throwable $e) { $salLabel = 'UNKNOWN'; }
 
             // Determine overall row status based on new classification system
-            // Priority: harm > bad > good > best
+            // Worst-parameter-wins: any HARM downgrades to HARM
             $labels = [$tempLabel, $phLabel, $doLabel, $salLabel];
-
-            $harmCount = collect($labels)->filter(fn($l) => $l === 'HARM')->count();
+            $hasHarm = in_array('HARM', $labels, true);
             $hasBad = in_array('BAD', $labels, true);
             $hasGood = in_array('GOOD', $labels, true);
             $allBest = collect($labels)->filter(fn($l) => $l !== 'UNKNOWN')->every(fn($l) => $l === 'BEST');
 
-            if ($harmCount >= 2) {
+            if ($hasHarm) {
                 $statusBorderClass = 'border-l-4 border-red-600';
                 $badgeClass = 'bg-red-100 text-red-800';
                 $statusLabel = 'HARM';
