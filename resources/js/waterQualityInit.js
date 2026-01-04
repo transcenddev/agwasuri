@@ -48,9 +48,36 @@
                 localStorage.removeItem("waterQualityKnownChartId:" + chartId);
             } catch (e) {}
 
+            // Also drop any other cached references to avoid stale id reuse
+            clearChartCache(chartId);
+
             console.debug("waterQualityInit: cleaned up chart", chartId);
         } catch (e) {
             console.error("waterQualityInit: destroy error", e);
+        }
+    }
+
+    function clearChartCache(chartId) {
+        if (!chartId) return;
+        try {
+            if (window.__waterQualityKnownChartId) {
+                delete window.__waterQualityKnownChartId[chartId];
+            }
+            if (window.__waterQualityChartRegistry) {
+                delete window.__waterQualityChartRegistry[chartId];
+            }
+            if (window.__waterQualityChartInstances) {
+                delete window.__waterQualityChartInstances[chartId];
+            }
+            if (window.__agwasuriCharts) {
+                delete window.__agwasuriCharts[chartId];
+            }
+            try {
+                localStorage.removeItem("waterQualityKnownChartId:" + chartId);
+            } catch (e) {}
+            console.debug("waterQualityInit: cleared cache for", chartId);
+        } catch (e) {
+            console.debug("waterQualityInit: clear cache failed", e);
         }
     }
 
@@ -128,6 +155,15 @@
     // On initial DOM ready, initialize any existing chart roots
     document.addEventListener("DOMContentLoaded", () => initAllRoots(document));
 
+    // Clear caches when server asks (e.g., user switch)
+    try {
+        window.addEventListener("water-quality:clear-cache", (evt) => {
+            const detail = evt && evt.detail ? evt.detail : {};
+            const ids = [detail.chartId, detail.nextChartId].filter(Boolean);
+            ids.forEach((id) => clearChartCache(id));
+        });
+    } catch (e) {}
+
     // CRITICAL: Destroy chart instances BEFORE Livewire message processing
     if (window.Livewire && typeof Livewire.hook === "function") {
         Livewire.hook("message.received", (message, component) => {
@@ -162,6 +198,21 @@
                 // Small delay to ensure DOM is fully rendered with correct dimensions
                 setTimeout(() => {
                     initAllRoots(component.el);
+
+                    // After re-init, request authoritative snapshots for any chart roots
+                    // inside the updated component so charts reflect current filters.
+                    try {
+                        const roots = component.el.querySelectorAll
+                            ? component.el.querySelectorAll("[data-chart-id]")
+                            : [];
+                        if (roots && roots.length && window.__waterQualityFetchSnapshot) {
+                            roots.forEach((r) => {
+                                try {
+                                    window.__waterQualityFetchSnapshot(r);
+                                } catch (e) {}
+                            });
+                        }
+                    } catch (e) {}
                 }, 100);
             } catch (e) {
                 console.debug(
@@ -255,6 +306,12 @@
             }
         }
 
+        // Expose the snapshot fetcher so other hooks (Livewire message.processed)
+        // or manual triggers can request an authoritative refresh for a specific root.
+        try {
+            window.__waterQualityFetchSnapshot = fetchAndApplySnapshot;
+        } catch (e) {}
+
         // Global listener: when any water-quality event occurs, try to refresh
         // visible charts via authoritative snapshot. This covers cases where
         // inline append handlers weren't bound due to load order or DOM swaps.
@@ -267,6 +324,27 @@
                     for (const root of roots) {
                         // fire-and-forget snapshot update per-root
                         fetchAndApplySnapshot(root);
+                    }
+                } catch (e) {}
+            });
+            // When filters change (date preset/custom), Livewire may update only
+            // KPI components. Allow dispatching a custom 'water-quality:filters'
+            // event (from Livewire) with detail { userId, chartId } to request
+            // a chart refresh for the selected user / chart.
+            window.addEventListener("water-quality:filters", (evt) => {
+                try {
+                    const detail = evt && evt.detail ? evt.detail : {};
+                    const userId = detail.userId || detail.user_id || null;
+                    const chartId = detail.chartId || detail.chart_id || null;
+                    if (chartId) {
+                        const root = document.querySelector(`[data-chart-id="${chartId}"]`);
+                        if (root) fetchAndApplySnapshot(root);
+                        return;
+                    }
+                    if (userId) {
+                        const roots = Array.from(document.querySelectorAll(`[data-chart-id^="water-quality-${userId}"]`));
+                        if (roots && roots.length) roots.forEach((r) => fetchAndApplySnapshot(r));
+                        return;
                     }
                 } catch (e) {}
             });
@@ -400,123 +478,155 @@ try {
                     : null;
             if (!chartId) return;
 
-            const container = document.getElementById(chartId);
-            if (!container) return;
+            console.debug("waterQualityInit: chart event", {
+                chartId,
+                cfgChartId: cfg && cfg.chart ? cfg.chart.id : null,
+                metaChartId: chartObj && chartObj.meta ? chartObj.meta.chart_id : null,
+            });
+            const MAX_RETRIES = 10;
+            const RETRY_DELAY = 120;
 
-            const targetCid =
-                (window.__waterQualityKnownChartId &&
-                    window.__waterQualityKnownChartId[chartId]) ||
-                chartId ||
-                "apexcharts" + chartId;
+            function renderWithRetry(attempt) {
+                // Prefer a user-scoped root when available so charts bind to the
+                // currently selected user (data-chart-id="water-quality-{userId}").
+                const userId =
+                    (chartObj && chartObj.meta && (chartObj.meta.user_id || chartObj.meta.userId)) ||
+                    (cfg && cfg.chart && (cfg.chart.user_id || cfg.chart.userId)) ||
+                    null;
 
-            window.__agwasuriCharts = window.__agwasuriCharts || {};
-            let chartInstance = window.__agwasuriCharts[chartId] || null;
-
-            if (
-                !chartInstance &&
-                window.ApexCharts &&
-                typeof window.ApexCharts.getChartByID === "function"
-            ) {
+                let container = null;
                 try {
-                    chartInstance = window.ApexCharts.getChartByID(targetCid);
-                } catch (e) {
-                    chartInstance = null;
-                }
-            }
-
-            if (chartInstance) {
-                // Update options and series in-place
-                try {
-                    chartInstance.updateOptions(cfg, false, true);
-                    chartInstance.updateSeries(series, true);
-                    window.__agwasuriCharts[chartId] = chartInstance;
-                    console.debug("waterQualityInit: updated chart", chartId);
-                } catch (e) {
-                    console.error(
-                        "waterQualityInit: failed to update chart",
-                        chartId,
-                        e
-                    );
-
-                    // Fallback: if update fails (e.g., ApexCharts internal resetSeries on null), destroy and recreate
-                    try {
-                        chartInstance.destroy();
-                    } catch (destroyErr) {
-                        console.debug(
-                            "waterQualityInit: destroy after update failure",
-                            destroyErr
+                    if (userId) {
+                        const preferredRoot = document.querySelector(
+                            `[data-chart-id="water-quality-${userId}"]`
                         );
+                        if (preferredRoot) {
+                            container = preferredRoot.querySelector(`#${chartId}`) || preferredRoot;
+                        }
                     }
+                } catch (e) {
+                    container = null;
+                }
+
+                // Fallback lookups if the preferred user-scoped root wasn't found
+                if (!container) {
+                    container =
+                        document.getElementById(chartId) ||
+                        document.querySelector(`[data-chart-id="${chartId}"] #${chartId}`) ||
+                        document.querySelector(`[data-chart-id="${chartId}"]`);
+                }
+                if (!container) {
+                    if (attempt < MAX_RETRIES) {
+                        setTimeout(() => renderWithRetry(attempt + 1), RETRY_DELAY);
+                    } else {
+                        console.error("waterQualityInit: container not found for", chartId, "after", attempt, "retries");
+                    }
+                    return;
+                }
+                // Consolidated create/update logic below. Use a pending flag to avoid
+                // concurrent double-inits during rapid Livewire swaps.
+                const targetCid =
+                    (window.__waterQualityKnownChartId &&
+                        window.__waterQualityKnownChartId[chartId]) ||
+                    chartId ||
+                    "apexcharts" + chartId;
+
+                window.__agwasuriCharts = window.__agwasuriCharts || {};
+                let chartInstance = window.__agwasuriCharts[chartId] || null;
+
+                if (
+                    !chartInstance &&
+                    window.ApexCharts &&
+                    typeof window.ApexCharts.getChartByID === "function"
+                ) {
                     try {
-                        const container = document.getElementById(chartId);
-                        if (container) {
-                            if (container.querySelector(".apexcharts-canvas")) {
-                                container.innerHTML = "";
-                            }
-                            const inst = new ApexCharts(container, cfg);
-                            inst.render();
-                            window.__agwasuriCharts[chartId] = inst;
-                            if (!window.__waterQualityChartInstances) {
-                                window.__waterQualityChartInstances = {};
-                            }
-                            window.__waterQualityChartInstances[chartId] = inst;
-                            window.__waterQualityKnownChartId =
-                                window.__waterQualityKnownChartId || {};
-                            window.__waterQualityKnownChartId[chartId] =
-                                cfg.chart && cfg.chart.id
-                                    ? cfg.chart.id
-                                    : chartId;
+                        chartInstance = window.ApexCharts.getChartByID(targetCid);
+                    } catch (e) {
+                        chartInstance = null;
+                    }
+                }
+
+                // If an instance exists, update it safely
+                if (chartInstance) {
+                    try {
+                        chartInstance.updateOptions(cfg, false, true);
+                        chartInstance.updateSeries(series, true);
+                        window.__agwasuriCharts[chartId] = chartInstance;
+                        console.debug("waterQualityInit: updated chart", chartId);
+                    } catch (e) {
+                        console.error(
+                            "waterQualityInit: failed to update chart",
+                            chartId,
+                            e
+                        );
+                        try {
+                            chartInstance.destroy();
+                        } catch (destroyErr) {
                             console.debug(
-                                "waterQualityInit: recreated chart after update failure",
-                                chartId
+                                "waterQualityInit: destroy after update failure",
+                                destroyErr
                             );
                         }
-                    } catch (recreateErr) {
-                        console.error(
-                            "waterQualityInit: recreate failed",
-                            chartId,
-                            recreateErr
-                        );
+                        chartInstance = null;
                     }
                 }
-                return;
-            }
 
-            // If DOM has canvas but instance missing, wipe once before creating
-            try {
-                if (container.querySelector(".apexcharts-canvas")) {
-                    container.innerHTML = "";
+                // If still no instance, create one (guarded by a pending flag)
+                if (!chartInstance) {
+                    window.__waterQualityPending = window.__waterQualityPending || {};
+                    if (window.__waterQualityPending[chartId]) {
+                        // Another render is in progress; schedule a short retry so the
+                        // current handler can pick up the instance once it's available.
+                        if (attempt < MAX_RETRIES) {
+                            setTimeout(() => renderWithRetry(attempt + 1), RETRY_DELAY);
+                        } else {
+                            console.error("waterQualityInit: pending create never resolved for", chartId);
+                        }
+                        return;
+                    }
+
+                    window.__waterQualityPending[chartId] = true;
+                    try {
+                        // If leftover canvas exists, wipe it to avoid ApexCharts errors
+                        try {
+                            if (container.querySelector && container.querySelector(".apexcharts-canvas")) {
+                                container.innerHTML = "";
+                            }
+                        } catch (e) {}
+
+                        cfg.noData = cfg.noData || {
+                            text: "No water quality data available yet",
+                            align: "center",
+                            verticalAlign: "middle",
+                            style: { fontSize: "14px", color: "#999" },
+                        };
+
+                        const inst = new ApexCharts(container, cfg);
+                        inst.render().then(() => {
+                            window.__waterQualityKnownChartId = window.__waterQualityKnownChartId || {};
+                            window.__waterQualityKnownChartId[chartId] = cfg.chart && cfg.chart.id ? cfg.chart.id : chartId;
+                            window.__waterQualityChartInstances = window.__waterQualityChartInstances || {};
+                            window.__waterQualityChartInstances[chartId] = inst;
+                            window.__agwasuriCharts[chartId] = inst;
+                            console.debug("waterQualityInit: created chart", chartId);
+                            window.__waterQualityPending[chartId] = false;
+                        }).catch((renderErr) => {
+                            console.error("waterQualityInit: failed to render chart", chartId, renderErr);
+                            window.__waterQualityPending[chartId] = false;
+                        });
+                    } catch (e) {
+                        console.error(
+                            "waterQualityInit: failed to create chart",
+                            chartId,
+                            e
+                        );
+                        window.__waterQualityPending[chartId] = false;
+                    }
                 }
-            } catch (e) {}
-
-            // No existing instance: create one
-            try {
-                // ensure noData fallback shows axes when series empty
-                cfg.noData = cfg.noData || {
-                    text: "No water quality data available yet",
-                    align: "center",
-                    verticalAlign: "middle",
-                    style: { fontSize: "14px", color: "#999" },
-                };
-
-                const inst = new ApexCharts(container, cfg);
-                inst.render();
-                window.__waterQualityKnownChartId =
-                    window.__waterQualityKnownChartId || {};
-                window.__waterQualityKnownChartId[chartId] =
-                    cfg.chart && cfg.chart.id ? cfg.chart.id : chartId;
-                window.__waterQualityChartInstances =
-                    window.__waterQualityChartInstances || {};
-                window.__waterQualityChartInstances[chartId] = inst;
-                window.__agwasuriCharts[chartId] = inst;
-                console.debug("waterQualityInit: created chart", chartId);
-            } catch (e) {
-                console.error(
-                    "waterQualityInit: failed to create chart",
-                    chartId,
-                    e
-                );
             }
+
+            renderWithRetry(0);
+            return; // renderWithRetry handles create/update paths
         } catch (e) {
             console.error("waterQualityInit: chart event handler failed", e);
         }
