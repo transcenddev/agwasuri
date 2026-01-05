@@ -107,7 +107,7 @@
                 <p class="mt-1 text-xs text-gray-500 max-w-[220px]">
                     Check power, battery, or network.
                 </p>
-                <a href="#troubleshooting" class="mt-2 text-xs text-gray-600 underline hover:text-gray-800 transition-colors" x-show="!compact">
+                <a href="{{ route('troubleshooting') }}" class="mt-2 text-xs text-gray-600 underline hover:text-gray-800 transition-colors" x-show="!compact">
                     Troubleshooting tips
                 </a>
             </div>
