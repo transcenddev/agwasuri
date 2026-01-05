@@ -75,7 +75,7 @@ class UserForm extends Component
             'water_type' => [
                  Rule::requiredIf($isUserAccount), // Conditionally required
                  'nullable', // Still allow null if admin
-                 Rule::in(['Freshwater', 'Brackishwater', 'Saltwater']),
+                  Rule::in(['Freshwater', 'Brackish', 'Saltwater']),
             ],
             'farm_type' => ['nullable', 'string', 'max:255'],
             'culture_system' => ['nullable', 'string', 'max:255'],
@@ -121,7 +121,7 @@ class UserForm extends Component
             $this->last_name = $user->last_name;
             $this->email = $user->email;
             // Don't load password
-            $this->account_type = $user->account_type; // Load existing account type
+            $this->account_type = $this->normalizeAccountType($user->account_type); // Load normalized account type
             $this->fishpond_name = $user->fishpond_name;
             $this->barangay = $user->barangay;
             $this->municipality = $user->municipality;
@@ -162,6 +162,8 @@ class UserForm extends Component
     {
         $validatedData = $this->validate();
 
+        $normalizedAccountType = $this->normalizeAccountType($validatedData['account_type']);
+
         $speciesArray = !empty($validatedData['species_cultured_string'])
             ? array_map('trim', explode(',', $validatedData['species_cultured_string']))
             : [];
@@ -171,7 +173,7 @@ class UserForm extends Component
             'first_name' => $validatedData['first_name'],
             'last_name' => $validatedData['last_name'],
             'email' => $validatedData['email'],
-            'account_type' => $validatedData['account_type'],
+            'account_type' => $normalizedAccountType,
             'fishpond_name' => $validatedData['fishpond_name'] ?? null,
             'barangay' => $validatedData['barangay'] ?? null,
             'municipality' => $validatedData['municipality'] ?? null,
@@ -218,6 +220,17 @@ class UserForm extends Component
     public function cancel()
     {
          $this->dispatch('closeForm');
+    }
+
+    private function normalizeAccountType($value): string
+    {
+        $normalized = strtolower(trim((string) $value));
+
+        if ($normalized === 'admin' || str_starts_with($normalized, 'admin')) {
+            return 'admin';
+        }
+
+        return 'user';
     }
 
     public function render()
