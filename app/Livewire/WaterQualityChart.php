@@ -6,15 +6,18 @@ use App\Models\WaterQualityData;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Asantibanez\LivewireCharts\Models\LineChartModel;
 use App\Services\WaterQualityChartService;
 
 class WaterQualityChart extends Component
 {
+    #[Url(as: 'user')]
     public ?int $userId = null;
     public ?string $startDate = null;
     public ?string $endDate = null;
+    public ?string $chartId = null;
 
     // Payload consumed by the existing client-side initializer
     public array $chartData = [];
@@ -29,7 +32,16 @@ class WaterQualityChart extends Component
     #[On('user-selected')]
     public function updateUser($userId)
     {
+        $previousChartId = $this->chartId;
         $this->userId = $userId;
+        $this->chartId = 'water-quality-' . ($this->userId ?? '0');
+        // Persist selection for other components and page reloads
+        session(['selected_user' => $this->userId]);
+        // Clear any cached client-side instances/mappings for the old chart id before re-render
+        $this->dispatchBrowserEvent('water-quality:clear-cache', [
+            'chartId' => $previousChartId,
+            'nextChartId' => $this->chartId,
+        ]);
         // Dispatch chart cleanup BEFORE loadData to ensure old instance is destroyed
         $this->dispatchBrowserEvent('water-quality:destroy-chart');
         
@@ -37,10 +49,20 @@ class WaterQualityChart extends Component
         usleep(50000); // 50ms
         
         $this->loadData();
+        \Log::info('WaterQualityChart updateUser', [
+            'userId' => $this->userId,
+            'chartId' => $this->chartId,
+        ]);
         // Push updated chart payload to the browser so the client can update the existing ApexCharts instance
         $this->dispatchBrowserEvent('water-quality:chart', [
             'chart' => $this->lineChartModelArray,
             'initial' => $this->chartData,
+            'meta' => [
+                'userId' => $this->userId,
+                'chart_id' => $this->chartId,
+                'startDate' => $this->startDate,
+                'endDate' => $this->endDate,
+            ],
         ]);
     }
 
@@ -58,11 +80,29 @@ class WaterQualityChart extends Component
         $this->endDate = $endDate ?: null;
         // Dispatch chart cleanup BEFORE loadData
         $this->dispatchBrowserEvent('water-quality:destroy-chart');
+        // Also clear cached instances for this chart id to avoid stale reuse across filters
+        $this->dispatchBrowserEvent('water-quality:clear-cache', [
+            'chartId' => $this->chartId,
+            'nextChartId' => $this->chartId,
+        ]);
         $this->loadData();
         // Notify client to refresh chart options/series after date range changed
         $this->dispatchBrowserEvent('water-quality:chart', [
             'chart' => $this->lineChartModelArray,
             'initial' => $this->chartData,
+            'meta' => [
+                'userId' => $this->userId,
+                'chart_id' => $this->chartId,
+                'startDate' => $this->startDate,
+                'endDate' => $this->endDate,
+            ],
+        ]);
+        // Signal filters event so the active chart instance for this user refreshes
+        $this->dispatchBrowserEvent('water-quality:filters', [
+            'userId' => $this->userId,
+            'chartId' => $this->chartId,
+            'startDate' => $this->startDate,
+            'endDate' => $this->endDate,
         ]);
     }
 
@@ -133,7 +173,9 @@ class WaterQualityChart extends Component
 
     public function mount(?int $userId = null): void
     {
-        if ($userId !== null) {
+        if ($this->userId !== null) {
+            $this->userId = (int) $this->userId;
+        } elseif ($userId !== null) {
             $this->userId = (int) $userId;
         } elseif (request()->has('user') && request('user')) {
             $this->userId = (int) request('user');
@@ -141,11 +183,39 @@ class WaterQualityChart extends Component
             $this->userId = (int) session('selected_user', Auth::id());
         }
 
+        // Persist the resolved user selection for consistency across page loads
+        session(['selected_user' => $this->userId]);
+
+        $this->chartId = 'water-quality-' . ($this->userId ?? '0');
+
         $this->loadData();
+
+        // Send an initial chart payload so the client renders immediately after login
+        $this->dispatchBrowserEvent('water-quality:chart', [
+            'chart' => $this->lineChartModelArray,
+            'initial' => $this->chartData,
+            'meta' => [
+                'userId' => $this->userId,
+                'chart_id' => $this->chartId,
+                'startDate' => $this->startDate,
+                'endDate' => $this->endDate,
+            ],
+        ]);
+    }
+
+    /**
+     * Keep the component in sync with the current querystring user when Livewire hydrates.
+     */
+    public function hydrate(): void
+    {
+        // Always realign chartId to the current user property so renders never reuse an old id
+        $this->chartId = 'water-quality-' . ($this->userId ?? '0');
     }
 
     public function loadData(): void
     {
+        $this->chartId = 'water-quality-' . ($this->userId ?? '0');
+
         $query = WaterQualityData::where('user_id', $this->userId);
 
         if ($this->startDate && $this->endDate) {
@@ -169,9 +239,10 @@ class WaterQualityChart extends Component
         // fetch a reasonable number of points for the chart (most recent first)
         $rows = $query->orderBy('recorded_at', 'desc')->limit(200)->get()->reverse()->values();
         
-        // CRITICAL DEBUG: Log what we're fetching
+        // CRITICAL DEBUG: Log what we're fetching and the computed chart id
         \Log::info('WaterQualityChart loadData', [
             'userId' => $this->userId,
+            'chartId' => $this->chartId,
             'rowCount' => $rows->count(),
             'hasData' => !$rows->isEmpty(),
             'firstRow' => $rows->first() ? [
@@ -218,7 +289,7 @@ class WaterQualityChart extends Component
             $this->lineChartModelArray = [
                 'jsonConfig' => [
                     'chart' => [
-                        'id' => 'water-quality-' . ($this->userId ?? '0'),
+                        'id' => $this->chartId,
                         'type' => 'line',
                         'height' => 480,
                         'width' => '100%',
@@ -245,7 +316,9 @@ class WaterQualityChart extends Component
                 ],
                 'meta' => [
                     'series_names' => ['Temperature', 'Salinity', 'Dissolved Oxygen', 'pH'],
-                    'series_keys' => ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level']
+                    'series_keys' => ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level'],
+                    'chart_id' => $this->chartId,
+                    'user_id' => $this->userId,
                 ],
                 'colors' => array_values($colors)
             ];
@@ -386,7 +459,7 @@ class WaterQualityChart extends Component
         // CRITICAL FIX: Enforce chart dimensions EVERY time (prevents height collapse on Livewire updates)
         $this->lineChartModelArray['jsonConfig']['chart']['height'] = 480;
         $this->lineChartModelArray['jsonConfig']['chart']['width'] = '100%';
-        $this->lineChartModelArray['jsonConfig']['chart']['id'] = $this->lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-' . ($this->userId ?? '0');
+        $this->lineChartModelArray['jsonConfig']['chart']['id'] = $this->chartId;
         
         // CRITICAL: Force aspect ratio off to prevent responsive height collapse
         $this->lineChartModelArray['jsonConfig']['chart']['maintainAspectRatio'] = false;
@@ -404,6 +477,10 @@ class WaterQualityChart extends Component
         $this->lineChartModelArray['meta'] = [
             'series_names' => array_keys($series),
             'series_keys' => ['temperature', 'salinity', 'dissolved_oxygen', 'ph_level'],
+            'chart_id' => $this->chartId,
+            // expose both snake and camel for client derivation
+            'user_id' => $this->userId,
+            'userId' => $this->userId,
         ];
 
         // Promote visual defaults into jsonConfig so the vendor bundle (ApexCharts) picks them up directly.
@@ -487,6 +564,8 @@ class WaterQualityChart extends Component
         $this->lineChartModelArray['meta']['series_names'] = $this->lineChartModelArray['meta']['series_names'] ?? array_keys($series);
         // canonical series_keys order used by client-side mapping
         $this->lineChartModelArray['meta']['series_keys'] = $this->lineChartModelArray['meta']['series_keys'] ?? ['temperature','salinity','dissolved_oxygen','ph_level'];
+        $this->lineChartModelArray['meta']['chart_id'] = $this->lineChartModelArray['meta']['chart_id'] ?? $this->chartId;
+        $this->lineChartModelArray['meta']['user_id'] = $this->lineChartModelArray['meta']['user_id'] ?? $this->userId;
     }
 
     /**
