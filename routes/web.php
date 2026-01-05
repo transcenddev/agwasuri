@@ -28,6 +28,10 @@ Route::view('historical-data', 'historical-data')
     ->middleware(['auth'])
     ->name('historical-data');
 
+Route::view('troubleshooting', 'troubleshooting')
+    ->middleware(['auth'])
+    ->name('troubleshooting');
+
 // Theme setter endpoint used by client to ensure server writes theme cookie
 Route::post('/set-theme', [ThemeController::class, 'set'])->name('theme.set');
 
