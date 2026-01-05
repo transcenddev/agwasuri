@@ -98,12 +98,21 @@ class WaterQualityChart extends Component
             ],
         ]);
         // Signal filters event so the active chart instance for this user refreshes
-        $this->dispatchBrowserEvent('water-quality:filters', [
+        $filtersPayload = [
             'userId' => $this->userId,
             'chartId' => $this->chartId,
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,
-        ]);
+        ];
+        // Emit both a browser CustomEvent and a Livewire-dispatched event to
+        // maximize the chance that client-side listeners receive the update
+        // regardless of DOM swap timing or Livewire partial updates.
+        $this->dispatchBrowserEvent('water-quality:filters', $filtersPayload);
+        try {
+            $this->dispatch('water-quality:filters', $filtersPayload);
+        } catch (\Throwable $e) {
+            // If dispatch isn't available in this context, ignore silently
+        }
     }
 
     #[On('echo:water-quality-data-created,WaterQualityCreated')]
