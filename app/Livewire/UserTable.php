@@ -19,6 +19,9 @@ class UserTable extends Component
     public $showForm = false;
     public $editingUserId = null;
 
+    // Global search term for header search box
+    public $searchTerm = '';
+
     // Bulk selection
     public $selected = [];
     public $selectAll = false;
@@ -74,7 +77,8 @@ class UserTable extends Component
         if (in_array($propertyName, [
             'filterName', 'filterEmail', 'filterAccountType',
             'filterBarangay', 'filterMunicipality', 'filterProvince', 'filterWaterType',
-            'filterSpecies', 'filterFishpondName' // Added fishpond name
+            'filterSpecies', 'filterFishpondName', // Added fishpond name
+            'searchTerm', // Header search bar
         ])) {
             $this->resetPage();
         }
@@ -96,18 +100,35 @@ class UserTable extends Component
     {
         $query = User::query();
 
+        // Database-agnostic full-name concat expression
+        try {
+            $driver = DB::getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        } catch (\Throwable $e) {
+            $driver = null;
+        }
+
+        $fullNameExpr = $driver === 'sqlite'
+            ? "first_name || ' ' || last_name"
+            : "CONCAT(first_name, ' ', last_name)";
+
+        // Global search from header search box
+        $search = trim((string) $this->searchTerm);
+        if ($search !== '') {
+            $query->where(function($q) use ($search, $fullNameExpr) {
+                $q->where('first_name', 'like', '%'.$search.'%')
+                  ->orWhere('last_name', 'like', '%'.$search.'%')
+                  ->orWhere('email', 'like', '%'.$search.'%')
+                  ->orWhere('fishpond_name', 'like', '%'.$search.'%')
+                  ->orWhere('barangay', 'like', '%'.$search.'%')
+                  ->orWhere('municipality', 'like', '%'.$search.'%')
+                  ->orWhere('province', 'like', '%'.$search.'%')
+                  ->orWhere('species_cultured', 'like', '%'.$search.'%')
+                  ->orWhereRaw("{$fullNameExpr} LIKE ?", ['%'.$search.'%']);
+            });
+        }
+
         if (!empty($this->filterName)) {
             $value = $this->filterName;
-            try {
-                $driver = DB::getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
-            } catch (\Throwable $e) {
-                $driver = null;
-            }
-
-            $fullNameExpr = $driver === 'sqlite'
-                ? "first_name || ' ' || last_name"
-                : "CONCAT(first_name, ' ', last_name)";
-
             $query->where(function($q) use ($value, $fullNameExpr) {
                 $q->where('first_name', 'like', '%'.$value.'%')
                   ->orWhere('last_name', 'like', '%'.$value.'%')
@@ -135,8 +156,11 @@ class UserTable extends Component
         if (!empty($this->filterProvince)) {
             $query->where('province', 'like', '%' . $this->filterProvince . '%');
         }
-         if (!empty($this->filterWaterType)) {
-            $query->where('water_type', $this->filterWaterType);
+        if (!empty($this->filterWaterType)) {
+            // Normalize comparison to handle capitalization/spacing differences
+            $normalized = strtolower(trim($this->filterWaterType));
+            // Use LIKE to tolerate stored values such as "brackishwater" or variant labels
+            $query->whereRaw('LOWER(TRIM(water_type)) LIKE ?', ['%'.$normalized.'%']);
         }
         if (!empty($this->filterSpecies)) {
             $query->where('species_cultured', 'like', '%' . $this->filterSpecies . '%');
@@ -498,61 +522,8 @@ class UserTable extends Component
 
     public function render()
     {
-        // Base query
-        $query = User::query();
-
-        // Apply filters
-        if (!empty($this->filterName)) {
-            $value = $this->filterName;
-            // Database-agnostic full-name concat expression
-            try {
-                $driver = DB::getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
-            } catch (\Throwable $e) {
-                $driver = null;
-            }
-
-            $fullNameExpr = $driver === 'sqlite'
-                ? "first_name || ' ' || last_name"
-                : "CONCAT(first_name, ' ', last_name)";
-
-            $query->where(function($q) use ($value, $fullNameExpr) {
-                $q->where('first_name', 'like', '%'.$value.'%')
-                  ->orWhere('last_name', 'like', '%'.$value.'%')
-                  ->orWhere('email', 'like', '%'.$value.'%')
-                  ->orWhere('fishpond_name', 'like', '%'.$value.'%')
-                  ->orWhere('barangay', 'like', '%'.$value.'%')
-                  ->orWhere('municipality', 'like', '%'.$value.'%')
-                  ->orWhere('province', 'like', '%'.$value.'%')
-                  ->orWhere('species_cultured', 'like', '%'.$value.'%')
-                  ->orWhereRaw("{$fullNameExpr} LIKE ?", ['%'.$value.'%']);
-            });
-        }
-        if (!empty($this->filterEmail)) {
-            $query->where('email', 'like', '%' . $this->filterEmail . '%');
-        }
-        if (!empty($this->filterAccountType)) {
-            $query->where('account_type', $this->filterAccountType);
-        }
-         if (!empty($this->filterBarangay)) {
-            $query->where('barangay', 'like', '%' . $this->filterBarangay . '%');
-        }
-        if (!empty($this->filterMunicipality)) {
-            $query->where('municipality', 'like', '%' . $this->filterMunicipality . '%');
-        }
-        if (!empty($this->filterProvince)) {
-            $query->where('province', 'like', '%' . $this->filterProvince . '%');
-        }
-         if (!empty($this->filterWaterType)) {
-            $query->where('water_type', $this->filterWaterType);
-        }
-        if (!empty($this->filterSpecies)) {
-            $query->where('species_cultured', 'like', '%' . $this->filterSpecies . '%');
-        }
-        // Added: Filter for Fishpond Name
-        if (!empty($this->filterFishpondName)) {
-            $query->where('fishpond_name', 'like', '%' . $this->filterFishpondName . '%');
-        }
-
+        // Base query with all filters applied
+        $query = $this->buildUserQuery();
 
         // Compute counts based on the same filtered query so the stats reflect current filters
         try {
