@@ -151,13 +151,31 @@ class RecommendationCard extends Component
 
     public function getSpeciesImage(string $speciesName): ?string
     {
-        $speciesFiles = glob(public_path('assets/species/*.{png,jpg,jpeg,svg,gif,webp}', GLOB_BRACE)) ?: [];
-        $speciesMap = [];
+        $speciesFiles = glob(public_path('assets/species/*.{webp,png,jpg,jpeg,svg,gif}'), GLOB_BRACE) ?: [];
+        $byBase = [];
         foreach ($speciesFiles as $file) {
             $filename = basename($file);
             $base = pathinfo($file, PATHINFO_FILENAME);
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             $key = strtolower(preg_replace('/[^a-z0-9]+/', '', $base));
-            $speciesMap[$key] = $filename;
+            $byBase[$key][$ext] = $filename;
+        }
+
+        $speciesMap = [];
+        foreach ($byBase as $key => $exts) {
+            if (isset($exts['webp'])) {
+                $speciesMap[$key] = $exts['webp'];
+            } elseif (isset($exts['png'])) {
+                $speciesMap[$key] = $exts['png'];
+            } elseif (isset($exts['jpg'])) {
+                $speciesMap[$key] = $exts['jpg'];
+            } elseif (isset($exts['jpeg'])) {
+                $speciesMap[$key] = $exts['jpeg'];
+            } elseif (isset($exts['svg'])) {
+                $speciesMap[$key] = $exts['svg'];
+            } elseif (isset($exts['gif'])) {
+                $speciesMap[$key] = $exts['gif'];
+            }
         }
 
         $aliasMap = [

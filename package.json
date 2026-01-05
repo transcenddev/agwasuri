@@ -8,6 +8,7 @@
         "dev-start": "node ./scripts/dev-start.js",
         "dev-start:win": "pwsh ./scripts/dev-start.ps1",
         "dev-reset": "npm run dev-start -- --fresh"
+        ,"convert-webp": "node ./tools/convert-images-to-webp.js"
     },
     "devDependencies": {
         "@commitlint/cli": "^17.6.7",

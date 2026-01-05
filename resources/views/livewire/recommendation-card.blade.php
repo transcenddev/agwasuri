@@ -46,11 +46,14 @@
 
             {{-- Animated fish carousel --}}
             <div id="dashboard-fish-carousel" data-base="{{ asset('assets/species') }}" class="flex justify-center items-center my-4 relative z-20 flex-grow" x-bind:class="compact ? 'my-2' : 'my-4'">
-                <img id="dashboard-fish-img" src="{{ asset('assets/species/tilapia.png') }}" 
-                     alt="Fish species" 
-                     class="object-contain w-full max-w-xs h-auto drop-shadow-2xl" 
-                     style="transition: opacity 0.45s ease, transform 0.45s ease; opacity: 0;"
-                     x-bind:class="compact ? 'w-20 h-20 max-w-none' : ''"/>
+                <picture id="dashboard-fish-picture" class="mx-auto">
+                    <source id="dashboard-fish-webp" srcset="{{ asset('assets/species/tilapia.webp') }}" type="image/webp">
+                    <img id="dashboard-fish-img" src="{{ asset('assets/species/tilapia.png') }}" 
+                         alt="Fish species" 
+                         class="object-contain w-full max-w-xs h-auto drop-shadow-2xl" 
+                         style="transition: opacity 0.45s ease, transform 0.45s ease; opacity: 0;"
+                         x-bind:class="compact ? 'w-20 h-20 max-w-none' : ''"/>
+                </picture>
             </div>
 
             {{-- Ready message --}}
