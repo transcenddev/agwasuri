@@ -133,4 +133,26 @@
             console.warn('Failed to update user query param', e);
         }
     });
+
+    // Bridge Livewire dispatch back to a DOM CustomEvent so global listeners can react
+    window.addEventListener('agwa:user-selected-browser', function (ev) {
+        try {
+            const userId = ev.detail?.userId;
+            if (!userId) return;
+            window.dispatchEvent(new CustomEvent('user-selected', { detail: { userId } }));
+        } catch (e) {
+            console.warn('Failed to fan-out user-selected', e);
+        }
+    });
+
+    // Listen for client-side navigate fallback and perform a hard navigation
+    window.addEventListener('agwa:client-navigate', function (ev) {
+        try {
+            const url = ev.detail?.url;
+            if (!url) return;
+            window.location.href = url;
+        } catch (e) {
+            console.warn('client navigate failed', e);
+        }
+    });
 </script>
