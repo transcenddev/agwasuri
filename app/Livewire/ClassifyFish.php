@@ -88,17 +88,55 @@ class ClassifyFish extends Component
             return;
         }
 
-        $this->userId = $loggedInUser->getKey();
+        $providedUserId = $this->userId; // set via property/route when available
+        if ($this->userId === null) {
+            $this->userId = $loggedInUser->getKey();
+        }
+
         $this->isAdminView = method_exists($loggedInUser, 'isAdmin') ? $loggedInUser->isAdmin() : false;
 
         if ($this->isAdminView) {
-            $this->userId = null;
-            Log::info('ClassifyFish: Mount - Admin view, awaiting user selection.');
+            // Allow pre-selected user (from query/session) if it differs from admin id; otherwise await selection
+            if ($providedUserId !== null && (int) $providedUserId !== (int) $loggedInUser->getKey()) {
+                $this->userId = (int) $providedUserId;
+                Log::info('ClassifyFish: Mount - Admin with preselected user.', ['userId' => $this->userId]);
+            } else {
+                $this->userId = null;
+                Log::info('ClassifyFish: Mount - Admin view, awaiting user selection.');
+            }
             $this->fetchLastTrainedTimestampFromDb();
         } else {
+            // Non-admin keeps provided user if set, otherwise defaults to own id
+            $this->userId = $providedUserId ?? $this->userId;
             Log::info('ClassifyFish: Mount - Non-admin view.', ['userId' => $this->userId]);
         }
         $this->checkCanPredict();
+
+        // Hydrate from prefilled session payload when coming from dashboard "View Analysis"
+        $this->hydrateFromPrefill();
+    }
+
+    private function hydrateFromPrefill(): void
+    {
+        $prefill = session()->pull('prefill_analysis');
+        if (!$prefill || !is_array($prefill)) {
+            return;
+        }
+
+        // Respect admin selection; if payload user differs from admin context, ignore
+        if ($this->isAdminView && (!isset($prefill['user_id']) || (int) $prefill['user_id'] !== (int) ($this->userId ?? 0))) {
+            Log::info('ClassifyFish: Prefill ignored due to admin user mismatch.', ['payloadUser' => $prefill['user_id'] ?? null, 'currentUser' => $this->userId]);
+            return;
+        }
+
+        $this->userId = (int) ($prefill['user_id'] ?? $this->userId);
+        $this->canPredict = !is_null($this->userId);
+        $this->waterQualityData = $prefill['water_quality'] ?? null;
+        $this->predictionResults = $prefill['predictions'] ?? [];
+        $this->modelMetrics = $prefill['model_metrics'] ?? [];
+        $this->error = null;
+        $this->generateExplanations();
+        Log::info('ClassifyFish: Hydrated from prefill payload.', ['userId' => $this->userId, 'predictions' => count($this->predictionResults)]);
     }
 
     public function fetchLastTrainedTimestampFromDb()
@@ -361,8 +399,17 @@ class ClassifyFish extends Component
             'shrimp' => $speciesMap['shrimp'] ?? 'shrimp.png',
             'alimango' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
             'mudcrab' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
-            'catfish' => $speciesMap['catfish'] ?? 'catfish.png',
-            'pangasius' => $speciesMap['catfish'] ?? 'catfish.png',
+            'catfish' => $speciesMap['hito'] ?? 'hito.png',
+            'pangasius' => $speciesMap['hito'] ?? 'hito.png',
+            'hito' => $speciesMap['hito'] ?? 'hito.png',
+            'dalag' => $speciesMap['dalag'] ?? 'dalag.png',
+            'ayungin' => $speciesMap['ayungin'] ?? 'ayungin.png',
+            'lapulapu' => $speciesMap['lapu-lapu'] ?? 'lapu-lapu.png',
+            'grouper' => $speciesMap['lapu-lapu'] ?? 'lapu-lapu.png',
+            'talakitok' => $speciesMap['talakitok'] ?? 'talakitok.png',
+            'trevally' => $speciesMap['talakitok'] ?? 'talakitok.png',
+            'mayamaya' => $speciesMap['maya-maya'] ?? 'maya-maya.png',
+            'redsnapper' => $speciesMap['maya-maya'] ?? 'maya-maya.png',
         ];
 
         // Helper: normalize (remove non-alnum and lowercase)

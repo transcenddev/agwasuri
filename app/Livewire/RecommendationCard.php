@@ -18,6 +18,7 @@ class RecommendationCard extends Component
     public bool $hasLatestData = false;
     public ?string $latestRecordedAt = null;
     public bool $hasPrediction = false;
+    public array $lastPredictionPayload = [];
     
     // Current water quality values for parameter breakdown
     public ?float $temperature = null;
@@ -99,6 +100,24 @@ class RecommendationCard extends Component
                     $this->species = data_get($topPrediction, 'species_name', 'Unknown');
                     $this->confidence = (float) data_get($topPrediction, 'confidence_percentage', 0);
                     $this->hasPrediction = true;
+
+                    // Cache payload for handoff to full analysis page
+                    $this->lastPredictionPayload = [
+                        'user_id' => $this->userId ?? auth()->id(),
+                        'water_quality' => [
+                            'temperature' => round((float) $averageData->temperature, 2),
+                            'salinity' => round((float) $averageData->salinity, 2),
+                            'dissolved_oxygen' => round((float) $averageData->dissolved_oxygen, 2),
+                            'ph_level' => round((float) $averageData->ph_level, 2),
+                        ],
+                        'predictions' => $predictions,
+                        'model_metrics' => [
+                            'accuracy' => (float) data_get($data, 'model_accuracy_percentage', 0),
+                            'precision' => (float) data_get($data, 'precision_percentage', 0),
+                            'recall' => (float) data_get($data, 'recall_percentage', 0),
+                            'f1_score' => (float) data_get($data, 'f1_score_percentage', 0),
+                        ],
+                    ];
                 }
             } else {
                 Log::error('RecommendationCard: Prediction API failed.', ['status' => $response->status()]);
@@ -116,6 +135,18 @@ class RecommendationCard extends Component
         $this->error = '';
         $this->species = 'Tilapia (Oreochromis niloticus)';
         $this->confidence = null;
+        $this->lastPredictionPayload = [];
+    }
+
+    public function viewFullAnalysis()
+    {
+        if (empty($this->lastPredictionPayload)) {
+            $this->error = 'Run a prediction first to view full analysis.';
+            return;
+        }
+
+        session()->put('prefill_analysis', $this->lastPredictionPayload);
+        return redirect()->route('optimal-fish', ['user' => $this->userId ?? auth()->id()]);
     }
 
     public function getSpeciesImage(string $speciesName): ?string
@@ -140,8 +171,17 @@ class RecommendationCard extends Component
             'shrimp' => $speciesMap['shrimp'] ?? 'shrimp.png',
             'alimango' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
             'mudcrab' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
-            'catfish' => $speciesMap['catfish'] ?? 'catfish.png',
-            'pangasius' => $speciesMap['catfish'] ?? 'catfish.png',
+            'catfish' => $speciesMap['hito'] ?? 'hito.png',
+            'pangasius' => $speciesMap['hito'] ?? 'hito.png',
+            'hito' => $speciesMap['hito'] ?? 'hito.png',
+            'dalag' => $speciesMap['dalag'] ?? 'dalag.png',
+            'ayungin' => $speciesMap['ayungin'] ?? 'ayungin.png',
+            'lapulapu' => $speciesMap['lapu-lapu'] ?? 'lapu-lapu.png',
+            'grouper' => $speciesMap['lapu-lapu'] ?? 'lapu-lapu.png',
+            'talakitok' => $speciesMap['talakitok'] ?? 'talakitok.png',
+            'trevally' => $speciesMap['talakitok'] ?? 'talakitok.png',
+            'mayamaya' => $speciesMap['maya-maya'] ?? 'maya-maya.png',
+            'redsnapper' => $speciesMap['maya-maya'] ?? 'maya-maya.png',
         ];
 
         $normalize = function ($s) {

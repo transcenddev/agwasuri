@@ -1,3 +1,10 @@
+import ApexCharts from "apexcharts";
+
+// Ensure ApexCharts is available on window even if CDN script is late/missing.
+if (typeof window !== "undefined" && ApexCharts && !window.ApexCharts) {
+    window.ApexCharts = ApexCharts;
+}
+
 // Lightweight initializer to keep water-quality chart append/replay working
 // across Livewire partial updates.
 
@@ -204,13 +211,21 @@
             if (handlingRange) return; // prevent infinite recursion
             handlingRange = true;
             try {
-                console.debug("waterQualityInit: date-range-updated event", evt.detail || evt);
+                console.debug(
+                    "waterQualityInit: date-range-updated event",
+                    evt.detail || evt
+                );
                 const detail = evt && evt.detail ? evt.detail : evt;
                 const payload = Array.isArray(detail)
                     ? { startDate: detail[0], endDate: detail[1] }
                     : {
-                          startDate: detail.startDate || detail[0] || detail.start || null,
-                          endDate: detail.endDate || detail[1] || detail.end || null,
+                          startDate:
+                              detail.startDate ||
+                              detail[0] ||
+                              detail.start ||
+                              null,
+                          endDate:
+                              detail.endDate || detail[1] || detail.end || null,
                           startTime: detail.startTime || null,
                           endTime: detail.endTime || null,
                           startDateTime: detail.startDateTime || null,
@@ -218,18 +233,37 @@
                       };
 
                 // Bridge to Livewire global dispatch (best effort)
-                if (window.Livewire && typeof window.Livewire.dispatch === "function") {
+                if (
+                    window.Livewire &&
+                    typeof window.Livewire.dispatch === "function"
+                ) {
                     window.Livewire.dispatch("date-range-updated", payload);
                 }
 
                 // Targeted: call updateDateRange on the chart component directly if present
                 try {
-                    const root = document.querySelector('[data-chart-id][data-livewire-id]');
-                    const compId = root ? root.getAttribute('data-livewire-id') : null;
-                    if (compId && window.Livewire && typeof window.Livewire.find === "function") {
+                    const root = document.querySelector(
+                        "[data-chart-id][data-livewire-id]"
+                    );
+                    const compId = root
+                        ? root.getAttribute("data-livewire-id")
+                        : null;
+                    if (
+                        compId &&
+                        window.Livewire &&
+                        typeof window.Livewire.find === "function"
+                    ) {
                         const comp = window.Livewire.find(compId);
                         if (comp && typeof comp.call === "function") {
-                            comp.call("updateDateRange", payload.startDate, payload.endDate, payload.startTime, payload.endTime, payload.startDateTime, payload.endDateTime);
+                            comp.call(
+                                "updateDateRange",
+                                payload.startDate,
+                                payload.endDate,
+                                payload.startTime,
+                                payload.endTime,
+                                payload.startDateTime,
+                                payload.endDateTime
+                            );
                         }
                     }
                 } catch (e) {}
@@ -947,7 +981,25 @@ try {
                             style: { fontSize: "14px", color: "#999" },
                         };
 
-                        const inst = new ApexCharts(container, cfg);
+                        const apex = window.ApexCharts || ApexCharts;
+                        if (!apex) {
+                            console.error(
+                                "waterQualityInit: ApexCharts not loaded; retrying",
+                                workingChartId
+                            );
+                            window.__waterQualityPending[
+                                workingChartId
+                            ] = false;
+                            if (attempt < MAX_RETRIES) {
+                                setTimeout(
+                                    () => renderWithRetry(attempt + 1),
+                                    RETRY_DELAY
+                                );
+                            }
+                            return;
+                        }
+
+                        const inst = new apex(container, cfg);
                         inst.render()
                             .then(() => {
                                 const resizeFn =

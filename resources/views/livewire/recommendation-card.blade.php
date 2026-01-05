@@ -22,12 +22,12 @@
                     <circle cx="34" cy="8" r="2" />
                 </svg>
             </div>
-            {{-- Arrow link icon --}}
-            <a href="{{ route('optimal-fish') }}" class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center hover:bg-opacity-30 transition-all">
+            {{-- Arrow link icon (prefill analysis when available) --}}
+            <button type="button" wire:click="viewFullAnalysis" class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center hover:bg-opacity-30 transition-all">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17L17 7m0 0H7m10 0v10"/>
                 </svg>
-            </a>
+            </button>
         </div>
 
         {{-- Title --}}
@@ -121,13 +121,13 @@
 
             {{-- Action buttons --}}
             <div class="mt-4 flex gap-2 relative z-10" x-show="!compact">
-                <a href="{{ route('optimal-fish') }}" 
+                <button type="button" wire:click="viewFullAnalysis" 
                    class="inline-flex items-center gap-2 px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm text-white rounded-lg text-sm font-semibold transition-all">
                     View Full Analysis
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
-                </a>
+                </button>
                 <button wire:click="resetPrediction"
                    class="inline-flex items-center gap-2 px-4 py-2 bg-white bg-opacity-10 hover:bg-opacity-20 backdrop-blur-sm text-white rounded-lg text-sm font-medium transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
