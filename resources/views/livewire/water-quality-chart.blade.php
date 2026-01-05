@@ -52,6 +52,7 @@
                         wire:key="chart-root-{{ $__chartId }}"
                         style="position: relative; display: block; height: 480px;"
                         data-chart-id="{{ $__chartId }}"
+                        data-livewire-id="{{ $this->getId() }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
                         data-series-keys='@json($__seriesKeys)'

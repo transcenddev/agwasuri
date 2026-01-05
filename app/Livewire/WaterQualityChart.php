@@ -15,7 +15,9 @@ class WaterQualityChart extends Component
 {
     #[Url(as: 'user')]
     public ?int $userId = null;
+    #[Url(as: 'start')]
     public ?string $startDate = null;
+    #[Url(as: 'end')]
     public ?string $endDate = null;
     public ?string $chartId = null;
 
@@ -28,6 +30,11 @@ class WaterQualityChart extends Component
     // Livewire-charts model (protected) and a serializable array for Blade
     protected $lineChartModel;
     public array $lineChartModelArray = [];
+
+    // Explicit listener mapping for Livewire bus and browser-dispatched events
+    protected $listeners = [
+        'date-range-updated' => 'updateDateRange',
+    ];
 
     #[On('user-selected')]
     public function updateUser($userId)
@@ -67,14 +74,43 @@ class WaterQualityChart extends Component
     }
 
     #[On('date-range-updated')]
-    public function updateDateRange(?string $startDate, ?string $endDate)
+    public function updateDateRange(
+        ?string $startDate,
+        ?string $endDate,
+        ?string $startTime = null,
+        ?string $endTime = null,
+        ?string $startDateTime = null,
+        ?string $endDateTime = null
+    )
     {
         // Normalize payload from both Livewire dispatch (named params) and browser CustomEvent detail arrays
         if (is_array($startDate) && $endDate === null) {
             $payload = $startDate['detail'] ?? $startDate;
             $startDate = $payload['startDate'] ?? $payload['start'] ?? $payload[0] ?? null;
             $endDate = $payload['endDate'] ?? $payload['end'] ?? $payload[1] ?? null;
+            $startDateTime = $payload['startDateTime'] ?? $payload['start_date_time'] ?? null;
+            $endDateTime = $payload['endDateTime'] ?? $payload['end_date_time'] ?? null;
+            $startTime = $payload['startTime'] ?? $payload['start_time'] ?? null;
+            $endTime = $payload['endTime'] ?? $payload['end_time'] ?? null;
         }
+
+        // Prefer full datetime bounds when provided (custom time ranges)
+        if (!isset($startDateTime)) { $startDateTime = null; }
+        if (!isset($endDateTime)) { $endDateTime = null; }
+        if (!isset($startTime)) { $startTime = null; }
+        if (!isset($endTime)) { $endTime = null; }
+
+        // Build explicit datetime strings when date + time are provided
+        if (! $startDateTime && $startDate && $startTime) {
+            try { $startDateTime = Carbon::parse($startDate)->setTimeFromTimeString($startTime)->toDateTimeString(); } catch (\Throwable $e) {}
+        }
+        if (! $endDateTime && $endDate && $endTime) {
+            try { $endDateTime = Carbon::parse($endDate)->setTimeFromTimeString($endTime)->toDateTimeString(); } catch (\Throwable $e) {}
+        }
+
+        // If datetime bounds exist, use them as primary filters
+        if ($startDateTime) { $startDate = $startDateTime; }
+        if ($endDateTime) { $endDate = $endDateTime; }
 
         $this->startDate = $startDate ?: null;
         $this->endDate = $endDate ?: null;
@@ -98,21 +134,18 @@ class WaterQualityChart extends Component
             ],
         ]);
         // Signal filters event so the active chart instance for this user refreshes
-        $filtersPayload = [
+        $this->dispatch('water-quality:filters', [
             'userId' => $this->userId,
             'chartId' => $this->chartId,
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,
-        ];
-        // Emit both a browser CustomEvent and a Livewire-dispatched event to
-        // maximize the chance that client-side listeners receive the update
-        // regardless of DOM swap timing or Livewire partial updates.
-        $this->dispatchBrowserEvent('water-quality:filters', $filtersPayload);
-        try {
-            $this->dispatch('water-quality:filters', $filtersPayload);
-        } catch (\Throwable $e) {
-            // If dispatch isn't available in this context, ignore silently
-        }
+        ]);
+        $this->dispatchBrowserEvent('water-quality:filters', [
+            'userId' => $this->userId,
+            'chartId' => $this->chartId,
+            'startDate' => $this->startDate,
+            'endDate' => $this->endDate,
+        ]);
     }
 
     #[On('echo:water-quality-data-created,WaterQualityCreated')]
@@ -190,6 +223,12 @@ class WaterQualityChart extends Component
             $this->userId = (int) request('user');
         } else {
             $this->userId = (int) session('selected_user', Auth::id());
+        }
+
+        // Apply querystring date filters as a fallback when browser events are missed
+        if (request()->has('start') || request()->has('end')) {
+            $this->startDate = request('start') ?: null;
+            $this->endDate = request('end') ?: null;
         }
 
         // Persist the resolved user selection for consistency across page loads

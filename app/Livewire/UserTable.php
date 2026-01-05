@@ -145,7 +145,8 @@ class UserTable extends Component
             $query->where('email', 'like', '%' . $this->filterEmail . '%');
         }
         if (!empty($this->filterAccountType)) {
-            $query->where('account_type', $this->filterAccountType);
+            $normalizedAccountType = strtolower(trim($this->filterAccountType));
+            $query->whereRaw('LOWER(account_type) = ?', [$normalizedAccountType]);
         }
          if (!empty($this->filterBarangay)) {
             $query->where('barangay', 'like', '%' . $this->filterBarangay . '%');
@@ -528,14 +529,16 @@ class UserTable extends Component
         // Compute counts based on the same filtered query so the stats reflect current filters
         try {
             $totalUsers = (clone $query)->count();
-            $adminCount = (clone $query)->where('account_type', 'admin')->count();
+            $adminCount = (clone $query)->whereRaw('LOWER(account_type) = ?', ['admin'])->count();
             $regularCount = $totalUsers - $adminCount;
         } catch (\Throwable $e) {
             // Fallback: if counting fails (rare), default to paginated count
             Log::warning('UserTable counts failed', ['error' => $e->getMessage()]);
             $usersForCount = $query->limit(1000)->get();
             $totalUsers = $usersForCount->count();
-            $adminCount = $usersForCount->where('account_type', 'admin')->count();
+            $adminCount = $usersForCount->filter(function ($user) {
+                return strtolower(trim((string) $user->account_type)) === 'admin';
+            })->count();
             $regularCount = $totalUsers - $adminCount;
         }
 

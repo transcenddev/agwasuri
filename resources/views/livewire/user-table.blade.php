@@ -214,11 +214,16 @@
 
             {{-- Active Filters Chips --}}
             @php
+                $formatAccountType = function ($value) {
+                    $n = strtolower(trim((string) $value));
+                    return $n === 'admin' ? 'Admin' : ($n === 'user' ? 'User' : $value);
+                };
+
                 $activeFiltersList = [
                     ['value' => $filterName, 'label' => 'Name', 'property' => 'filterName'],
                     ['value' => $filterEmail, 'label' => 'Email', 'property' => 'filterEmail'],
                     ['value' => $filterFishpondName, 'label' => 'Fishpond', 'property' => 'filterFishpondName'],
-                    ['value' => $filterAccountType, 'label' => 'Account Type', 'property' => 'filterAccountType'],
+                    ['value' => $filterAccountType ? $formatAccountType($filterAccountType) : '', 'label' => 'Account Type', 'property' => 'filterAccountType'],
                     ['value' => $filterBarangay, 'label' => 'Barangay', 'property' => 'filterBarangay'],
                     ['value' => $filterMunicipality, 'label' => 'Municipality', 'property' => 'filterMunicipality'],
                     ['value' => $filterProvince, 'label' => 'Province', 'property' => 'filterProvince'],
@@ -911,6 +916,16 @@
             $speciesValue = is_array($selectedUser->species_cultured)
                 ? implode(', ', array_filter($selectedUser->species_cultured))
                 : (filled($selectedUser->species_cultured) ? $selectedUser->species_cultured : 'Not set');
+            $accountTypeLabel = function ($value) {
+                $n = strtolower(trim((string) $value));
+                if ($n === 'admin') {
+                    return 'Admin';
+                }
+                if ($n === 'user') {
+                    return 'User';
+                }
+                return $value ?: 'Not set';
+            };
         @endphp
         <div id="{{ $modalId }}" x-data @keydown.escape.window="$wire.call('closeDetails')" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
@@ -936,7 +951,7 @@
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Account Type</div>
-                                        <div class="font-medium">{{ $selectedUser->account_type ?? 'Not set' }}</div>
+                                        <div class="font-medium">{{ $accountTypeLabel($selectedUser->account_type ?? null) }}</div>
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Fishpond Name</div>
@@ -956,7 +971,17 @@
                                     </div>
                                     <div>
                                         <div class="text-xs text-gray-500">Water Type</div>
-                                        <div class="font-medium">{{ $selectedUser->water_type ?? 'Not set' }}</div>
+                                        @php
+                                            $waterMap = function ($value) {
+                                                if (!$value) return 'Not set';
+                                                $n = strtolower(trim($value));
+                                                if (str_starts_with($n, 'fresh')) return 'Freshwater';
+                                                if (str_starts_with($n, 'brack')) return 'Brackish';
+                                                if (str_starts_with($n, 'salt')) return 'Saltwater';
+                                                return $value;
+                                            };
+                                        @endphp
+                                        <div class="font-medium">{{ $waterMap($selectedUser->water_type ?? null) }}</div>
                                     </div>
                                      <div class="sm:col-span-2">
                                          <div class="text-xs text-gray-500">API Key</div>

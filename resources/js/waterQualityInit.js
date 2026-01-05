@@ -197,6 +197,50 @@
     // On initial DOM ready, initialize any existing chart roots
     document.addEventListener("DOMContentLoaded", () => initAllRoots(document));
 
+    // Debug helper: log date-range-updated events reaching the browser (with reentrancy guard)
+    try {
+        let handlingRange = false;
+        window.addEventListener("date-range-updated", (evt) => {
+            if (handlingRange) return; // prevent infinite recursion
+            handlingRange = true;
+            try {
+                console.debug("waterQualityInit: date-range-updated event", evt.detail || evt);
+                const detail = evt && evt.detail ? evt.detail : evt;
+                const payload = Array.isArray(detail)
+                    ? { startDate: detail[0], endDate: detail[1] }
+                    : {
+                          startDate: detail.startDate || detail[0] || detail.start || null,
+                          endDate: detail.endDate || detail[1] || detail.end || null,
+                          startTime: detail.startTime || null,
+                          endTime: detail.endTime || null,
+                          startDateTime: detail.startDateTime || null,
+                          endDateTime: detail.endDateTime || null,
+                      };
+
+                // Bridge to Livewire global dispatch (best effort)
+                if (window.Livewire && typeof window.Livewire.dispatch === "function") {
+                    window.Livewire.dispatch("date-range-updated", payload);
+                }
+
+                // Targeted: call updateDateRange on the chart component directly if present
+                try {
+                    const root = document.querySelector('[data-chart-id][data-livewire-id]');
+                    const compId = root ? root.getAttribute('data-livewire-id') : null;
+                    if (compId && window.Livewire && typeof window.Livewire.find === "function") {
+                        const comp = window.Livewire.find(compId);
+                        if (comp && typeof comp.call === "function") {
+                            comp.call("updateDateRange", payload.startDate, payload.endDate, payload.startTime, payload.endTime, payload.startDateTime, payload.endDateTime);
+                        }
+                    }
+                } catch (e) {}
+            } catch (e) {
+                console.debug("waterQualityInit: date-range handler error", e);
+            } finally {
+                handlingRange = false;
+            }
+        });
+    } catch (e) {}
+
     // Clear caches when server asks (e.g., user switch)
     try {
         window.addEventListener("water-quality:clear-cache", (evt) => {
@@ -275,6 +319,25 @@
                 );
             }
         });
+
+        // Bridge Livewire-dispatched filter events to window-level CustomEvents
+        // so any listener (including non-Livewire scripts) can react.
+        if (typeof window.Livewire.on === "function") {
+            window.Livewire.on("water-quality:filters", (detail) => {
+                try {
+                    window.dispatchEvent(
+                        new CustomEvent("water-quality:filters", {
+                            detail,
+                        })
+                    );
+                } catch (e) {
+                    console.debug(
+                        "waterQualityInit: forward filters event failed",
+                        e
+                    );
+                }
+            });
+        }
     } else {
         // Defensive: if Livewire isn't available yet, attempt a global hook later
         console.debug("waterQualityInit: Livewire not present at init time");

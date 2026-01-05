@@ -77,10 +77,10 @@
                     <div class="flex flex-col gap-1">
                         <!-- presets only inside dropdown -->
                         <div class="pt-1"></div>
-                        <button type="button" data-range="1h" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">1h</button>
-                        <button type="button" data-range="24h" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">24h</button>
-                        <button type="button" data-range="7d" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">7d</button>
-                        <button type="button" data-range="30d" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">30d</button>
+                        <button type="button" data-range="1h" onclick="(function(btn){const r=btn.dataset.range;const now=new Date();const start=new Date(now-3600000);const s=start.toISOString();const e=now.toISOString();console.debug('topbar inline dispatch',r,s,e);window.dispatchEvent(new CustomEvent('date-range-updated',{detail:[s,e]}));if(window.Livewire?.dispatch){window.Livewire.dispatch('date-range-updated',{startDate:s,endDate:e,startDateTime:s,endDateTime:e});}return false;})(this)" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">1h</button>
+                        <button type="button" data-range="24h" onclick="(function(btn){const r=btn.dataset.range;const now=new Date();const start=new Date(now-86400000);const s=start.toISOString();const e=now.toISOString();console.debug('topbar inline dispatch',r,s,e);window.dispatchEvent(new CustomEvent('date-range-updated',{detail:[s,e]}));if(window.Livewire?.dispatch){window.Livewire.dispatch('date-range-updated',{startDate:s,endDate:e,startDateTime:s,endDateTime:e});}return false;})(this)" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">24h</button>
+                        <button type="button" data-range="7d" onclick="(function(btn){const r=btn.dataset.range;const now=new Date();const start=new Date(now-7*86400000);const s=start.toISOString();const e=now.toISOString();console.debug('topbar inline dispatch',r,s,e);window.dispatchEvent(new CustomEvent('date-range-updated',{detail:[s,e]}));if(window.Livewire?.dispatch){window.Livewire.dispatch('date-range-updated',{startDate:s,endDate:e,startDateTime:s,endDateTime:e});}return false;})(this)" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">7d</button>
+                        <button type="button" data-range="30d" onclick="(function(btn){const r=btn.dataset.range;const now=new Date();const start=new Date(now-30*86400000);const s=start.toISOString();const e=now.toISOString();console.debug('topbar inline dispatch',r,s,e);window.dispatchEvent(new CustomEvent('date-range-updated',{detail:[s,e]}));if(window.Livewire?.dispatch){window.Livewire.dispatch('date-range-updated',{startDate:s,endDate:e,startDateTime:s,endDateTime:e});}return false;})(this)" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">30d</button>
                     </div>
                 </div>
             </div>
@@ -171,8 +171,25 @@
                 // Update URL without page reload
                 window.history.pushState({}, '', url.toString());
                 
-                // Dispatch event for Livewire components
+                // Dispatch event for Livewire components (DOM + Livewire bus)
                 window.dispatchEvent(new CustomEvent('date-range-updated', { detail: [ start, end ] }));
+                try {
+                    if (window.Livewire && typeof window.Livewire.dispatch === 'function') {
+                        window.Livewire.dispatch('date-range-updated', {
+                            startDate: start,
+                            endDate: end,
+                            startTime: null,
+                            endTime: null,
+                            startDateTime: start,
+                            endDateTime: end,
+                        });
+                    }
+                } catch (e) {
+                    // swallow client dispatch errors
+                }
+                try {
+                    console.debug('topbar: dispatched date-range-updated', { start, end });
+                } catch (e) {}
             }
 
             // Attach handlers once DOM ready
