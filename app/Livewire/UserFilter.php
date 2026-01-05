@@ -281,14 +281,11 @@ class UserFilter extends Component
         // Hard fallback: perform a client-side navigation so all components reload
         // with the selected user (prevents stale charts when JS listeners miss).
         try {
-            // Always target the dashboard route (not the Livewire /livewire/update endpoint)
-            $targetUrl = route('dashboard', ['user' => $this->selectedUserId]);
-            // Use JS navigation to avoid Livewire hitting /livewire/update via GET
-            if (method_exists($this, 'js')) {
-                $this->js("window.location.href = '" . $targetUrl . "'");
-            } else {
-                $this->dispatch('agwa:client-navigate', url: $targetUrl);
-            }
+            // Use Livewire SPA navigation to avoid a full reload while still
+            // navigating to the canonical dashboard URL. This relies on
+            // Livewire's `navigate: true` behavior which performs a client-side
+            // visit and keeps history in sync.
+            $this->redirect(route('dashboard', ['user' => $this->selectedUserId]), navigate: true);
         } catch (\Throwable $e) {}
     }
 
