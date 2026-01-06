@@ -73,7 +73,6 @@
                             <thead>
                                 <tr>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-left text-gray-700 bg-white border-b border-gray-100">Recorded At</th>
-                                    <th class="sticky top-0 z-10 px-4 py-3 text-sm font-medium text-center text-gray-700 bg-white border-b border-gray-100">Status</th>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-temperature)">Temperature (°C)</th>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-salinity)">Salinity (ppt)</th>
                                     <th class="sticky top-0 z-10 px-6 py-3 text-sm font-medium text-right bg-white border-b border-gray-100" style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</th>
@@ -90,27 +89,7 @@
                                         preg_match('/\((.+?)\)/', $entry->doFormatted ?? '', $mDo); $doLabel = strtoupper($mDo[1] ?? 'UNKNOWN');
                                         preg_match('/\((.+?)\)/', $entry->phFormatted ?? '', $mPh); $phLabel = strtoupper($mPh[1] ?? 'UNKNOWN');
 
-                                        // Use shared helper to align with dashboard card rule
-                                        $rowStatus = water_status_from_metrics([
-                                            'temperature' => $tempLabel,
-                                            'salinity' => $salLabel,
-                                            'dissolved_oxygen' => $doLabel,
-                                            'ph' => $phLabel,
-                                        ]);
-
-                                        $worst = $rowStatus['status'] ?? 'UNKNOWN';
-                                        $statusTokens = $rowStatus['tokens'] ?? water_status_tokens('UNKNOWN');
-                                        $culprit = $rowStatus['culprits'][0] ?? null;
-
-                                        // Simpler border classes matching Recent Measurements
-                                        $borderMap = [
-                                            'BEST' => 'border-l-4 border-emerald-200',
-                                            'GOOD' => 'border-l-4 border-sky-200',
-                                            'BAD' => 'border-l-4 border-amber-200',
-                                            'HARM' => 'border-l-4 border-rose-200',
-                                            'UNKNOWN' => 'border-l-4 border-gray-100',
-                                        ];
-                                        $rowBorder = $borderMap[$worst] ?? 'border-l-4 border-gray-100';
+                                        $rowBorder = 'border-l-4 border-gray-100';
 
                                         // Simpler pill classes matching Recent Measurements
                                         $pill = fn($label) => match(strtoupper($label)) {
@@ -124,17 +103,6 @@
 
                                         <tr class="bg-white odd:bg-white even:bg-gray-50 hover:bg-gray-100">
                                             <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700 {{ $rowBorder }}">{{ $entry->recorded_at }}</td>
-                                            <td class="px-4 py-3 text-center">
-                                                <div x-data="{ open:false }" class="inline-block relative" @mouseenter="open=true" @mouseleave="open=false" @focusin="open=true" @focusout="open=false">
-                                                    <span tabindex="0" class="{{ $pill($worst) }}">{{ $worst }}</span>
-                                                    @if($culprit)
-                                                        <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
-                                                            <div class="font-medium mb-1">Cause</div>
-                                                            <div>{{ $worst }}: {{ $culprit }}</div>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </td>
                                             <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->temperature !== null ? number_format($entry->temperature, 2) : '-' }} <span class="ml-2 {{ $pill($tempLabel) }}">{{ $tempLabel }}</span></td>
                                             <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->salinity !== null ? number_format($entry->salinity, 2) : '-' }} <span class="ml-2 {{ $pill($salLabel) }}">{{ $salLabel }}</span></td>
                                             <td class="px-6 py-3 text-sm text-right text-gray-700">{{ $entry->dissolved_oxygen !== null ? number_format($entry->dissolved_oxygen, 2) : '-' }} <span class="ml-2 {{ $pill($doLabel) }}">{{ $doLabel }}</span></td>
@@ -157,25 +125,7 @@
                         preg_match('/\((.+?)\)/', $entry->doFormatted ?? '', $mDo); $doLabel = strtoupper($mDo[1] ?? 'UNKNOWN');
                         preg_match('/\((.+?)\)/', $entry->phFormatted ?? '', $mPh); $phLabel = strtoupper($mPh[1] ?? 'UNKNOWN');
 
-                        $rowStatus = water_status_from_metrics([
-                            'temperature' => $tempLabel,
-                            'salinity' => $salLabel,
-                            'dissolved_oxygen' => $doLabel,
-                            'ph' => $phLabel,
-                        ]);
-
-                        $worst = $rowStatus['status'] ?? 'UNKNOWN';
-                        $culprit = $rowStatus['culprits'][0] ?? null;
-
-                        // Simpler border matching Recent Measurements
-                        $borderMap = [
-                            'BEST' => 'border-l-4 border-emerald-200',
-                            'GOOD' => 'border-l-4 border-sky-200',
-                            'BAD' => 'border-l-4 border-amber-200',
-                            'HARM' => 'border-l-4 border-rose-200',
-                            'UNKNOWN' => 'border-l-4 border-gray-100',
-                        ];
-                        $rowBorder = $borderMap[$worst] ?? 'border-l-4 border-gray-100';
+                        $rowBorder = 'border-l-4 border-gray-100';
 
                         $pill = function($label) {
                             return match(strtoupper($label)) {
@@ -190,20 +140,7 @@
 
                     <div class="bg-white border rounded-md p-3 hover:bg-gray-50 {{ $rowBorder }}">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div x-data="{ open:false }" class="relative inline-block" @click.outside="open=false">
-                                    <button @click="open = !open" class="inline-flex items-center {{ $pill($worst) }}">
-                                        {{ $worst }}
-                                    </button>
-                                    @if($culprit)
-                                        <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
-                                            <div class="font-medium mb-1">Cause</div>
-                                            <div>{{ $worst }}: {{ $culprit }}</div>
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="text-sm font-medium text-gray-700">{{ $entry->recorded_at }}</div>
-                            </div>
+                            <div class="text-sm font-medium text-gray-700">{{ $entry->recorded_at }}</div>
                         </div>
 
                         <div class="mt-2 grid grid-cols-2 gap-3 text-sm text-gray-700">

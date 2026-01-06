@@ -21,7 +21,6 @@
                     <thead>
                         <tr>
                             <th class="px-6 py-3 text-sm font-medium text-gray-700 text-left sticky top-0 bg-white z-10 border-b border-gray-100">Recorded At</th>
-                            <th class="px-4 py-3 text-sm font-medium text-gray-700 text-center sticky top-0 bg-white z-10 border-b border-gray-100">Status</th>
                             <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-temperature)">Temperature (°C)</th>
                             <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-salinity)">Salinity (ppt)</th>
                             <th class="px-6 py-3 text-sm font-medium text-right sticky top-0 bg-white z-10 border-b border-gray-100" style="color: var(--wq-series-do)">Dissolved Oxygen (mg/L)</th>
@@ -32,30 +31,13 @@
                     <tbody class="divide-y divide-gray-100">
                         @foreach($items as $row)
                             @php
-                                $s = strtoupper($row->ui_status ?? 'GOOD');
                                 $labels = [
                                     'temperature' => strtoupper($row->tempLabel ?? 'UNKNOWN'),
                                     'salinity' => strtoupper($row->salLabel ?? 'UNKNOWN'),
                                     'dissolved_oxygen' => strtoupper($row->doLabel ?? 'UNKNOWN'),
                                     'ph' => strtoupper($row->phLabel ?? 'UNKNOWN'),
                                 ];
-                                $priority = ['HARM' => 4, 'BAD' => 3, 'GOOD' => 2, 'BEST' => 1, 'UNKNOWN' => 0];
-                                $worst = 'UNKNOWN'; $worstScore = 0; $culprit = null;
-                                foreach($labels as $k => $v) {
-                                    $score = $priority[$v] ?? 0;
-                                    if ($score > $worstScore) { $worstScore = $score; $worst = $v; $culprit = $k; }
-                                }
-                                $culpritName = $culprit ? ucfirst(str_replace('_',' ',$culprit)) : null;
-                                $causeText = $culpritName ? ($worst . ': ' . $culpritName) : null;
-
-                                $borderMap = [
-                                    'BEST' => 'border-l-4 border-emerald-200',
-                                    'GOOD' => 'border-l-4 border-sky-200',
-                                    'BAD' => 'border-l-4 border-amber-200',
-                                    'HARM' => 'border-l-4 border-rose-200',
-                                    'UNKNOWN' => 'border-l-4 border-gray-100',
-                                ];
-                                $rowBorder = $borderMap[$s] ?? 'border-l-4 border-gray-100';
+                                $rowBorder = 'border-l-4 border-gray-100';
                                 $pill = fn($label) => match(strtoupper($label)) {
                                     'BEST' => 'text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
                                     'GOOD' => 'text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
@@ -66,17 +48,6 @@
                             @endphp
                             <tr class="bg-white odd:bg-white even:bg-gray-50 hover:bg-gray-100">
                                 <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700 {{ $rowBorder }}">{{ optional($row->recorded_at)->format('Y-m-d H:i') ?? $row->recorded_at }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700 text-center">
-                                    <div x-data="{ open:false }" class="inline-block relative" @mouseenter="open=true" @mouseleave="open=false" @focusin="open=true" @focusout="open=false">
-                                        <span tabindex="0" class="{{ $pill($s) }}">{{ $s }}</span>
-                                        @if($causeText)
-                                            <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
-                                                <div class="font-medium mb-1">Cause</div>
-                                                <div>{{ $causeText }}</div>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </td>
                                 <td class="px-6 py-3 text-sm text-right text-gray-700">{{ isset($row->temperature) ? number_format($row->temperature, 2) : '-' }} <span class="ml-2 {{ $pill($row->tempLabel ?? 'UNKNOWN') }}">{{ strtoupper($row->tempLabel ?? 'UNKNOWN') }}</span></td>
 
                                 <td class="px-6 py-3 text-sm text-right text-gray-700">{{ isset($row->salinity) ? number_format($row->salinity, 2) : '-' }} <span class="ml-2 {{ $pill($row->salLabel ?? 'UNKNOWN') }}">{{ strtoupper($row->salLabel ?? 'UNKNOWN') }}</span></td>
@@ -95,38 +66,18 @@
             <div class="block lg:hidden space-y-3">
                 @foreach($items as $row)
                     @php
-                        $s = strtoupper($row->ui_status ?? 'GOOD');
-                        $statusClass = ($row->statusBorderClass ?? 'border-l-4 border-gray-100') . ' bg-white';
-                        $badgeClass = $row->badgeClass ?? 'text-gray-700 bg-gray-50';
-                        $dotClass = $row->statusDotClass ?? 'bg-gray-400';
-                    @endphp
-
-                    @php
-                        $borderMap = [
-                            'BEST' => 'border-l-4 border-emerald-200',
-                            'GOOD' => 'border-l-4 border-sky-200',
-                            'BAD' => 'border-l-4 border-amber-200',
-                            'HARM' => 'border-l-4 border-rose-200',
-                            'UNKNOWN' => 'border-l-4 border-gray-100',
-                        ];
-                        $rowBorder = $borderMap[$s] ?? 'border-l-4 border-gray-100';
+                        $rowBorder = 'border-l-4 border-gray-100';
+                        $pill = fn($label) => match(strtoupper($label)) {
+                            'BEST' => 'text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                            'GOOD' => 'text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                            'BAD' => 'text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                            'HARM' => 'text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                            default => 'text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                        };
                     @endphp
                     <div class="bg-white border rounded-md p-3 hover:bg-gray-50 {{ $rowBorder }}">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div x-data="{ open:false }" class="relative inline-block" @click.outside="open=false">
-                                    <button @click="open = !open" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $pill($s) }}">
-                                        {{ $s }}
-                                    </button>
-                                    @if($causeText)
-                                        <div x-show="open" x-cloak class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 bg-white border border-gray-200 rounded shadow-lg text-xs text-gray-700 p-2 z-50">
-                                            <div class="font-medium mb-1">Cause</div>
-                                            <div>{{ $causeText }}</div>
-                                        </div>
-                                    @endif
-                                </div>
-                                <div class="text-sm font-medium text-gray-700">{{ optional($row->recorded_at)->format('Y-m-d H:i') ?? $row->recorded_at }}</div>
-                            </div>
+                            <div class="text-sm font-medium text-gray-700">{{ optional($row->recorded_at)->format('Y-m-d H:i') ?? $row->recorded_at }}</div>
                         </div>
 
                         <div class="mt-2 grid grid-cols-2 gap-3 text-sm text-gray-700">
