@@ -94,7 +94,7 @@
         {{-- Water Quality Card --}}
         @if($overallKey === 'disconnected')
             {{-- Compact placeholder when sensor is offline --}}
-            <div class="flex flex-col items-center justify-center text-center bg-gray-100 text-gray-700 rounded-2xl shadow-md transition-all duration-300"
+            <div class="flex flex-col items-center justify-center text-center bg-gray-100 text-gray-700 rounded-2xl shadow-md transition-all duration-300 sm:col-span-2 lg:col-span-2"
                  x-data="{ compact: false }"
                  @toggle-compact-view.window="compact = !compact"
                  x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
@@ -112,7 +112,7 @@
                 </a>
             </div>
         @else
-            <div class="flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }}"
+            <div class="flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }} sm:col-span-2 lg:col-span-2"
                  x-data="{ compact: false }"
                  @toggle-compact-view.window="compact = !compact"
                  x-bind:class="compact ? 'px-3 py-4' : 'px-5 py-6'"
