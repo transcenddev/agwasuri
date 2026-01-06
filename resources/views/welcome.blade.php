@@ -88,7 +88,7 @@
 
 <body
     class="relative font-sans antialiased transition-colors duration-300 bg-fixed bg-center bg-no-repeat bg-cover dark:bg-[#0a0a0a]"
-    style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), linear-gradient(rgba(27, 101, 27, 0.2), rgba(27, 101, 27, 0.2)), url('{{ asset('assets/hidden_forest_lake.png') }}');">
+    style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), linear-gradient(rgba(27, 101, 27, 0.2), rgba(27, 101, 27, 0.2)), url('{{ asset('assets/ternate_fispond_landsacape.webp') }}');">
 
     <!-- Dark mode overlay (kept behind interactive elements so buttons stay bright) -->
     <div class="fixed inset-0 transition-opacity duration-300 bg-black pointer-events-none dark:opacity-60 opacity-0 z-0"></div>
@@ -99,10 +99,12 @@
         <div class="relative flex items-center justify-center min-h-screen px-4 mx-auto max-w-screen-xl lg:px-8 pt-32">
             <div class="text-center max-w-4xl mx-auto">
 
-                <!-- Tagline -->
-                <p class="text-cvsu-500 text-xs sm:text-sm font-semibold tracking-widest uppercase mb-4 drop-shadow-lg animate-on-load animate-fade-in-up delay-100">
-                    IoT-Powered Water Quality Monitoring
-                </p>
+                <!-- Tagline with Glassmorphism -->
+                <div class="inline-block px-6 py-3 mb-6 backdrop-blur-md bg-white/10 dark:bg-gray-900/20 border border-white/30 dark:border-gray-700/40 rounded-full shadow-xl animate-on-load animate-fade-in-up delay-100">
+                    <p class="text-cvsu-300 dark:text-cvsu-200 text-xs sm:text-sm font-semibold tracking-widest uppercase">
+                        IoT-Powered Water Quality Monitoring
+                    </p>
+                </div>
 
                 <!-- Heading -->
                 <h1 class="text-3xl font-normal text-white font-serif sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl drop-shadow-lg animate-on-load animate-fade-in-up delay-200">

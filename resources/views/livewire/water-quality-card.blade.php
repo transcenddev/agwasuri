@@ -29,7 +29,7 @@
         </div>
     @endif
     {{-- Mobile-first: 1 col mobile, 2 cols tablet, 5 cols desktop for all KPI cards in one row --}}
-    <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'gap-4' : 'gap-6'">
+    <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 lg:items-stretch transition-all duration-300 lg:auto-rows-fr lg:[&>div]:h-full" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'gap-4' : 'gap-6'">
         @php
             $tempStatus = $this->statusFor('temperature', $this->temperature);
             $salStatus = $this->statusFor('salinity', $this->salinity);
@@ -94,8 +94,8 @@
         {{-- Water Quality Card --}}
         @if($overallKey === 'disconnected')
             {{-- Compact placeholder when sensor is offline --}}
-            <div class="flex flex-col items-center justify-center text-center bg-gray-100 text-gray-700 rounded-2xl shadow-md transition-all duration-300 sm:col-span-2"
-                 x-data="{ compact: false }"
+            <div class="flex flex-col items-center justify-center text-center bg-gray-100 text-gray-700 rounded-2xl shadow-md transition-all duration-300 sm:col-span-2 lg:col-span-1 lg:h-full lg:min-h-[260px]"
+                  x-data="{ compact: false }"
                  @toggle-compact-view.window="compact = !compact"
                  x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
                 <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-2 text-gray-500 shadow-sm">
@@ -112,8 +112,8 @@
                 </a>
             </div>
         @else
-            <div class="flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }} sm:col-span-2"
-                 x-data="{ compact: false }"
+            <div class="flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }} sm:col-span-2 lg:col-span-1 lg:h-full lg:min-h-[260px]"
+                  x-data="{ compact: false }"
                  @toggle-compact-view.window="compact = !compact"
                  x-bind:class="compact ? 'px-3 py-4' : 'px-5 py-6'"
                  style="background: {{ $gradient }};">
@@ -151,7 +151,7 @@
         @endif
 
         {{-- Temperature (°C) --}}
-        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
+        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300 lg:h-full lg:min-h-[260px]" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Temperature (°C)</dt>
 
             <dd class="flex flex-col items-center gap-1">
@@ -210,7 +210,7 @@
         </div>
 
         {{-- Salinity (ppt) --}}
-        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
+        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300 lg:h-full lg:min-h-[260px]" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Salinity (ppt)</dt>
 
             <dd class="flex flex-col items-center gap-1">
@@ -269,7 +269,7 @@
         </div>
 
         {{-- Dissolved Oxygen (mg/L) --}}
-        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
+        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300 lg:h-full lg:min-h-[260px]" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">Dissolved Oxygen (mg/L)</dt>
 
             <dd class="flex flex-col items-center gap-1">
@@ -328,7 +328,7 @@
         </div>
 
         {{-- pH Level --}}
-        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
+        <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300 lg:h-full lg:min-h-[260px]" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
             <dt class="order-last text-sm sm:text-base font-medium text-gray-500">pH Level</dt>
 
             <dd class="flex flex-col items-center gap-1">
