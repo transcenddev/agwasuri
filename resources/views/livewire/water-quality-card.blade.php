@@ -28,65 +28,127 @@
             </div>
         </div>
     @endif
-    {{-- When disconnected, show a more prominent alert with troubleshooting link --}}
-    @if(strtolower($overallStatus ?? $this->overallStatus) === 'disconnected')
-        <div class="mb-4">
-            <div class="rounded-md bg-amber-50 p-3 border border-amber-100">
-                <div class="flex items-start gap-3">
-                    <svg class="h-5 w-5 text-amber-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
-                    </svg>
-                    <div class="flex-1 text-sm text-amber-700">
-                        Sensor offline. Check power, battery, or network connection.
-                        <a href="#troubleshooting" class="ml-2 text-sm text-amber-700 underline">Troubleshooting tips</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
     {{-- Mobile-first: 1 col mobile, 2 cols tablet, 5 cols desktop for all KPI cards in one row --}}
     <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'gap-4' : 'gap-6'">
         @php
-            $scoreBadge = $this->scoreStatusBadge();
             $tempStatus = $this->statusFor('temperature', $this->temperature);
             $salStatus = $this->statusFor('salinity', $this->salinity);
             $doStatus = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
             $phStatus = $this->statusFor('ph_level', $this->ph_level);
+
+            $statusPriority = ['harm', 'bad', 'good', 'best', 'unknown'];
+            $metricStatuses = [
+                'Temperature' => ['status' => $tempStatus, 'value' => $this->temperature, 'unit' => $this->unitFor('temperature'), 'label' => $temperatureClassification['label'] ?? null, 'classificationKey' => 'temperature_c'],
+                'Salinity' => ['status' => $salStatus, 'value' => $this->salinity, 'unit' => $this->unitFor('salinity'), 'label' => $salinityClassification['label'] ?? null, 'classificationKey' => 'salinity_ppt'],
+                'Dissolved Oxygen' => ['status' => $doStatus, 'value' => $this->dissolved_oxygen, 'unit' => $this->unitFor('dissolved_oxygen'), 'label' => $dissolvedOxygenClassification['label'] ?? null, 'classificationKey' => 'dissolved_oxygen_mg_l'],
+                'pH' => ['status' => $phStatus, 'value' => $this->ph_level, 'unit' => $this->unitFor('ph_level'), 'label' => $phClassification['label'] ?? null, 'classificationKey' => 'ph'],
+            ];
+
+            $worstMetric = collect($metricStatuses)
+                ->sortBy(fn($meta) => array_search($meta['status'], $statusPriority, true))
+                ->first();
+
+            $worstMetricName = collect($metricStatuses)
+                ->sortBy(fn($meta) => array_search($meta['status'], $statusPriority, true))
+                ->keys()
+                ->first();
+
+            $overallKey = strtolower($overallStatus ?? $this->overallStatus);
+            $gradient = match($overallKey) {
+                'harm' => 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                'bad' => 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                'good', 'best' => 'linear-gradient(135deg, #1B651B 0%, #0f4910 100%)',
+                default => 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)',
+            };
+
+            $overallBadgeClass = match($overallKey) {
+                'best' => 'bg-green-100 text-green-800',
+                'good' => 'bg-blue-100 text-blue-800',
+                'bad' => 'bg-yellow-100 text-yellow-800',
+                'harm' => 'bg-red-100 text-red-800',
+                default => 'bg-gray-100 text-gray-800',
+            };
+
+            $reasonLine = 'All parameters are within acceptable ranges.';
+
+            if (in_array($worstMetric['status'], ['harm', 'bad'], true)) {
+                $valueFormatted = $worstMetric['value'] === null
+                    ? 'n/a'
+                    : number_format($worstMetric['value'], $worstMetricName === 'Salinity' ? 2 : ($worstMetricName === 'pH' ? 2 : 1)) . ' ' . $worstMetric['unit'];
+
+                $targetHint = null;
+                $cfg = config('water_quality');
+                if ($worstMetric['classificationKey'] && isset($cfg[$worstMetric['classificationKey']]) && is_array($cfg[$worstMetric['classificationKey']])) {
+                    $bestRange = collect($cfg[$worstMetric['classificationKey']])->firstWhere('label', 'BEST');
+                    if ($bestRange && isset($bestRange['min'], $bestRange['max'])) {
+                        $targetHint = number_format((float) $bestRange['min'], 2) . '–' . number_format((float) $bestRange['max'], 2) . ' ' . $worstMetric['unit'];
+                    }
+                }
+
+                $reasonLine = $targetHint
+                    ? "{$worstMetricName} is " . strtoupper($worstMetric['status']) . " ({$valueFormatted}). Target {$targetHint}."
+                    : "{$worstMetricName} is " . strtoupper($worstMetric['status']) . " ({$valueFormatted}).";
+            }
         @endphp
 
-        {{-- Water Quality Score Card (1st KPI) - Inspired by Plant Health Design --}}
-        <div class="flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }}"
-             x-data="{ compact: false }"
-             @toggle-compact-view.window="compact = !compact"
-             x-bind:class="compact ? 'px-3 py-4' : 'px-5 py-6'"
-             style="background: linear-gradient(135deg, {{ $this->overallScore >= 90 ? '#1B651B 0%, #0f4910 100%' : ($this->overallScore >= 70 ? '#f59e0b 0%, #d97706 100%' : '#dc2626 0%, #b91c1c 100%') }});">
-            {{-- Decorative gradient overlay --}}
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
-
-            {{-- Icon --}}
-            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mb-3 relative z-10">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+        {{-- Water Quality Card --}}
+        @if($overallKey === 'disconnected')
+            {{-- Compact placeholder when sensor is offline --}}
+            <div class="flex flex-col items-center justify-center text-center bg-gray-100 text-gray-700 rounded-2xl shadow-md transition-all duration-300 sm:col-span-2"
+                 x-data="{ compact: false }"
+                 @toggle-compact-view.window="compact = !compact"
+                 x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-2 text-gray-500 shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M5.636 5.636A9 9 0 0118.364 18.364M9.88 9.88A3 3 0 0114.12 14.12" />
+                    </svg>
+                </div>
+                <div class="text-lg font-semibold">Sensor Offline</div>
+                <p class="mt-1 text-xs text-gray-500 max-w-[220px]">
+                    Check power, battery, or network.
+                </p>
+                <a href="{{ route('troubleshooting') }}" class="mt-2 text-xs text-gray-600 underline hover:text-gray-800 transition-colors" x-show="!compact">
+                    Troubleshooting tips
+                </a>
             </div>
+        @else
+            <div class="flex flex-col items-center justify-center text-center relative overflow-hidden rounded-3xl shadow-xl transition-all duration-300 {{ $this->overallScore < 70 ? 'animate-pulse' : '' }} sm:col-span-2"
+                 x-data="{ compact: false }"
+                 @toggle-compact-view.window="compact = !compact"
+                 x-bind:class="compact ? 'px-3 py-4' : 'px-5 py-6'"
+                 style="background: {{ $gradient }};">
+                {{-- Decorative gradient overlay --}}
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
 
-            <dd class="flex flex-col items-center gap-2 mb-3 relative z-10">
-                <div class="flex items-baseline gap-1">
-                    <span class="font-black text-white transition-all duration-300" x-bind:class="compact ? 'text-4xl' : 'text-5xl'">{{ $this->overallScore }}</span>
-                    <span class="text-2xl font-bold text-white opacity-90">%</span>
+                {{-- Status icon --}}
+                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mb-2 relative z-10">
+                    @php
+                        $iconPath = in_array($overallKey, ['harm','bad'], true)
+                            ? 'M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z'
+                            : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z';
+                    @endphp
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $iconPath }}" />
+                    </svg>
                 </div>
 
-                <span class="px-3 py-1 rounded-full text-xs font-bold bg-white bg-opacity-20 text-white backdrop-blur-sm uppercase tracking-wide">
-                    {{ is_array($scoreBadge) ? $scoreBadge['text'] : $scoreBadge }}
-                </span>
-            </dd>
+                {{-- Hero status (no badge duplication) --}}
+                <dd class="flex flex-col items-center gap-2 mb-2 relative z-10">
+                    <div class="flex items-baseline gap-2 text-white">
+                        <span class="font-black transition-all duration-300" x-bind:class="compact ? 'text-4xl' : 'text-5xl'">{{ strtoupper($overallStatus ?? $this->overallStatus) }}</span>
+                    </div>
+                    <div class="text-xs text-white text-opacity-80">
+                        Index: {{ $this->overallScore }}/100
+                    </div>
+                </dd>
 
-            <dt class="text-sm font-semibold text-white opacity-90 mb-2 relative z-10">Water Quality Score</dt>
+                <dt class="text-sm font-semibold text-white opacity-90 mb-1 relative z-10">Water Quality Risk</dt>
 
-            <p class="text-xs text-white opacity-80 leading-relaxed max-w-[200px] relative z-10">
-                {{ $this->overallScore >= 90 ? 'All parameters optimal.' : ($this->overallScore >= 70 ? 'Some parameters need attention.' : 'Immediate action required.') }}
-            </p>
-        </div>
+                <p class="text-xs text-white opacity-80 leading-relaxed max-w-[220px] relative z-10">
+                    {{ $reasonLine }}
+                </p>
+            </div>
+        @endif
 
         {{-- Temperature (°C) --}}
         <div class="flex flex-col items-center justify-center text-center bg-white rounded-2xl shadow-md transition-all duration-300" x-data="{ compact: false }" @toggle-compact-view.window="compact = !compact" x-bind:class="compact ? 'px-3 py-4 h-32' : 'px-5 py-6 sm:py-6 min-h-24'">

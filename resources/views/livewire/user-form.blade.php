@@ -104,7 +104,7 @@
                              <label for="water_type" class="block text-sm font-medium text-gray-700">Water Type</label>
                              <select wire:model.defer="water_type" id="water_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                  <option value="Freshwater">Freshwater</option>
-                                 <option value="Brackishwater">Brackishwater</option>
+                                 <option value="Brackish">Brackish</option>
                                  <option value="Saltwater">Saltwater</option>
                              </select>
                              @error('water_type') <span class="text-xs text-red-500">{{ $message }}</span> @enderror

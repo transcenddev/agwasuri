@@ -64,6 +64,26 @@ class User extends Authenticatable
     }
 
     /**
+     * Normalize account_type on write to keep canonical lowercase values.
+     */
+    protected function accountType(): Attribute
+    {
+        return Attribute::make(
+            set: function ($value) {
+                $normalized = strtolower(trim((string) $value));
+                if ($normalized === 'admin') {
+                    return 'admin';
+                }
+                if ($normalized === 'user') {
+                    return 'user';
+                }
+
+                return 'user';
+            },
+        );
+    }
+
+    /**
      * Virtual name accessor that combines first and last name.
      * Returns a fallback of 'User' when both are empty.
      */

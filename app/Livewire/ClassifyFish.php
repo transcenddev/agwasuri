@@ -46,6 +46,13 @@ class ClassifyFish extends Component
     #[On('date-range-updated')]
     public function updateDates($startDate, $endDate)
     {
+        // Normalize payload from Livewire dispatch (named params) or browser CustomEvent detail arrays
+        if (is_array($startDate) && $endDate === null) {
+            $payload = $startDate['detail'] ?? $startDate;
+            $startDate = $payload['startDate'] ?? $payload['start'] ?? $payload[0] ?? null;
+            $endDate = $payload['endDate'] ?? $payload['end'] ?? $payload[1] ?? null;
+        }
+
         Log::info('ClassifyFish: Date range updated.', ['start' => $startDate, 'end' => $endDate]);
         $this->startDate = $startDate ?: null;
         $this->endDate = $endDate ?: null;
@@ -81,17 +88,55 @@ class ClassifyFish extends Component
             return;
         }
 
-        $this->userId = $loggedInUser->getKey();
+        $providedUserId = $this->userId; // set via property/route when available
+        if ($this->userId === null) {
+            $this->userId = $loggedInUser->getKey();
+        }
+
         $this->isAdminView = method_exists($loggedInUser, 'isAdmin') ? $loggedInUser->isAdmin() : false;
 
         if ($this->isAdminView) {
-            $this->userId = null;
-            Log::info('ClassifyFish: Mount - Admin view, awaiting user selection.');
+            // Allow pre-selected user (from query/session) if it differs from admin id; otherwise await selection
+            if ($providedUserId !== null && (int) $providedUserId !== (int) $loggedInUser->getKey()) {
+                $this->userId = (int) $providedUserId;
+                Log::info('ClassifyFish: Mount - Admin with preselected user.', ['userId' => $this->userId]);
+            } else {
+                $this->userId = null;
+                Log::info('ClassifyFish: Mount - Admin view, awaiting user selection.');
+            }
             $this->fetchLastTrainedTimestampFromDb();
         } else {
+            // Non-admin keeps provided user if set, otherwise defaults to own id
+            $this->userId = $providedUserId ?? $this->userId;
             Log::info('ClassifyFish: Mount - Non-admin view.', ['userId' => $this->userId]);
         }
         $this->checkCanPredict();
+
+        // Hydrate from prefilled session payload when coming from dashboard "View Analysis"
+        $this->hydrateFromPrefill();
+    }
+
+    private function hydrateFromPrefill(): void
+    {
+        $prefill = session()->pull('prefill_analysis');
+        if (!$prefill || !is_array($prefill)) {
+            return;
+        }
+
+        // Respect admin selection; if payload user differs from admin context, ignore
+        if ($this->isAdminView && (!isset($prefill['user_id']) || (int) $prefill['user_id'] !== (int) ($this->userId ?? 0))) {
+            Log::info('ClassifyFish: Prefill ignored due to admin user mismatch.', ['payloadUser' => $prefill['user_id'] ?? null, 'currentUser' => $this->userId]);
+            return;
+        }
+
+        $this->userId = (int) ($prefill['user_id'] ?? $this->userId);
+        $this->canPredict = !is_null($this->userId);
+        $this->waterQualityData = $prefill['water_quality'] ?? null;
+        $this->predictionResults = $prefill['predictions'] ?? [];
+        $this->modelMetrics = $prefill['model_metrics'] ?? [];
+        $this->error = null;
+        $this->generateExplanations();
+        Log::info('ClassifyFish: Hydrated from prefill payload.', ['userId' => $this->userId, 'predictions' => count($this->predictionResults)]);
     }
 
     public function fetchLastTrainedTimestampFromDb()
@@ -332,14 +377,33 @@ class ClassifyFish extends Component
      */
     public function getSpeciesImage(string $speciesName): ?string
     {
-        // Discover available species images
-        $speciesFiles = glob(public_path('assets/species/*.{png,jpg,jpeg,svg,gif}', GLOB_BRACE)) ?: [];
-        $speciesMap = [];
+        // Discover available species images and prefer WebP when present
+        $speciesFiles = glob(public_path('assets/species/*.{webp,png,jpg,jpeg,svg,gif}'), GLOB_BRACE) ?: [];
+        $byBase = [];
         foreach ($speciesFiles as $file) {
             $filename = basename($file);
             $base = pathinfo($file, PATHINFO_FILENAME);
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
             $key = strtolower(preg_replace('/[^a-z0-9]+/', '', $base));
-            $speciesMap[$key] = $filename;
+            $byBase[$key][$ext] = $filename;
+        }
+
+        // prefer extensions: webp > png > jpg/jpeg > svg > gif
+        $speciesMap = [];
+        foreach ($byBase as $key => $exts) {
+            if (isset($exts['webp'])) {
+                $speciesMap[$key] = $exts['webp'];
+            } elseif (isset($exts['png'])) {
+                $speciesMap[$key] = $exts['png'];
+            } elseif (isset($exts['jpg'])) {
+                $speciesMap[$key] = $exts['jpg'];
+            } elseif (isset($exts['jpeg'])) {
+                $speciesMap[$key] = $exts['jpeg'];
+            } elseif (isset($exts['svg'])) {
+                $speciesMap[$key] = $exts['svg'];
+            } elseif (isset($exts['gif'])) {
+                $speciesMap[$key] = $exts['gif'];
+            }
         }
 
         // Alias map for common synonyms (map normalized keys to actual filenames)
@@ -354,8 +418,17 @@ class ClassifyFish extends Component
             'shrimp' => $speciesMap['shrimp'] ?? 'shrimp.png',
             'alimango' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
             'mudcrab' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
-            'catfish' => $speciesMap['catfish'] ?? 'catfish.png',
-            'pangasius' => $speciesMap['catfish'] ?? 'catfish.png',
+            'catfish' => $speciesMap['hito'] ?? 'hito.png',
+            'pangasius' => $speciesMap['hito'] ?? 'hito.png',
+            'hito' => $speciesMap['hito'] ?? 'hito.png',
+            'dalag' => $speciesMap['dalag'] ?? 'dalag.png',
+            'ayungin' => $speciesMap['ayungin'] ?? 'ayungin.png',
+            'lapulapu' => $speciesMap['lapu-lapu'] ?? 'lapu-lapu.png',
+            'grouper' => $speciesMap['lapu-lapu'] ?? 'lapu-lapu.png',
+            'talakitok' => $speciesMap['talakitok'] ?? 'talakitok.png',
+            'trevally' => $speciesMap['talakitok'] ?? 'talakitok.png',
+            'mayamaya' => $speciesMap['maya-maya'] ?? 'maya-maya.png',
+            'redsnapper' => $speciesMap['maya-maya'] ?? 'maya-maya.png',
         ];
 
         // Helper: normalize (remove non-alnum and lowercase)

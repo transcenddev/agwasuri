@@ -1,4 +1,4 @@
-<div class="w-full pt-4 pb-2 bg-white dark:bg-slate-900 relative z-999 px-4 sm:px-6 lg:px-8">
+<div class="w-full pt-4 pb-2 bg-transparent dark:bg-transparent backdrop-blur-sm relative z-999 px-4 sm:px-6 lg:px-8">
     @php
         $isAdmin = auth()->check() && (method_exists(auth()->user(), 'isAdmin') ? auth()->user()->isAdmin() : (
             (isset(auth()->user()->role) && auth()->user()->role === 'admin') ||
@@ -22,10 +22,31 @@
         <div class="flex-1"></div>
 
         {{-- Compact range presets (hidden on small screens) - moved to the right. No inner changes. --}}
-        <div id="topbar-range" x-data="{ open:false, customOpen:false, label: '24h', customLabel: 'Custom' }" @keydown.escape.window="open=false; customOpen=false" class="hidden md:flex items-center gap-2 {{ $isAdmin ? 'ms-4' : '' }}">
+        <div id="topbar-range" x-data="{
+                open:false,
+                customOpen:false,
+                label: '24h',
+                customLabel: 'Custom',
+                customStyle:'',
+                presetStyle:'',
+                syncCustom(){
+                    const btn = this.$refs.customBtn;
+                    if (!btn) return;
+                    const r = btn.getBoundingClientRect();
+                    const left = Math.min(r.left, window.innerWidth - 320);
+                    this.customStyle = `position:fixed; top:${r.bottom + 6}px; left:${left}px`;
+                },
+                syncPreset(){
+                    const btn = this.$refs.presetBtn;
+                    if (!btn) return;
+                    const r = btn.getBoundingClientRect();
+                    const left = Math.min(r.left, window.innerWidth - 220);
+                    this.presetStyle = `position:fixed; top:${r.bottom + 6}px; left:${left}px`;
+                }
+            }" @keydown.escape.window="open=false; customOpen=false" x-init="window.addEventListener('resize', () => { if(customOpen) syncCustom(); if(open) syncPreset(); });" class="hidden md:flex items-center gap-2 {{ $isAdmin ? 'ms-4' : '' }}">
             <!-- Separate Custom pill to the left of the dropdown -->
             <div class="relative order-first">
-                <button @click="customOpen = !customOpen; open = false" type="button" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="dialog" :aria-expanded="customOpen" :aria-controls="'topbar-custom-pop'">
+                <button x-ref="customBtn" @click="customOpen = !customOpen; open = false; $nextTick(() => { if(customOpen) syncCustom(); });" type="button" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="dialog" :aria-expanded="customOpen" :aria-controls="'topbar-custom-pop'">
                     <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -34,16 +55,18 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
-                <div x-show="customOpen" x-trap="customOpen" @click.outside="customOpen=false" x-cloak id="topbar-custom-pop" role="dialog" aria-modal="true" class="absolute left-0 top-full z-50 mt-2 w-[18rem] bg-white rounded-md shadow-lg p-3">
-                    <label class="text-xs text-gray-600">Start Date</label>
-                    <input x-ref="customStart" type="date" id="topbar-custom-start" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
-                    <label class="text-xs text-gray-600 mt-2">End Date</label>
-                    <input type="date" id="topbar-custom-end" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
-                    <div class="flex items-center gap-2 mt-2">
-                        <button type="button" id="topbar-custom-apply" @click="customOpen=false; const start = document.getElementById('topbar-custom-start').value; const end = document.getElementById('topbar-custom-end').value; if(start && end) { const s = new Date(start).toLocaleDateString('en-US', {month: 'short', day: '2-digit'}); const e = new Date(end).toLocaleDateString('en-US', {month: 'short', day: '2-digit'}); customLabel = s + ' - ' + e; }" class="inline-flex items-center px-3 py-1.5 rounded-md bg-cvsu text-white text-sm">Apply</button>
-                        <button type="button" @click.prevent="customOpen=false" class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-200 text-sm">Cancel</button>
+                <template x-teleport="body">
+                    <div x-show="customOpen" x-trap="customOpen" @click.outside="customOpen=false" x-cloak id="topbar-custom-pop" role="dialog" aria-modal="true" class="z-[9999] w-[18rem] bg-white rounded-md shadow-lg p-3" :style="customStyle">
+                        <label class="text-xs text-gray-600">Start Date</label>
+                        <input x-ref="customStart" type="date" id="topbar-custom-start" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
+                        <label class="text-xs text-gray-600 mt-2">End Date</label>
+                        <input type="date" id="topbar-custom-end" class="block w-full h-9 px-3 py-2 border border-gray-200 rounded-md">
+                        <div class="flex items-center gap-2 mt-2">
+                            <button type="button" id="topbar-custom-apply" @click.prevent="(() => { const start = $refs.customStart?.value; const end = document.getElementById('topbar-custom-end')?.value; if(!start || !end){ alert('Please pick both start and end dates'); return; } const s = new Date(start).toLocaleDateString('en-US', {month: 'short', day: '2-digit'}); const e = new Date(end).toLocaleDateString('en-US', {month: 'short', day: '2-digit'}); customLabel = s + ' - ' + e; if (window.__wq_updateDateRange) { window.__wq_updateDateRange(start, end); } customOpen = false; })()" class="inline-flex items-center px-3 py-1.5 rounded-md bg-cvsu text-white text-sm">Apply</button>
+                            <button type="button" @click.prevent="customOpen=false" class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-200 text-sm">Cancel</button>
+                        </div>
                     </div>
-                </div>
+                </template>
                 <script>
                     (function(){
                         // when the Custom popover opens, focus the start input for keyboard users
@@ -63,7 +86,7 @@
             </div>
 
             <div class="relative">
-                <button @click="open = !open; customOpen=false" type="button" class="inline-flex items-center gap-2 px-3 py-1 rounded-2xl border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="menu" :aria-expanded="open">
+                <button x-ref="presetBtn" @click="open = !open; customOpen=false; $nextTick(() => { if(open) syncPreset(); });" type="button" class="inline-flex items-center gap-2 px-3 py-1 rounded-2xl border border-gray-200 bg-white text-xs hover:bg-gray-50" aria-haspopup="menu" :aria-expanded="open">
                     <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3M21 12A9 9 0 113 12a9 9 0 0118 0z" />
                     </svg>
@@ -73,16 +96,18 @@
                     </svg>
                 </button>
 
-                <div x-show="open" @click.outside="open=false; customOpen=false" x-cloak class="absolute left-0 top-full z-50 mt-2 min-w-[6rem] bg-white rounded-md shadow-lg p-2">
-                    <div class="flex flex-col gap-1">
-                        <!-- presets only inside dropdown -->
-                        <div class="pt-1"></div>
-                        <button type="button" data-range="1h" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">1h</button>
-                        <button type="button" data-range="24h" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">24h</button>
-                        <button type="button" data-range="7d" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">7d</button>
-                        <button type="button" data-range="30d" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50">30d</button>
+                <template x-teleport="body">
+                    <div x-show="open" @click.outside="open=false; customOpen=false" x-cloak class="z-[9998] min-w-[6rem] bg-white rounded-md shadow-lg p-2" :style="presetStyle">
+                        <div class="flex flex-col gap-1">
+                            <!-- presets only inside dropdown -->
+                            <div class="pt-1"></div>
+                            <button type="button" data-range="1h" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50" @click.prevent="(() => { const end = new Date().toISOString(); const start = new Date(Date.now() - 1000*60*60).toISOString(); label='1h'; if(window.__wq_updateDateRange){ window.__wq_updateDateRange(start, end); } open=false; })()">1h</button>
+                            <button type="button" data-range="24h" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50" @click.prevent="(() => { const end = new Date().toISOString(); const start = new Date(Date.now() - 1000*60*60*24).toISOString(); label='24h'; if(window.__wq_updateDateRange){ window.__wq_updateDateRange(start, end); } open=false; })()">24h</button>
+                            <button type="button" data-range="7d" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50" @click.prevent="(() => { const end = new Date().toISOString(); const start = new Date(Date.now() - 1000*60*60*24*7).toISOString(); label='7d'; if(window.__wq_updateDateRange){ window.__wq_updateDateRange(start, end); } open=false; })()">7d</button>
+                            <button type="button" data-range="30d" class="topbar-range-btn text-left w-full px-3 py-2 text-sm rounded hover:bg-gray-50" @click.prevent="(() => { const end = new Date().toISOString(); const start = new Date(Date.now() - 1000*60*60*24*30).toISOString(); label='30d'; if(window.__wq_updateDateRange){ window.__wq_updateDateRange(start, end); } open=false; })()">30d</button>
+                        </div>
                     </div>
-                </div>
+                </template>
             </div>
             
             <!-- Export Data Button -->
@@ -157,9 +182,6 @@
             setInterval(() => { if (lastTs && lastEl) lastEl.textContent = fmtRelative(lastTs); }, 30000);
 
             // Range preset buttons in topbar: update URL query params and dispatch event
-            function isoNow(){ return new Date().toISOString(); }
-            function isoNowMinus(ms){ return new Date(Date.now() - ms).toISOString(); }
-            
             function updateDateRange(start, end) {
                 // Update URL query parameters
                 const url = new URL(window.location.href);
@@ -171,57 +193,27 @@
                 // Update URL without page reload
                 window.history.pushState({}, '', url.toString());
                 
-                // Dispatch event for Livewire components
+                // Dispatch event for Livewire components (DOM + Livewire bus)
                 window.dispatchEvent(new CustomEvent('date-range-updated', { detail: [ start, end ] }));
-            }
-
-            // Attach handlers once DOM ready
-            document.addEventListener('DOMContentLoaded', function(){
                 try {
-                    document.querySelectorAll('.topbar-range-btn').forEach(function(btn){
-                        btn.addEventListener('click', function(){
-                            const r = btn.getAttribute('data-range');
-                            let start = null, end = isoNow();
-                            if (r === '1h') start = isoNowMinus(1000*60*60);
-                            else if (r === '24h') start = isoNowMinus(1000*60*60*24);
-                            else if (r === '7d') start = isoNowMinus(1000*60*60*24*7);
-                            else if (r === '30d') start = isoNowMinus(1000*60*60*24*30);
-                            
-                            updateDateRange(start, end);
-                            
-                            // Update visible label in dropdown
-                            try {
-                                const disp = document.getElementById('topbar-range-display');
-                                if (disp) disp.textContent = r;
-                            } catch (e) {}
-                        });
-                    });
-
-                    const apply = document.getElementById('topbar-custom-apply');
-                    if (apply) {
-                        apply.addEventListener('click', function(){
-                            const s = document.getElementById('topbar-custom-start').value;
-                            const e = document.getElementById('topbar-custom-end').value;
-                            if (!s || !e) {
-                                alert('Please pick both start and end dates');
-                                return;
-                            }
-                            
-                            updateDateRange(s, e);
-                            
-                            // Update dropdown label to 'Custom'
-                            try {
-                                const disp = document.getElementById('topbar-range-display');
-                                if (disp) disp.textContent = 'Custom';
-                            } catch (e) {}
-                            // close any open dropdown by blurring
-                            try { document.activeElement.blur(); } catch(e){}
+                    if (window.Livewire && typeof window.Livewire.dispatch === 'function') {
+                        window.Livewire.dispatch('date-range-updated', {
+                            startDate: start,
+                            endDate: end,
+                            startTime: null,
+                            endTime: null,
+                            startDateTime: start,
+                            endDateTime: end,
                         });
                     }
                 } catch (e) {
-                    // swallow
+                    // swallow client dispatch errors
                 }
-            });
+                try {
+                    console.debug('topbar: dispatched date-range-updated', { start, end });
+                } catch (e) {}
+            }
+            window.__wq_updateDateRange = updateDateRange;
         })();
     </script>
 </div>

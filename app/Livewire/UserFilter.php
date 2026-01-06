@@ -255,6 +255,13 @@ class UserFilter extends Component
         // Dispatch event for same-page Livewire consumers
         $this->dispatch('user-selected', userId: $userId);
 
+        // Keep the URL in sync (so back/forward + reload restore selection)
+        $this->dispatch('agwa:update-user-query', user: $userId);
+
+        // Bridge to browser-level custom event so non-Livewire listeners (chart JS)
+        // can react without a full navigation
+        $this->dispatch('agwa:user-selected-browser', userId: $userId);
+
         // Update the placeholder properties if we can resolve the user
         try {
             $u = User::find($userId);
@@ -271,6 +278,18 @@ class UserFilter extends Component
         // Hide the dropdowns (don't reset input value again)
         $this->resetFullNameSearch(false);
         $this->resetFishpondNameSearch(false);
+        // Hard fallback: perform a client-side navigation so all components reload
+        // with the selected user (prevents stale charts when JS listeners miss).
+        try {
+            // Always target the dashboard route (not the Livewire /livewire/update endpoint)
+            $targetUrl = route('dashboard', ['user' => $this->selectedUserId]);
+            // Use JS navigation to avoid Livewire hitting /livewire/update via GET
+            if (method_exists($this, 'js')) {
+                $this->js("window.location.href = '" . $targetUrl . "'");
+            } else {
+                $this->dispatch('agwa:client-navigate', url: $targetUrl);
+            }
+        } catch (\Throwable $e) {}
     }
 
     // Reset Full Name search results

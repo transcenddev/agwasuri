@@ -44,6 +44,12 @@ class WaterQualityCard extends Component
     public ?string $startDate = null;
     public ?string $endDate = null;
 
+    // Time-aware filtering
+    public ?string $startTime = null;
+    public ?string $endTime = null;
+    public ?string $startDateTime = null;
+    public ?string $endDateTime = null;
+
     #[On('user-selected')]
     public function updateUser($userId)
     {
@@ -52,10 +58,25 @@ class WaterQualityCard extends Component
     }
 
     #[On('date-range-updated')]
-    public function updateDateRange(?string $startDate, ?string $endDate)
+    public function updateDateRange(?string $startDate, ?string $endDate, ?string $startTime = null, ?string $endTime = null, ?string $startDateTime = null, ?string $endDateTime = null)
     {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
+        // Accept both Livewire-dispatched named params and CustomEvent detail arrays
+        if (is_array($startDate) && $endDate === null) {
+            $payload = $startDate['detail'] ?? $startDate;
+            $startDate = $payload['startDate'] ?? $payload['start'] ?? $payload[0] ?? null;
+            $endDate = $payload['endDate'] ?? $payload['end'] ?? $payload[1] ?? null;
+            $startTime = $payload['startTime'] ?? null;
+            $endTime = $payload['endTime'] ?? null;
+            $startDateTime = $payload['startDateTime'] ?? null;
+            $endDateTime = $payload['endDateTime'] ?? null;
+        }
+
+        $this->startDate = $startDate ?: null;
+        $this->endDate = $endDate ?: null;
+        $this->startTime = $startTime ?: null;
+        $this->endTime = $endTime ?: null;
+        $this->startDateTime = $startDateTime ?: null;
+        $this->endDateTime = $endDateTime ?: null;
         $this->loadData();
     }
 
@@ -102,17 +123,20 @@ class WaterQualityCard extends Component
     {
         $baseQuery = WaterQualityData::where('user_id', $this->userId);
 
-        if ($this->startDate && $this->endDate) {
-            $baseQuery->whereBetween('recorded_at', [
-                Carbon::parse($this->startDate)->startOfDay(),
-                Carbon::parse($this->endDate)->endOfDay()
-            ]);
-        } elseif ($this->startDate) {
-            $baseQuery->whereDate('recorded_at', $this->startDate);
+        $range = $this->computeBounds();
+        if ($range['start'] && $range['end']) {
+            $baseQuery->whereBetween('recorded_at', [$range['start'], $range['end']]);
+        } elseif ($range['start']) {
+            $baseQuery->where('recorded_at', '>=', $range['start']);
+        } elseif ($range['end']) {
+            $baseQuery->where('recorded_at', '<=', $range['end']);
         }
 
         // latest reading
-        $waterQualityData = (clone $baseQuery)->orderBy('recorded_at', 'desc')->first();
+        $waterQualityData = (clone $baseQuery)
+            ->orderByDesc('recorded_at')
+            ->orderByDesc('id')
+            ->first();
 
         if ($waterQualityData) {
             $this->temperature = $waterQualityData->temperature;
@@ -125,7 +149,8 @@ class WaterQualityCard extends Component
             // Try to fetch the previous reading (if any) to compute deltas
             $previous = (clone $baseQuery)
                 ->where('recorded_at', '<', $waterQualityData->recorded_at)
-                ->orderBy('recorded_at', 'desc')
+                ->orderByDesc('recorded_at')
+                ->orderByDesc('id')
                 ->first();
 
             if ($previous) {
@@ -240,34 +265,33 @@ class WaterQualityCard extends Component
         $statuses[] = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
         $statuses[] = $this->statusFor('ph_level', $this->ph_level);
 
-        if (in_array('harm', $statuses, true)) {
+        $hasHarm = in_array('harm', $statuses, true);
+        $hasBad = in_array('bad', $statuses, true);
+        $hasGood = in_array('good', $statuses, true);
+        $allBest = collect($statuses)->filter(fn($s) => $s !== 'unknown')->every(fn($s) => $s === 'best');
+
+        // Worst-parameter-wins: any HARM downgrades overall to HARM.
+        if ($hasHarm) {
             $this->overallStatus = 'HARM';
             return;
         }
 
-        if (in_array('bad', $statuses, true)) {
+        if ($hasBad) {
             $this->overallStatus = 'BAD';
             return;
         }
 
-        if (in_array('good', $statuses, true)) {
+        if ($hasGood) {
             $this->overallStatus = 'GOOD';
             return;
         }
 
-        // if all available metrics are best
-        if (collect($statuses)->filter(fn($s) => $s !== 'unknown')->every(fn($s) => $s === 'best')) {
+        if ($allBest) {
             $this->overallStatus = 'BEST';
             return;
         }
 
-        // if all unknown or null, mark disconnected
-        if (collect($statuses)->every(fn($s) => $s === 'unknown')) {
-            $this->overallStatus = 'Disconnected';
-            return;
-        }
-
-        $this->overallStatus = 'BEST';
+        $this->overallStatus = 'Unknown';
     }
 
     /**
@@ -309,10 +333,11 @@ class WaterQualityCard extends Component
 
         $status = $this->statusFor($metric, $value);
 
+        // Map config-based labels (best/good/bad/harm/unknown) into scoring buckets
         return match($status) {
-            'good' => 100,
-            'warning' => 80, // mid-range for warning
-            'danger' => 40,  // mid-range for danger
+            'best', 'good' => 100,
+            'bad' => 80,   // warning bucket
+            'harm' => 40,  // danger bucket
             'unknown' => 0,
             default => 0,
         };
@@ -383,34 +408,25 @@ class WaterQualityCard extends Component
             return 'unknown';
         }
 
-        switch ($metric) {
-            case 'temperature':
-                // good: 24-30, warning: 20-24 or 30-34, danger: otherwise
-                if ($value >= 24 && $value <= 30) return 'good';
-                if (($value >= 20 && $value < 24) || ($value > 30 && $value <= 34)) return 'warning';
-                return 'danger';
+        // Map friendly metric names to classifier keys used in config/water_quality.php
+        $map = [
+            'temperature' => 'temperature',
+            'salinity' => 'salinity',
+            'dissolved_oxygen' => 'do',
+            'ph_level' => 'ph',
+        ];
 
-            case 'salinity':
-                // salinity in ppt: good <=35, warning 35-50, danger >50
-                if ($value <= 35) return 'good';
-                if ($value > 35 && $value <= 50) return 'warning';
-                return 'danger';
+        $key = $map[$metric] ?? $metric;
+        $classification = classifyWaterParam($key, $value);
+        $label = strtoupper($classification['label'] ?? 'UNKNOWN');
 
-            case 'dissolved_oxygen':
-                // mg/L: good >=5, warning 3-5, danger <3
-                if ($value >= 5) return 'good';
-                if ($value >= 3 && $value < 5) return 'warning';
-                return 'danger';
-
-            case 'ph_level':
-                // pH: good 6.5-8.5, warning 6.0-6.5 or 8.5-9.0, danger otherwise
-                if ($value >= 6.5 && $value <= 8.5) return 'good';
-                if (($value >= 6.0 && $value < 6.5) || ($value > 8.5 && $value <= 9.0)) return 'warning';
-                return 'danger';
-
-            default:
-                return 'unknown';
-        }
+        return match ($label) {
+            'BEST' => 'best',
+            'GOOD' => 'good',
+            'BAD' => 'bad',
+            'HARM' => 'harm',
+            default => 'unknown',
+        };
     }
 
     public function classesForStatus(string $status): string
@@ -583,5 +599,30 @@ class WaterQualityCard extends Component
     public function render()
     {
         return \view('livewire.water-quality-card');
+    }
+
+    private function computeBounds(): array
+    {
+        $start = null; $end = null;
+
+        try {
+            if ($this->startDateTime) {
+                $start = Carbon::parse($this->startDateTime);
+            } elseif ($this->startDate) {
+                $start = Carbon::parse($this->startDate)->startOfDay();
+                if ($this->startTime) { $start->setTimeFromTimeString($this->startTime); }
+            }
+        } catch (\Throwable $e) {}
+
+        try {
+            if ($this->endDateTime) {
+                $end = Carbon::parse($this->endDateTime);
+            } elseif ($this->endDate) {
+                $end = Carbon::parse($this->endDate)->endOfDay();
+                if ($this->endTime) { $end->setTimeFromTimeString($this->endTime); }
+            }
+        } catch (\Throwable $e) {}
+
+        return ['start' => $start, 'end' => $end];
     }
 }

@@ -21,6 +21,10 @@ class WaterQualityDataTable extends Component
 
     public ?string $startDate = null;
     public ?string $endDate = null;
+    public ?string $startTime = null;
+    public ?string $endTime = null;
+    public ?string $startDateTime = null;
+    public ?string $endDateTime = null;
     
     protected $queryString = [
         'startDate' => ['as' => 'start', 'except' => ''],
@@ -40,10 +44,25 @@ class WaterQualityDataTable extends Component
     }
 
     #[On('date-range-updated')]
-    public function updateDateRange(?string $startDate, ?string $endDate)
+    public function updateDateRange(?string $startDate, ?string $endDate, ?string $startTime = null, ?string $endTime = null, ?string $startDateTime = null, ?string $endDateTime = null)
     {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
+        // Handle CustomEvent detail arrays as well as named parameters
+        if (is_array($startDate) && $endDate === null) {
+            $payload = $startDate['detail'] ?? $startDate;
+            $startDate = $payload['startDate'] ?? $payload['start'] ?? $payload[0] ?? null;
+            $endDate = $payload['endDate'] ?? $payload['end'] ?? $payload[1] ?? null;
+            $startTime = $payload['startTime'] ?? null;
+            $endTime = $payload['endTime'] ?? null;
+            $startDateTime = $payload['startDateTime'] ?? null;
+            $endDateTime = $payload['endDateTime'] ?? null;
+        }
+
+        $this->startDate = $startDate ?: null;
+        $this->endDate = $endDate ?: null;
+        $this->startTime = $startTime ?: null;
+        $this->endTime = $endTime ?: null;
+        $this->startDateTime = $startDateTime ?: null;
+        $this->endDateTime = $endDateTime ?: null;
         $this->resetPage();
     }
 
@@ -56,22 +75,61 @@ class WaterQualityDataTable extends Component
         }
 
         $matchesDate = true;
-        if ($this->startDate || $this->endDate) {
-             try {
+        $range = $this->computeBounds();
+        if ($range['start'] || $range['end']) {
+            try {
                 $recordDate = Carbon::parse($event['waterQualityData']['recorded_at']);
-                if ($this->startDate && $this->endDate) {
-                    $matchesDate = $recordDate->betweenIncluded(Carbon::parse($this->startDate)->startOfDay(), Carbon::parse($this->endDate)->endOfDay());
-                } elseif ($this->startDate) {
-                    $matchesDate = $recordDate->isSameDay(Carbon::parse($this->startDate));
+                if ($range['start'] && $range['end']) {
+                    $matchesDate = $recordDate->betweenIncluded($range['start'], $range['end']);
+                } elseif ($range['start']) {
+                    $matchesDate = $recordDate->greaterThanOrEqualTo($range['start']);
+                } elseif ($range['end']) {
+                    $matchesDate = $recordDate->lessThanOrEqualTo($range['end']);
                 }
-             } catch (\Exception $e) {
-                 $matchesDate = false;
-             }
+            } catch (\Exception $e) {
+                $matchesDate = false;
+            }
         }
 
         if ($matchesDate) {
             $this->resetPage();
         }
+    }
+
+    private function computeBounds(): array
+    {
+        $start = null; $end = null;
+        try {
+            if ($this->startDateTime) {
+                $start = Carbon::parse($this->startDateTime);
+            } elseif ($this->startDate) {
+                $start = Carbon::parse($this->startDate)->startOfDay();
+                if ($this->startTime) { $start->setTimeFromTimeString($this->startTime); }
+            }
+        } catch (\Throwable $e) {}
+
+        try {
+            if ($this->endDateTime) {
+                $end = Carbon::parse($this->endDateTime);
+            } elseif ($this->endDate) {
+                $end = Carbon::parse($this->endDate)->endOfDay();
+                if ($this->endTime) { $end->setTimeFromTimeString($this->endTime); }
+            }
+        } catch (\Throwable $e) {}
+
+        return ['start' => $start, 'end' => $end];
+    }
+
+    #[On('clear-filters')]
+    public function clearFilters(): void
+    {
+        $this->startDate = null;
+        $this->endDate = null;
+        $this->startTime = null;
+        $this->endTime = null;
+        $this->startDateTime = null;
+        $this->endDateTime = null;
+        $this->resetPage();
     }
 
     public function mount(?int $userId = null): void
@@ -113,13 +171,13 @@ class WaterQualityDataTable extends Component
             \Log::info('WaterQualityDataTable:render - query count', ['userId' => $this->userId, 'count' => $query->count()]);
         } catch (\Throwable $e) {}
 
-        if ($this->startDate && $this->endDate) {
-            $query->whereBetween('recorded_at', [
-                Carbon::parse($this->startDate)->startOfDay(),
-                Carbon::parse($this->endDate)->endOfDay()
-            ]);
-        } elseif ($this->startDate) {
-            $query->whereDate('recorded_at', $this->startDate);
+        $range = $this->computeBounds();
+        if ($range['start'] && $range['end']) {
+            $query->whereBetween('recorded_at', [$range['start'], $range['end']]);
+        } elseif ($range['start']) {
+            $query->where('recorded_at', '>=', $range['start']);
+        } elseif ($range['end']) {
+            $query->where('recorded_at', '<=', $range['end']);
         }
 
         // Calculate summary statistics - clone query to avoid affecting pagination
@@ -131,7 +189,10 @@ class WaterQualityDataTable extends Component
             AVG(ph_level) as avg_ph
         ')->first();
 
-        $water_quality_data = $query->latest('recorded_at')
+        // Deterministic ordering to match dashboard preview: newest by recorded_at, then by id
+        $water_quality_data = $query
+            ->orderByDesc('recorded_at')
+            ->orderByDesc('id')
             ->paginate(perPage: $this->paginate_num);
 
         // Annotate each row with a computed status using the shared classifier.
@@ -151,15 +212,14 @@ class WaterQualityDataTable extends Component
             } catch (\Throwable $e) { $salLabel = 'UNKNOWN'; }
 
             // Determine overall row status based on new classification system
-            // Priority: harm > bad > good > best
+            // Worst-parameter-wins: any HARM downgrades to HARM
             $labels = [$tempLabel, $phLabel, $doLabel, $salLabel];
-
-            $harmCount = collect($labels)->filter(fn($l) => $l === 'HARM')->count();
+            $hasHarm = in_array('HARM', $labels, true);
             $hasBad = in_array('BAD', $labels, true);
             $hasGood = in_array('GOOD', $labels, true);
             $allBest = collect($labels)->filter(fn($l) => $l !== 'UNKNOWN')->every(fn($l) => $l === 'BEST');
 
-            if ($harmCount >= 2) {
+            if ($hasHarm) {
                 $statusBorderClass = 'border-l-4 border-red-600';
                 $badgeClass = 'bg-red-100 text-red-800';
                 $statusLabel = 'HARM';

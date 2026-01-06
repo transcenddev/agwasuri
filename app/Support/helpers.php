@@ -130,14 +130,15 @@ if (!function_exists('water_status_from_metrics')) {
             $normalized[$metric] = strtoupper(trim((string) $label));
         }
 
-        $harmCount = collect($normalized)->filter(fn($l) => $l === 'HARM')->count();
+        $hasHarm = in_array('HARM', $normalized, true);
         $hasBad = in_array('BAD', $normalized, true);
         $hasGood = in_array('GOOD', $normalized, true);
         $allBest = collect($normalized)
             ->filter(fn($l) => $l !== 'UNKNOWN')
             ->every(fn($l) => $l === 'BEST');
 
-        if ($harmCount >= 2) {
+        // Worst-parameter-wins rule: any HARM makes the overall status HARM.
+        if ($hasHarm) {
             $status = 'HARM';
         } elseif ($hasBad) {
             $status = 'BAD';

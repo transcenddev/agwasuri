@@ -15,6 +15,9 @@ class DateFilter extends Component
     public ?string $startDate = null;
     public ?string $endDate = null;
 
+    public ?string $startTime = null; // HH:MM (24h)
+    public ?string $endTime = null;   // HH:MM (24h)
+
     public ?string $minAllowedDate = null;
     public ?string $maxAllowedDate = null;
 
@@ -69,11 +72,11 @@ class DateFilter extends Component
 
     public function updated($propertyName): void
     {
-        if (! in_array($propertyName, ['startDate', 'endDate'])) {
+        if (! in_array($propertyName, ['startDate', 'endDate', 'startTime', 'endTime'])) {
             return;
         }
 
-        // Normalize inputs to plain Y-m-d (no timezone conversion)
+        // Normalize inputs to plain Y-m-d and HH:MM (no timezone conversion)
         foreach (['startDate', 'endDate'] as $prop) {
             $val = $this->$prop;
             if ($val) {
@@ -82,6 +85,20 @@ class DateFilter extends Component
                     $this->$prop = $d->format('Y-m-d'); // keep as date-only string
                 } catch (\Exception $e) {
                     Log::warning('DateFilter: invalid date format', ['property' => $prop, 'value' => $val]);
+                    $this->$prop = null;
+                }
+            }
+        }
+
+        foreach (['startTime', 'endTime'] as $prop) {
+            $val = $this->$prop;
+            if ($val === '') { $this->$prop = null; continue; }
+            if ($val) {
+                try {
+                    $t = Carbon::createFromFormat('H:i', $val);
+                    $this->$prop = $t->format('H:i');
+                } catch (\Exception $e) {
+                    Log::warning('DateFilter: invalid time format', ['property' => $prop, 'value' => $val]);
                     $this->$prop = null;
                 }
             }
@@ -147,10 +164,13 @@ class DateFilter extends Component
     /**
      * Clear selected filters and emit nulls.
      */
+    #[On('clear-filters')]
     public function clearFilters(): void
     {
         $this->startDate = null;
         $this->endDate = null;
+        $this->startTime = null;
+        $this->endTime = null;
 
         $this->emitDateRange();
         Log::info('DateFilter: clearFilters emitted null date range.');
@@ -158,9 +178,55 @@ class DateFilter extends Component
 
     protected function emitDateRange(): void
     {
-        // Dispatch based on current state, validation happened in 'updated'
-        $this->dispatch('date-range-updated', startDate: $this->startDate, endDate: $this->endDate);
-        Log::info('DateFilter: Emitting date range.', ['start' => $this->startDate, 'end' => $this->endDate]);
+        $bounds = $this->computeBounds();
+
+        // Dispatch with both legacy date-only fields and precise datetime bounds
+        $this->dispatch('date-range-updated',
+            startDate: $this->startDate,
+            endDate: $this->endDate,
+            startTime: $this->startTime,
+            endTime: $this->endTime,
+            startDateTime: $bounds['start'],
+            endDateTime: $bounds['end']
+        );
+        Log::info('DateFilter: Emitting date range.', [
+            'start' => $this->startDate,
+            'end' => $this->endDate,
+            'startDateTime' => $bounds['start'],
+            'endDateTime' => $bounds['end'],
+        ]);
+    }
+
+    private function computeBounds(): array
+    {
+        $start = null; $end = null;
+
+        if ($this->startDate) {
+            try {
+                $start = Carbon::parse($this->startDate)->startOfDay();
+                if ($this->startTime) {
+                    $start->setTimeFromTimeString($this->startTime);
+                }
+            } catch (\Throwable $e) {
+                $start = null;
+            }
+        }
+
+        if ($this->endDate) {
+            try {
+                $end = Carbon::parse($this->endDate)->endOfDay();
+                if ($this->endTime) {
+                    $end->setTimeFromTimeString($this->endTime);
+                }
+            } catch (\Throwable $e) {
+                $end = null;
+            }
+        }
+
+        return [
+            'start' => $start?->toDateTimeString(),
+            'end' => $end?->toDateTimeString(),
+        ];
     }
 
     public function mount()

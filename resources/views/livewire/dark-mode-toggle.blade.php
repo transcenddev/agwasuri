@@ -102,6 +102,9 @@
             const sun = btn.querySelector('[data-role="icon-sun"]');
             const moon = btn.querySelector('[data-role="icon-moon"]');
 
+            // If the expected icons are missing, bail out to avoid null.classList errors
+            if (!sun || !moon) return;
+
             function setIcons(theme) {
                 const dark = theme === 'dark' || (!theme && document.documentElement.classList.contains('dark'));
                 if (dark) {

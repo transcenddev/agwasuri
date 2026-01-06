@@ -6,10 +6,10 @@
             {{-- Legend intentionally removed for simplified UI (series toggling handled elsewhere) --}}
 
             {{-- Chart Area: render via the lightweight wrapper that consumes the serializable model array --}}
-            <div class="w-full" wire:ignore wire:key="chart-container-{{ $userId }}">
+            <div class="w-full" wire:key="chart-container-{{ $chartId ?? ($userId ?? (request()->get('user') ?? session('selected_user', auth()->id()))) }}">
                 <div class="relative">
                     @php
-                        $__chartId = $lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-0';
+                        $__chartId = $chartId ?? ($lineChartModelArray['jsonConfig']['chart']['id'] ?? 'water-quality-0');
                         $__debugApiKey = config('app.debug') ? optional(\App\Models\User::find(request()->get('user') ?? session('selected_user', auth()->id())))->api_key : null;
                         $__seriesNames = $lineChartModelArray['meta']['series_names'] ?? array_keys($chartData['series'] ?? []);
                         $__seriesKeys = $lineChartModelArray['meta']['series_keys'] ?? ["temperature", "dissolved_oxygen", "salinity", "ph_level"];
@@ -45,15 +45,20 @@
                         }
                     @endphp
 
-                    <div id="water-quality-chart-root" wire:ignore.self class="w-full px-4 pb-2 max-w-content-xl mx-auto"
+                    @php
+                        $__resolvedUserId = $userId ?? (request()->get('user') ?? session('selected_user', auth()->id()));
+                    @endphp
+                    <div id="water-quality-chart-root-{{ $__chartId }}" class="w-full px-4 pb-2 max-w-content-xl mx-auto"
+                        wire:key="chart-root-{{ $__chartId }}"
                         style="position: relative; display: block; height: 480px;"
                         data-chart-id="{{ $__chartId }}"
+                        data-livewire-id="{{ $this->getId() }}"
                         data-api-key='@json($__debugApiKey)'
                         data-series-names='@json($__seriesNames)'
                         data-series-keys='@json($__seriesKeys)'
                         data-initial='@json($chartData)'
                         data-chart-config='@json($lineChartModelArray)'
-                        data-user-id="{{ request()->get('user') ?? session('selected_user', auth()->id()) }}">
+                        data-user-id="{{ $__resolvedUserId }}">
                         {{-- Chart will be created by inline JS below, not by vendor wrapper --}}
                         <div id="{{ $__chartId }}" class="apexcharts-canvas-wrapper" style="min-height:480px;height:480px;width:100%;position:relative;"></div>
                     </div>
@@ -67,7 +72,8 @@
     {{-- Lightweight append-only listener for realtime points. Will attempt to append points to ApexCharts when ready. --}}
     <script>
         (function(){
-            const root = document.getElementById('water-quality-chart-root');
+            const rootId = 'water-quality-chart-root-{{ $__chartId }}';
+            const root = document.getElementById(rootId) || document.querySelector(`[data-chart-id="{{ $__chartId }}"]`);
             if (!root) {
                 console.error('❌ Chart root element not found!');
                 return;
@@ -885,21 +891,6 @@
                                                 }
                                             }
                                         }
-                                        // Force updateSeries to not animate regardless of caller to avoid flicker
-                                        try {
-                                            if (window.ApexCharts && window.ApexCharts.prototype && !window.__waterQualityPatchedUpdateSeries) {
-                                                window.__waterQualityPatchedUpdateSeries = true;
-                                                const _origUpdateSeries = window.ApexCharts.prototype.updateSeries;
-                                                window.ApexCharts.prototype.updateSeries = function(series, animate, redrawPaths) {
-                                                    try {
-                                                        return _origUpdateSeries.call(this, series, false, redrawPaths);
-                                                    } catch (err) {
-                                                        // Fallback if original signature differs
-                                                        return _origUpdateSeries.call(this, series, animate, redrawPaths);
-                                                    }
-                                                };
-                                            }
-                                        } catch (e) {}
                                     } catch (e) {
                                         // ignore wrapper errors
                                     }
