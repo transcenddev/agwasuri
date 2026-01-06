@@ -2,12 +2,12 @@
     {{-- Stat Cards Row --}}
     @isset($totalUsers)
         <div class="px-6 pt-6 pb-4">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
                 {{-- Total Users --}}
-                <div class="bg-gradient-to-br from-cvsu-50 to-white dark:from-cvsu-900/20 dark:to-gray-800 rounded-lg p-4 border border-cvsu-100 dark:border-cvsu-800">
+                <div class="p-4 border rounded-lg bg-gradient-to-br from-cvsu-50 to-white dark:from-cvsu-900/20 dark:to-gray-800 border-cvsu-100 dark:border-cvsu-800">
                     <div class="flex items-center gap-3">
-                        <div class="p-2 bg-cvsu-100 dark:bg-cvsu-800 rounded-lg">
-                            <svg class="h-6 w-6 text-cvsu-600 dark:text-cvsu-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="p-2 rounded-lg bg-cvsu-100 dark:bg-cvsu-800">
+                            <svg class="w-6 h-6 text-cvsu-600 dark:text-cvsu-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                             </svg>
                         </div>
@@ -19,10 +19,10 @@
                 </div>
 
                 {{-- Farmers --}}
-                <div class="bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-gray-800 rounded-lg p-4 border border-green-100 dark:border-green-800">
+                <div class="p-4 border border-green-100 rounded-lg bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-gray-800 dark:border-green-800">
                     <div class="flex items-center gap-3">
-                        <div class="p-2 bg-green-100 dark:bg-green-800 rounded-lg">
-                            <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="p-2 bg-green-100 rounded-lg dark:bg-green-800">
+                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
                         </div>
@@ -34,10 +34,10 @@
                 </div>
 
                 {{-- Admins --}}
-                <div class="bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-gray-800 rounded-lg p-4 border border-purple-100 dark:border-purple-800">
+                <div class="p-4 border border-purple-100 rounded-lg bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-gray-800 dark:border-purple-800">
                     <div class="flex items-center gap-3">
-                        <div class="p-2 bg-purple-100 dark:bg-purple-800 rounded-lg">
-                            <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="p-2 bg-purple-100 rounded-lg dark:bg-purple-800">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                             </svg>
                         </div>
@@ -49,10 +49,10 @@
                 </div>
 
                 {{-- Active Today --}}
-                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
+                <div class="p-4 border border-blue-100 rounded-lg bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800 dark:border-blue-800">
                     <div class="flex items-center gap-3">
-                        <div class="p-2 bg-blue-100 dark:bg-blue-800 rounded-lg">
-                            <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="p-2 bg-blue-100 rounded-lg dark:bg-blue-800">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
@@ -71,14 +71,14 @@
             <x-slot name="title">
                 <div class="flex-1">
                     <h1 class="text-lg font-semibold text-gray-900">Account Management</h1>
-                    <p class="text-sm text-gray-500 mt-1">Manage accounts, roles, and API keys</p>
+                    <p class="mt-1 text-sm text-gray-500">Manage accounts, roles, and API keys</p>
                 </div>
             </x-slot>
 
             <x-slot name="actions">
-                <div class="w-full flex flex-col md:flex-row md:items-center md:justify-end md:space-x-4 gap-3">
+                <div class="flex flex-col w-full gap-3 md:flex-row md:items-center md:justify-end md:space-x-4">
                     {{-- Search + actions wrapper: on mobile stack vertically, on tablet wrap, on desktop align horizontally --}}
-                    <div class="w-full md:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-2 gap-2 md:gap-0">
+                    <div class="flex flex-col w-full gap-2 md:w-auto sm:flex-row sm:items-center sm:space-x-2 md:gap-0">
                         <div x-data="{ q: @entangle('searchTerm') }">
                             <style>
                                 /* Hide native search clear to avoid double “x” while keeping custom clear button */
@@ -94,7 +94,7 @@
                                     type="search"
                                     wire:model.live="searchTerm"
                                     placeholder="Search name, email, pond, location"
-                                    class="no-native-clear w-full md:w-64 rounded-md border border-cvsu-200 px-3 py-2 pr-10 text-sm focus:border-cvsu-600 focus:ring-cvsu-300 focus:outline-none"
+                                    class="w-full px-3 py-2 pr-10 text-sm border rounded-md no-native-clear md:w-64 border-cvsu-200 focus:border-cvsu-600 focus:ring-cvsu-300 focus:outline-none"
                                     aria-label="Search users"
                                 />
 
@@ -104,13 +104,13 @@
                                     x-transition.opacity.duration.200
                                     type="button"
                                     @click.prevent="q = ''; $nextTick(() => $refs.search.focus())"
-                                    class="absolute right-0 mr-1 inline-flex h-11 w-11 items-center justify-center rounded focus:outline-none focus:ring-2 focus:ring-cvsu-300 focus:ring-offset-1 transform transition transform-gpu"
+                                    class="absolute right-0 inline-flex items-center justify-center mr-1 transition transform rounded h-11 w-11 focus:outline-none focus:ring-2 focus:ring-cvsu-300 focus:ring-offset-1 transform-gpu"
                                     aria-label="Clear search"
                                     title="Clear search"
                                     tabindex="0"
                                 >
                                     <span class="sr-only">Clear search</span>
-                                    <svg class="h-5 w-5 text-gray-500 transition-colors duration-150 transform-gpu hover:scale-110 group-focus:text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <svg class="w-5 h-5 text-gray-500 transition-colors duration-150 transform-gpu hover:scale-110 group-focus:text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
@@ -118,13 +118,13 @@
                         </div>
                     </div>
 
-                    <div class="w-full md:w-auto flex flex-col sm:flex-row sm:items-center sm:space-x-2 gap-2 md:gap-0 md:justify-end">
+                    <div class="flex flex-col w-full gap-2 md:w-auto sm:flex-row sm:items-center sm:space-x-2 md:gap-0 md:justify-end">
                         <button
                             wire:click="toggleFilters"
                             aria-expanded="{{ $showFilters ? 'true' : 'false' }}"
-                            class="w-full sm:w-auto rounded bg-white border border-cvsu-200 px-3 py-2 text-sm text-cvsu-600 hover:bg-cvsu-50 flex items-center justify-center relative"
+                            class="relative flex items-center justify-center w-full px-3 py-2 text-sm bg-white border rounded sm:w-auto border-cvsu-200 text-cvsu-600 hover:bg-cvsu-50"
                         >
-                            <svg class="h-4 w-4 mr-2 text-cvsu-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <svg class="w-4 h-4 mr-2 text-cvsu-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01.29.71l-6 6V20l-4-2v-7.29L3.29 6.71A1 1 0 013 6V4z" />
                             </svg>
                             <span>Filters</span>
@@ -136,14 +136,14 @@
                                 ])->filter()->count();
                             @endphp
                             @if($activeFilterCount > 0)
-                                <span class="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                                <span class="absolute flex items-center justify-center w-5 h-5 text-xs font-semibold text-white rounded-full -top-1 -right-1 bg-rose-500">
                                     {{ $activeFilterCount }}
                                 </span>
                             @endif
                         </button>
 
-                        <button wire:click="createUser" class="w-full sm:w-auto rounded bg-cvsu-600 px-3 py-2 text-sm font-medium text-white hover:bg-cvsu-700 flex items-center justify-center">
-                            <svg class="h-4 w-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <button wire:click="createUser" class="flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-white rounded sm:w-auto bg-cvsu-600 hover:bg-cvsu-700">
+                            <svg class="w-4 h-4 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
                             Create User
@@ -154,32 +154,32 @@
         </x-card-header>
     </x-slot>
 
-            <div class="p-6 relative">
+            <div class="relative p-6">
                 {{-- Bulk actions bar: render client-side and bind to Livewire `selected` so
                      it appears immediately when checkboxes change (no extra click needed) --}}
                 <div x-data="{ selected: @entangle('selected') }" x-cloak x-show="Array.isArray(selected) ? selected.length > 0 : false" x-transition class="mb-4">
-                    <div class="p-3 rounded bg-gray-50 border border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded bg-gray-50">
                         <div class="text-sm text-gray-700" x-text="Array.isArray(selected) ? selected.length + ' selected' : '0 selected'"></div>
                         <div class="flex items-center space-x-2">
-                            <button wire:click="bulkDeleteSelected" class="inline-flex items-center px-3 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700">Delete Selected</button>
-                            <button type="button" @click="selected = []" class="inline-flex items-center px-3 py-2 bg-white border border-gray-200 rounded text-sm">Clear</button>
+                            <button wire:click="bulkDeleteSelected" class="inline-flex items-center px-3 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700">Delete Selected</button>
+                            <button type="button" @click="selected = []" class="inline-flex items-center px-3 py-2 text-sm bg-white border border-gray-200 rounded">Clear</button>
                         </div>
                     </div>
                 </div>
         {{-- Session Messages (Green for success, Red for errors) --}}
         @if (session()->has('message'))
-            <div class="mb-4 rounded bg-green-100 p-4 text-sm text-green-700">
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded">
                 {{ session('message') }}
             </div>
         @elseif (session()->has('error'))
-            <div class="mb-4 rounded bg-red-100 p-4 text-sm text-red-700">
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded">
                 {{ session('error') }}
             </div>
         @endif
 
         {{-- Backdrop --}}
         @if ($showFilters)
-            <div wire:click="toggleFilters" class="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+            <div wire:click="toggleFilters" class="fixed inset-0 z-40 bg-black bg-opacity-50"></div>
         @endif
 
         {{-- Slide-out Drawer --}}
@@ -191,11 +191,11 @@
              x-transition:leave="transform transition ease-in duration-200"
              x-transition:leave-start="translate-x-0"
              x-transition:leave-end="translate-x-full"
-             class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white dark:bg-gray-800 shadow-2xl z-50 overflow-y-auto"
+             class="fixed top-0 right-0 z-50 w-full h-full overflow-y-auto bg-white shadow-2xl sm:w-96 dark:bg-gray-800"
              style="display: none;">
-            
+
             {{-- Drawer Header --}}
-            <div class="sticky top-0 bg-cvsu-600 dark:bg-cvsu-700 text-white px-6 py-4 flex items-center justify-between border-b border-cvsu-700 dark:border-cvsu-600 z-10">
+            <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 text-white border-b bg-cvsu-600 dark:bg-cvsu-700 border-cvsu-700 dark:border-cvsu-600">
                 <div class="flex items-center gap-3">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -204,8 +204,8 @@
                     </svg>
                     <h3 class="text-lg font-semibold">Filter Users</h3>
                 </div>
-                <button wire:click="toggleFilters" 
-                    class="p-1 hover:bg-cvsu-700 dark:hover:bg-cvsu-600 rounded transition-colors">
+                <button wire:click="toggleFilters"
+                    class="p-1 transition-colors rounded hover:bg-cvsu-700 dark:hover:bg-cvsu-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -234,15 +234,15 @@
             @endphp
 
             @if($hasActiveFilters)
-                <div class="px-6 py-4 bg-sky-50 dark:bg-gray-700 border-b border-sky-200 dark:border-gray-600">
-                    <p class="text-xs font-medium text-sky-900 dark:text-sky-200 mb-2">Active Filters:</p>
+                <div class="px-6 py-4 border-b bg-sky-50 dark:bg-gray-700 border-sky-200 dark:border-gray-600">
+                    <p class="mb-2 text-xs font-medium text-sky-900 dark:text-sky-200">Active Filters:</p>
                     <div class="flex flex-wrap gap-2">
                         @foreach($activeFiltersList as $filter)
                             @if(!empty($filter['value']))
-                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-white dark:bg-gray-600 border border-sky-300 dark:border-gray-500 rounded-full text-sm">
+                                <span class="inline-flex items-center gap-1 px-3 py-1 text-sm bg-white border rounded-full dark:bg-gray-600 border-sky-300 dark:border-gray-500">
                                     <span class="text-gray-700 dark:text-gray-300">{{ $filter['label'] }}:</span>
                                     <span class="font-medium text-gray-900 dark:text-white">{{ Str::limit($filter['value'], 15) }}</span>
-                                    <button wire:click="$set('{{ $filter['property'] }}', '')" 
+                                    <button wire:click="$set('{{ $filter['property'] }}', '')"
                                         class="ml-1 text-gray-500 hover:text-rose-600 dark:text-gray-400 dark:hover:text-rose-400">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -259,7 +259,7 @@
             <div class="p-6 space-y-6">
                 {{-- User Information Section --}}
                 <div>
-                    <h4 class="text-sm font-semibold text-cvsu-700 dark:text-cvsu-300 mb-3 uppercase tracking-wide flex items-center gap-2">
+                    <h4 class="flex items-center gap-2 mb-3 text-sm font-semibold tracking-wide uppercase text-cvsu-700 dark:text-cvsu-300">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>
@@ -267,29 +267,29 @@
                     </h4>
                     <div class="space-y-3">
                         <div>
-                            <label for="filterName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="filterName" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Name
                             </label>
                             <input type="text" id="filterName" wire:model.live.debounce.300ms="filterName"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cvsu-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:ring-2 focus:ring-cvsu-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                                 placeholder="Enter name...">
                         </div>
 
                         <div>
-                            <label for="filterFishpondName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="filterFishpondName" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Fishpond Name
                             </label>
                             <input type="text" id="filterFishpondName" wire:model.live.debounce.300ms="filterFishpondName"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cvsu-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:ring-2 focus:ring-cvsu-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                                 placeholder="Enter fishpond name...">
                         </div>
 
                         <div>
-                            <label for="filterAccountType" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="filterAccountType" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Account Type
                             </label>
                             <select id="filterAccountType" wire:model.live="filterAccountType"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cvsu-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:ring-2 focus:ring-cvsu-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                                 <option value="">All Account Types</option>
                                 <option value="admin">Admin</option>
                                 <option value="user">User</option>
@@ -300,7 +300,7 @@
 
                 {{-- Contact Information Section --}}
                 <div>
-                    <h4 class="text-sm font-semibold text-cvsu-700 dark:text-cvsu-300 mb-3 uppercase tracking-wide flex items-center gap-2">
+                    <h4 class="flex items-center gap-2 mb-3 text-sm font-semibold tracking-wide uppercase text-cvsu-700 dark:text-cvsu-300">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
@@ -308,11 +308,11 @@
                     </h4>
                     <div class="space-y-3">
                         <div>
-                            <label for="filterEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="filterEmail" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Email
                             </label>
                             <input type="text" id="filterEmail" wire:model.live.debounce.300ms="filterEmail"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cvsu-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:ring-2 focus:ring-cvsu-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                                 placeholder="Enter email...">
                         </div>
                     </div>
@@ -320,7 +320,7 @@
 
                 {{-- Location Information Section --}}
                 <div>
-                    <h4 class="text-sm font-semibold text-cvsu-700 dark:text-cvsu-300 mb-3 uppercase tracking-wide flex items-center gap-2">
+                    <h4 class="flex items-center gap-2 mb-3 text-sm font-semibold tracking-wide uppercase text-cvsu-700 dark:text-cvsu-300">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -329,29 +329,29 @@
                     </h4>
                     <div class="space-y-3">
                         <div>
-                            <label for="filterBarangay" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="filterBarangay" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Barangay
                             </label>
                             <input type="text" id="filterBarangay" wire:model.live.debounce.300ms="filterBarangay"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cvsu-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:ring-2 focus:ring-cvsu-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                                 placeholder="Enter barangay...">
                         </div>
 
                         <div>
-                            <label for="filterMunicipality" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="filterMunicipality" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Municipality
                             </label>
                             <input type="text" id="filterMunicipality" wire:model.live.debounce.300ms="filterMunicipality"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cvsu-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:ring-2 focus:ring-cvsu-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                                 placeholder="Enter municipality...">
                         </div>
 
                         <div>
-                            <label for="filterProvince" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="filterProvince" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Province
                             </label>
                             <input type="text" id="filterProvince" wire:model.live.debounce.300ms="filterProvince"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cvsu-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:ring-2 focus:ring-cvsu-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                                 placeholder="Enter province...">
                         </div>
                     </div>
@@ -359,7 +359,7 @@
 
                 {{-- Aquaculture Information Section --}}
                 <div>
-                    <h4 class="text-sm font-semibold text-cvsu-700 dark:text-cvsu-300 mb-3 uppercase tracking-wide flex items-center gap-2">
+                    <h4 class="flex items-center gap-2 mb-3 text-sm font-semibold tracking-wide uppercase text-cvsu-700 dark:text-cvsu-300">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
@@ -367,11 +367,11 @@
                     </h4>
                     <div class="space-y-3">
                         <div>
-                            <label for="filterWaterType" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="filterWaterType" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Water Type
                             </label>
                             <select id="filterWaterType" wire:model.live="filterWaterType"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cvsu-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:ring-2 focus:ring-cvsu-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
                                 <option value="">All Water Types</option>
                                 <option value="Freshwater">Freshwater</option>
                                 <option value="Brackish">Brackish</option>
@@ -380,11 +380,11 @@
                         </div>
 
                         <div>
-                            <label for="filterSpecies" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label for="filterSpecies" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Species
                             </label>
                             <input type="text" id="filterSpecies" wire:model.live.debounce.300ms="filterSpecies"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cvsu-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                class="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg dark:border-gray-600 focus:ring-2 focus:ring-cvsu-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                                 placeholder="Enter species...">
                         </div>
                     </div>
@@ -392,13 +392,13 @@
             </div>
 
             {{-- Drawer Footer --}}
-            <div class="sticky bottom-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4 flex gap-3">
+            <div class="sticky bottom-0 flex gap-3 px-6 py-4 bg-white border-t border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                 <button wire:click="resetFilters"
-                    class="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium">
+                    class="flex-1 px-4 py-2 font-medium text-gray-700 transition-colors bg-gray-200 rounded-lg dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600">
                     Reset All
                 </button>
                 <button wire:click="toggleFilters"
-                    class="flex-1 px-4 py-2 bg-cvsu-600 text-white rounded-lg hover:bg-cvsu-700 transition-colors font-medium">
+                    class="flex-1 px-4 py-2 font-medium text-white transition-colors rounded-lg bg-cvsu-600 hover:bg-cvsu-700">
                     Done
                 </button>
             </div>
@@ -412,14 +412,14 @@
         {{-- Conditionally render the Delete Confirmation Modal --}}
         @if ($showDeleteModal)
         <div x-data="deleteModal()" @keydown.escape.window="$wire.call('cancelDelete')" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="cancelDelete"></div>
+            <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" wire:click="cancelDelete"></div>
                 <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
-                <div class="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+                    <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-red-100 rounded-full sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="w-6 h-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                                 </svg>
                             </div>
@@ -438,7 +438,7 @@
                             <input wire:model.defer="deleteConfirmName"
                                    id="delete-confirm-input"
                                    type="text"
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                   class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                    placeholder="Type full name to confirm" />
                         </div>
 
@@ -448,16 +448,16 @@
 
                         <!-- Debug text removed: confirmation input is sufficient -->
                     </div>
-                        <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                        <div class="px-4 py-3 bg-gray-50 sm:flex sm:flex-row-reverse sm:px-6">
                         <button type="button"
                                 wire:click="clientDestroyUserFromUI({{ $deletingUserId }})"
                                 wire:loading.attr="disabled"
                                 wire:target="clientDestroyUserFromUI"
-                                class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                                class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
                                 aria-label="Confirm delete">
                             Delete
                         </button>
-                        <button type="button" wire:click="cancelDelete" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm">
+                        <button type="button" wire:click="cancelDelete" class="inline-flex justify-center w-full px-4 py-2 mt-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm">
                             Cancel
                         </button>
                     </div>
@@ -465,8 +465,8 @@
             </div>
         </div>
         @endif
-        <div class="overflow-x-auto relative overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
-            <table class="hidden md:table min-w-full divide-y divide-gray-200 table-fixed responsive table-condensed themed-table accounts--table-desktop">
+        <div class="relative overflow-x-auto overflow-y-visible"> {{-- This div handles the horizontal scroll for the table; allow vertical overflow for dropdowns --}}
+            <table class="hidden min-w-full divide-y divide-gray-200 table-fixed md:table responsive table-condensed themed-table accounts--table-desktop">
                 <colgroup>
                     <col style="width:3.5rem"> <!-- select -->
                     <col style="width:6rem"> <!-- ID -->
@@ -478,65 +478,65 @@
                 </colgroup>
                 <thead class="bg-white">
                     <tr>
-                        <th scope="col" class="sticky top-0 z-10 bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                            <input type="checkbox" wire:model="selectAll" aria-label="Select all" class="h-4 w-4 rounded border-gray-300">
+                        <th scope="col" class="sticky top-0 z-10 px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase bg-white">
+                            <input type="checkbox" wire:model="selectAll" aria-label="Select all" class="w-4 h-4 border-gray-300 rounded">
                         </th>
-                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">ID</th>
-                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Full Name</th>
-                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Email</th>
-                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
-                        <th scope="col" class="sticky top-0 z-10 bg-white px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Location</th>
-                        <th scope="col" class="sticky top-0 right-0 z-10 bg-white px-6 py-3 text-center text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
+                        <th scope="col" class="sticky top-0 z-10 px-6 py-3 text-xs font-medium tracking-wider text-right text-gray-500 uppercase bg-white">ID</th>
+                        <th scope="col" class="sticky top-0 z-10 px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase bg-white">Full Name</th>
+                        <th scope="col" class="sticky top-0 z-10 px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase bg-white">Email</th>
+                        <th scope="col" class="sticky top-0 z-10 px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase bg-white">Type</th>
+                        <th scope="col" class="sticky top-0 z-10 px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase bg-white">Location</th>
+                        <th scope="col" class="sticky top-0 right-0 z-10 px-6 py-3 text-xs font-medium tracking-wider text-center text-gray-500 uppercase bg-white">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
+                <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($users as $user)
                         <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-50">
-                            <td class="whitespace-nowrap px-4 py-2 text-sm text-gray-900 text-left">
-                                <input type="checkbox" wire:model="selected" value="{{ $user->user_id }}" class="h-4 w-4 rounded border-gray-300">
+                            <td class="px-4 py-2 text-sm text-left text-gray-900 whitespace-nowrap">
+                                <input type="checkbox" wire:model="selected" value="{{ $user->user_id }}" class="w-4 h-4 border-gray-300 rounded">
                             </td>
-                            <td data-cell="ID" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-right">{{ $user->user_id }}</td>
-                            <td data-cell="Full Name" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-left">{{ $user->first_name }} {{ $user->last_name }}</td>
+                            <td data-cell="ID" class="px-6 py-2 text-sm text-right text-gray-900 whitespace-nowrap">{{ $user->user_id }}</td>
+                            <td data-cell="Full Name" class="px-6 py-2 text-sm text-left text-gray-900 whitespace-nowrap">{{ $user->first_name }} {{ $user->last_name }}</td>
                             <td data-cell="Email" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 truncate max-w-[18rem] text-left" title="{{ $user->email }}">{{ $user->email }}</td>
-                            <td data-cell="Type" class="whitespace-nowrap px-6 py-2 text-sm text-gray-900 text-center">
+                            <td data-cell="Type" class="px-6 py-2 text-sm text-center text-gray-900 whitespace-nowrap">
                                 @if(strtolower($user->account_type) === 'admin')
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cvsu-600 text-white">Admin</span>
                                 @else
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">User</span>
                                 @endif
                             </td>
-                            <td data-cell="Location" class="px-6 py-2 text-sm text-gray-700 text-center">
+                            <td data-cell="Location" class="px-6 py-2 text-sm text-center text-gray-700">
                                 <div class="font-medium">{{ $user->fishpond_name ?: ($user->barangay ? $user->barangay : '—') }}</div>
                                 <div class="text-xs text-gray-500">{{ $user->municipality }}{{ $user->municipality && $user->province ? ', ' : '' }}{{ $user->province }}</div>
                             </td>
-                            <td data-cell="Actions" class="sticky right-0 bg-white whitespace-nowrap px-6 py-2 text-sm font-medium text-center">
+                            <td data-cell="Actions" class="sticky right-0 px-6 py-2 text-sm font-medium text-center bg-white whitespace-nowrap">
                                 {{-- Primary inline actions (desktop) --}}
-                                <div class="hidden desktop-actions items-center justify-center space-x-1">
-                                    <button type="button" wire:click="openUserDetails({{ $user->user_id }})" 
-                                        title="View details" 
-        
-                                        aria-label="View details for {{ $user->first_name }} {{ $user->last_name }}" 
-                                        class="inline-flex items-center justify-center p-2 rounded-md text-cvsu-600 hover:text-cvsu-700 hover:bg-cvsu-50 dark:hover:bg-cvsu-900/20 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <div class="items-center justify-center hidden space-x-1 desktop-actions">
+                                    <button type="button" wire:click="openUserDetails({{ $user->user_id }})"
+                                        title="View details"
+
+                                        aria-label="View details for {{ $user->first_name }} {{ $user->last_name }}"
+                                        class="inline-flex items-center justify-center p-2 transition-colors rounded-md text-cvsu-600 hover:text-cvsu-700 hover:bg-cvsu-50 dark:hover:bg-cvsu-900/20">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
                                     </button>
 
-                                    <button wire:click="editUser({{ $user->user_id }})" 
-                                        title="Edit user" 
-                                        aria-label="Edit {{ $user->first_name }} {{ $user->last_name }}" 
-                                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <button wire:click="editUser({{ $user->user_id }})"
+                                        title="Edit user"
+                                        aria-label="Edit {{ $user->first_name }} {{ $user->last_name }}"
+                                        class="inline-flex items-center justify-center p-2 text-gray-600 transition-colors rounded-md hover:text-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4 1 1-4L16.862 3.487z"/>
                                         </svg>
                                     </button>
 
-                                    <button wire:click="confirmDelete({{ $user->user_id }})" 
-                                        title="Delete user" 
-                                        aria-label="Delete {{ $user->first_name }} {{ $user->last_name }}" 
-                                        class="inline-flex items-center justify-center p-2 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <button wire:click="confirmDelete({{ $user->user_id }})"
+                                        title="Delete user"
+                                        aria-label="Delete {{ $user->first_name }} {{ $user->last_name }}"
+                                        class="inline-flex items-center justify-center p-2 text-red-600 transition-colors rounded-md hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
                                     </button>
@@ -553,35 +553,39 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="whitespace-nowrap px-6 py-2 text-center text-sm text-gray-500">No users found.</td>
+                            <td colspan="6" class="px-6 py-2 text-sm text-center text-gray-500 whitespace-nowrap">No users found.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
             {{-- Mobile: Card-list view for small screens (visible until md breakpoint) --}}
-            <div class="table-mobile mt-2 md:hidden accounts--cards-desktop">
+            <div class="mt-2 table-mobile md:hidden accounts--cards-desktop">
                 <div class="space-y-3">
                     @forelse ($users as $user)
-                        <div class="bg-white border border-gray-100 rounded-lg p-4 shadow-sm">
+                        <div class="p-4 bg-white border border-gray-100 rounded-lg shadow-sm">
                             <div class="flex items-start justify-between">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2">
-                                        <div class="font-medium text-sm text-gray-900 truncate">{{ $user->first_name }} {{ $user->last_name }}</div>
+                                        <div class="text-sm font-medium text-gray-900 truncate">{{ $user->first_name }} {{ $user->last_name }}</div>
                                         @if(strtolower($user->account_type) === 'admin')
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cvsu-600 text-white">Admin</span>
                                         @else
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">User</span>
                                         @endif
                                     </div>
-                                    <div class="text-xs text-gray-500 mt-1 truncate">{{ $user->email }}</div>
-                                    <div class="text-xs text-gray-500 mt-1">{{ $user->fishpond_name ?: ($user->barangay ? $user->barangay : '—') }}@if($user->municipality), {{ $user->municipality }}@endif@if($user->province), {{ $user->province }}@endif</div>
+                                    <div class="mt-1 text-xs text-gray-500 truncate">{{ $user->email }}</div>
+                                    <div class="mt-1 text-xs text-gray-500">
+                                        {{ $user->fishpond_name ?: ($user->barangay ? $user->barangay : '—') }}
+                                        @if($user->municipality), {{ $user->municipality }}@endif
+                                        @if($user->province), {{ $user->province }}@endif
+                                    </div>
                                 </div>
 
                                 <div class="ml-4">
                                     <!-- Mobile: single kebab menu that opens the shared global action menu -->
                                     <button
                                         type="button"
-                                        class="inline-flex items-center justify-center rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                                        class="inline-flex items-center justify-center p-2 text-gray-600 rounded-full hover:bg-gray-100"
                                         aria-haspopup="true"
                                         aria-expanded="false"
                                         title="More actions"
@@ -599,7 +603,7 @@
                                         })(event)"
                                     >
                                         <span class="sr-only">Open actions</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                             <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM18 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                     </button>
@@ -611,7 +615,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="text-center text-sm text-gray-500">No users found.</div>
+                        <div class="text-sm text-center text-gray-500">No users found.</div>
                     @endforelse
                 </div>
             </div>
@@ -717,7 +721,7 @@
                         if (!portalEl.contains(e.target)) removePortal();
                     };
                     document.addEventListener('click', clickAwayHandler, true);
-                    
+
                     escHandler = function(e) {
                         if (e.key === 'Escape' || e.key === 'Esc') removePortal();
                     };
@@ -928,15 +932,15 @@
             };
         @endphp
         <div id="{{ $modalId }}" x-data @keydown.escape.window="$wire.call('closeDetails')" x-cloak class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="closeDetails"></div>
+            <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" wire:click="closeDetails"></div>
                 <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
-                <div class="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:align-middle">
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-2xl sm:align-middle">
+                    <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start">
-                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                            <div class="w-full mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
                                 <h3 class="text-lg font-medium leading-6 text-gray-900" id="modal-title">User Details</h3>
-                                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div class="grid grid-cols-1 gap-3 mt-4 sm:grid-cols-2">
                                     <div>
                                         <div class="text-xs text-gray-500">ID</div>
                                         <div class="font-medium">{{ $selectedUser->user_id ?? 'Not set' }}</div>
@@ -1016,8 +1020,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <button type="button" wire:click="closeDetails" class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Close</button>
+                    <div class="px-4 py-3 bg-gray-50 sm:flex sm:flex-row-reverse sm:px-6">
+                        <button type="button" wire:click="closeDetails" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Close</button>
                     </div>
                 </div>
             </div>
