@@ -19,13 +19,13 @@ class RecommendationCard extends Component
     public ?string $latestRecordedAt = null;
     public bool $hasPrediction = false;
     public array $lastPredictionPayload = [];
-    
+
     // Current water quality values for parameter breakdown
     public ?float $temperature = null;
     public ?float $dissolved_oxygen = null;
     public ?float $salinity = null;
     public ?float $ph_level = null;
-    
+
     public bool $done = false;
     public bool $reminded = false;
 
@@ -42,7 +42,7 @@ class RecommendationCard extends Component
         $latest = WaterQualityData::where('user_id', $this->userId ?? auth()->id())
             ->latest('recorded_at')
             ->first();
-            
+
         if ($latest) {
             $this->hasLatestData = true;
             $this->latestRecordedAt = optional($latest->recorded_at)->format('M d, Y h:i A');
@@ -94,7 +94,7 @@ class RecommendationCard extends Component
             if ($response->successful()) {
                 $data = $response->json();
                 $predictions = (array) data_get($data, 'predictions', []);
-                
+
                 if (!empty($predictions)) {
                     $topPrediction = $predictions[0];
                     $this->species = data_get($topPrediction, 'species_name', 'Unknown');
@@ -184,9 +184,9 @@ class RecommendationCard extends Component
             'oreochromisniloticus' => $speciesMap['tilapia'] ?? 'tilapia.png',
             'bangus' => $speciesMap['bangus'] ?? 'bangus.png',
             'milkfish' => $speciesMap['bangus'] ?? 'bangus.png',
-            'sugpo' => $speciesMap['shrimp'] ?? 'shrimp.png',
-            'prawn' => $speciesMap['shrimp'] ?? 'shrimp.png',
-            'shrimp' => $speciesMap['shrimp'] ?? 'shrimp.png',
+            'sugpo' => $speciesMap['sugpo'] ?? 'sugpo.png',
+            'prawn' => $speciesMap['sugpo'] ?? 'sugpo.png',
+            'shrimp' => $speciesMap['sugpo'] ?? 'sugpo.png',
             'alimango' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
             'mudcrab' => $speciesMap['mudcrab'] ?? 'mudcrab.png',
             'catfish' => $speciesMap['hito'] ?? 'hito.png',
