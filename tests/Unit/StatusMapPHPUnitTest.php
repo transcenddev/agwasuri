@@ -12,7 +12,7 @@ class StatusMapPHPUnitTest extends TestCase
 
         $this->assertIsArray($map);
 
-        foreach (['GOOD', 'BAD', 'HARMFUL'] as $status) {
+        foreach (['GOOD', 'CRITICAL'] as $status) {
             $this->assertArrayHasKey($status, $map);
             $this->assertArrayHasKey('badge', $map[$status]);
             $this->assertArrayHasKey('value', $map[$status]);

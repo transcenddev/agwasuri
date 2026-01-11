@@ -254,7 +254,7 @@ class WaterQualityCard extends Component
 
     /**
      * Compute an aggregated overall status from individual metric statuses.
-     * Priority: harm > bad > good > best > disconnected
+     * Priority: critical > good > disconnected
      */
     protected function computeOverallStatus(): void
     {
@@ -265,29 +265,17 @@ class WaterQualityCard extends Component
         $statuses[] = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
         $statuses[] = $this->statusFor('ph_level', $this->ph_level);
 
-        $hasHarm = in_array('harm', $statuses, true);
-        $hasBad = in_array('bad', $statuses, true);
+        $hasCritical = in_array('critical', $statuses, true);
         $hasGood = in_array('good', $statuses, true);
-        $allBest = collect($statuses)->filter(fn($s) => $s !== 'unknown')->every(fn($s) => $s === 'best');
 
-        // Worst-parameter-wins: any HARM downgrades overall to HARM.
-        if ($hasHarm) {
-            $this->overallStatus = 'HARM';
-            return;
-        }
-
-        if ($hasBad) {
-            $this->overallStatus = 'BAD';
+        // Worst-parameter-wins: any CRITICAL downgrades overall to CRITICAL.
+        if ($hasCritical) {
+            $this->overallStatus = 'CRITICAL';
             return;
         }
 
         if ($hasGood) {
             $this->overallStatus = 'GOOD';
-            return;
-        }
-
-        if ($allBest) {
-            $this->overallStatus = 'BEST';
             return;
         }
 
@@ -323,7 +311,7 @@ class WaterQualityCard extends Component
 
     /**
      * Calculate individual parameter score (0-100) based on status
-     * good = 100%, warning = 70-90% (interpolated), danger = 0-69% (interpolated)
+     * good = 100%, critical = 0%
      */
     protected function parameterScore(string $metric, $value): ?int
     {
@@ -333,11 +321,10 @@ class WaterQualityCard extends Component
 
         $status = $this->statusFor($metric, $value);
 
-        // Map config-based labels (best/good/bad/harm/unknown) into scoring buckets
+        // Map config-based labels (good/critical/unknown) into scoring buckets
         return match($status) {
-            'best', 'good' => 100,
-            'bad' => 80,   // warning bucket
-            'harm' => 40,  // danger bucket
+            'good' => 100,
+            'critical' => 0,
             'unknown' => 0,
             default => 0,
         };
@@ -390,17 +377,15 @@ class WaterQualityCard extends Component
     public function overallClassesForStatus(string $status): string
     {
         return match(strtolower($status)) {
-            'best' => 'bg-green-50 text-green-800',
-            'good' => 'bg-blue-50 text-blue-800',
-            'bad' => 'bg-yellow-50 text-yellow-800',
-            'harm' => 'bg-rose-50 text-rose-700',
+            'good' => 'bg-green-50 text-green-800',
+            'critical' => 'bg-red-50 text-red-700',
             'disconnected' => 'bg-amber-50 text-amber-800',
             default => 'bg-gray-50 text-gray-700',
         };
     }
 
     /**
-     * Return a status string for a given metric value: good|warning|danger
+     * Return a status string for a given metric value: good|critical|unknown
      */
     public function statusFor(string $metric, $value): string
     {
@@ -421,10 +406,8 @@ class WaterQualityCard extends Component
         $label = strtoupper($classification['label'] ?? 'UNKNOWN');
 
         return match ($label) {
-            'BEST' => 'best',
             'GOOD' => 'good',
-            'BAD' => 'bad',
-            'HARM' => 'harm',
+            'CRITICAL' => 'critical',
             default => 'unknown',
         };
     }
@@ -432,10 +415,8 @@ class WaterQualityCard extends Component
     public function classesForStatus(string $status): string
     {
         return match($status) {
-            'best' => 'bg-green-50 border-green-200 text-green-700',
-            'good' => 'bg-blue-50 border-blue-200 text-blue-700',
-            'bad' => 'bg-yellow-50 border-yellow-200 text-yellow-700',
-            'harm' => 'bg-rose-50 border-rose-200 text-rose-700',
+            'good' => 'bg-green-50 border-green-200 text-green-700',
+            'critical' => 'bg-red-50 border-red-200 text-red-700',
             default => 'bg-gray-50 border-gray-200 text-gray-700',
         };
     }
@@ -457,10 +438,8 @@ class WaterQualityCard extends Component
     public function numberColorForStatus(string $status): string
     {
         return match($status) {
-            'best' => 'text-green-700',
-            'good' => 'text-blue-700',
-            'bad' => 'text-yellow-700',
-            'harm' => 'text-rose-700',
+            'good' => 'text-green-700',
+            'critical' => 'text-red-700',
             default => 'text-gray-700',
         };
     }

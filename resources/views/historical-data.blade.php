@@ -29,10 +29,8 @@
                             <div x-show="open" x-cloak x-transition.origin.top.right class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg p-3 text-sm text-gray-700 z-50" id="status-key-popover" @click.outside="open=false">
                                 <div class="font-medium mb-2">Status key</div>
                                 <div class="flex flex-col gap-2">
-                                    <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-600"></span> <span class="text-xs text-gray-700">BEST</span></div>
-                                    <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-sky-600"></span> <span class="text-xs text-gray-700">GOOD</span></div>
-                                    <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-500"></span> <span class="text-xs text-gray-700">BAD</span></div>
-                                    <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-600"></span> <span class="text-xs text-gray-700">HARM</span></div>
+                                    <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-600"></span> <span class="text-xs text-gray-700">GOOD</span></div>
+                                    <div class="inline-flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-600"></span> <span class="text-xs text-gray-700">CRITICAL</span></div>
                                 </div>
                             </div>
                         </div>

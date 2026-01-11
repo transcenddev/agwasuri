@@ -12,38 +12,26 @@ return [
     */
 
     'ph' => [
-        ['min' => null, 'max' => 6.00, 'label' => 'HARM', 'note' => 'extremely outside the acceptable range and may pose high risk to fish health and survival'],
-        ['min' => 6.00, 'max' => 6.49, 'label' => 'BAD',  'note' => 'outside the acceptable range; indicates undesirable conditions requiring corrective action'],
-        ['min' => 6.50, 'max' => 7.88, 'label' => 'GOOD', 'note' => 'within the acceptable range but outside the typical operating range observed in the study'],
-        ['min' => 7.89, 'max' => 8.31, 'label' => 'BEST', 'note' => 'typical operating range observed and within the acceptable standard'],
-        ['min' => 8.32, 'max' => 8.50, 'label' => 'GOOD', 'note' => 'within the acceptable range but outside the typical operating range observed in the study'],
-        ['min' => 8.51, 'max' => 9.00, 'label' => 'BAD',  'note' => 'outside the acceptable range; indicates undesirable conditions requiring corrective action'],
-        ['min' => 9.00, 'max' => null, 'label' => 'HARM', 'note' => 'extremely outside the acceptable range and may pose high risk to fish health and survival'],
+        ['min' => null, 'max' => 6.50, 'label' => 'CRITICAL', 'note' => 'Below 6.5 - outside acceptable range (DENR AO 2016-08 Class C: 6.5-8.5; Class D Critical: 6.0-9.0)'],
+        ['min' => 6.50, 'max' => 9.00, 'label' => 'GOOD', 'note' => 'Within acceptable range for freshwater species (DENR AO 2016-08; PHILMINAQ: 6.5-9.0)'],
+        ['min' => 9.00, 'max' => null, 'label' => 'CRITICAL', 'note' => 'Above 9.0 - outside acceptable range (DENR AO 2016-08 Class D Critical maximum)'],
     ],
 
     'temperature_c' => [
-        ['min' => null,  'max' => 20.00, 'label' => 'HARM', 'note' => 'sub-lethal or lethal range that may impair survival, consistent with thresholds cited in the study'],
-        ['min' => 20.00, 'max' => 24.99, 'label' => 'BAD',  'note' => 'outside the recommended range and may reduce fish performance and stability'],
-        ['min' => 25.00, 'max' => 29.83, 'label' => 'GOOD', 'note' => 'within the recommended range but below the typical upper operating range observed in the study'],
-        ['min' => 29.84, 'max' => 31.00, 'label' => 'BEST', 'note' => 'upper operating range aligned with observed values while remaining within the recommended limit'],
-        ['min' => 31.01, 'max' => 35.00, 'label' => 'BAD',  'note' => 'outside the recommended range and may reduce fish performance and stability'],
-        ['min' => 35.00, 'max' => null,  'label' => 'HARM', 'note' => 'sub-lethal or lethal range that may impair survival, consistent with thresholds cited in the study'],
+        ['min' => null, 'max' => 26.00, 'label' => 'CRITICAL', 'note' => 'Below 26°C - suboptimal temperature conditions'],
+        ['min' => 26.00, 'max' => 32.00, 'label' => 'GOOD', 'note' => 'Optimal range (DENR AO 2016-08: max rise 3°C; PHILMINAQ: below 32°C maintains good oxygen capacity)'],
+        ['min' => 32.00, 'max' => null, 'label' => 'CRITICAL', 'note' => 'Above 32°C - significantly reduces oxygen-carrying capacity of water (PHILMINAQ)'],
     ],
 
     'salinity_ppt' => [
-        ['min' => null,  'max' => 5.00,  'label' => 'HARM', 'note' => 'very low salinity condition that may increase stress risk and reduce survival for cultured species requiring brackish conditions'],
-        ['min' => 5.00,  'max' => 6.99,  'label' => 'BAD',  'note' => 'low range that may be unsuitable for stable culture conditions without careful management'],
-        ['min' => 7.00,  'max' => 9.99,  'label' => 'GOOD', 'note' => 'light range that supports more stable conditions than lower ranges'],
-        ['min' => 10.00, 'max' => 17.33, 'label' => 'BEST', 'note' => 'optimal operating range aligned with the observed peak range reported in the study'],
-        ['min' => 17.34, 'max' => 25.00, 'label' => 'GOOD', 'note' => 'acceptable upper range; requires monitoring to prevent spikes due to evaporation and concentration'],
-        ['min' => 25.01, 'max' => null,  'label' => 'HARM', 'note' => 'excessively high salinity that may increase stress risk and reduce survival if sustained'],
+        ['min' => null, 'max' => 0.50, 'label' => 'CRITICAL', 'note' => 'Below 0.5 ppt - below freshwater threshold (DENR AO 2016-08: freshwater <500 ppm or 0.5 ppt)'],
+        ['min' => 0.50, 'max' => 30.00, 'label' => 'GOOD', 'note' => 'Acceptable range covering freshwater to brackish water (DENR AO 2016-08; PHILMINAQ)'],
+        ['min' => 30.00, 'max' => null, 'label' => 'CRITICAL', 'note' => 'Above 30 ppt - marine water level, may be unsuitable for most cultured species (DENR AO 2016-08: marine ≥30 ppt)'],
     ],
 
     'dissolved_oxygen_mg_l' => [
-        ['min' => null, 'max' => 3.75, 'label' => 'HARM', 'note' => 'below the minimum observed range; indicates critically low oxygen conditions requiring immediate action'],
-        ['min' => 3.75, 'max' => 4.99, 'label' => 'BAD',  'note' => 'below the recommended minimum; may result in stress and reduced growth performance'],
-        ['min' => 5.00, 'max' => 6.12, 'label' => 'GOOD', 'note' => 'meets the recommended minimum and remains within the observed range'],
-        ['min' => 6.13, 'max' => null, 'label' => 'BEST', 'note' => 'satisfies the minimum guideline for fish production'],
+        ['min' => null, 'max' => 5.00, 'label' => 'CRITICAL', 'note' => 'Below 5.0 mg/L - insufficient for good growth (DENR AO 2016-08 Class C: min 5 mg/L; PHILMINAQ: at least 5 ppm required)'],
+        ['min' => 5.00, 'max' => null, 'label' => 'GOOD', 'note' => '5.0 mg/L and above - adequate for good growth and high production yield (DENR AO 2016-08; PHILMINAQ)'],
     ],
 
     'meta' => [
@@ -53,9 +41,9 @@ return [
     // Handy numeric thresholds used for chart annotations and quick reference
     'thresholds' => [
         'dissolved_oxygen_mg_l' => 5.0,
-        'temperature_c' => [25.0, 31.0],
-        'ph' => [6.5, 8.5],
-        'salinity_ppt' => [7.0, 25.0],
+        'temperature_c' => [26.0, 32.0],
+        'ph' => [6.5, 9.0],
+        'salinity_ppt' => [0.5, 30.0],
     ],
     // UI status -> CSS class mapping for badges, values and row borders
     'status_map' => [
@@ -64,12 +52,7 @@ return [
             'value' => 'text-green-700',
             'border' => 'border-l-4 border-green-100',
         ],
-        'BAD' => [
-            'badge' => 'text-amber-700 bg-amber-50',
-            'value' => 'text-amber-600',
-            'border' => 'border-l-4 border-amber-100',
-        ],
-        'HARMFUL' => [
+        'CRITICAL' => [
             'badge' => 'text-red-700 bg-red-50',
             'value' => 'text-red-700 font-semibold',
             'border' => 'border-l-4 border-red-200',

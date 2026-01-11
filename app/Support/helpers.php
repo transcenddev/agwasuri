@@ -80,32 +80,22 @@ if (! function_exists('classifyWaterParam')) {
 if (!function_exists('water_status_tokens')) {
     /**
      * Return shared Tailwind token classes for water status labels.
-     * Labels: BEST=emerald, GOOD=sky, BAD=amber, HARM=rose.
+     * Labels: GOOD=green, CRITICAL=red.
      */
     function water_status_tokens(?string $label): array
     {
         $key = strtoupper(trim((string) $label));
 
         $map = [
-            'BEST' => [
-                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200',
-                'border' => 'border-l-4 border-emerald-500',
-                'dot' => 'bg-emerald-500',
-            ],
             'GOOD' => [
-                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-200',
-                'border' => 'border-l-4 border-sky-500',
-                'dot' => 'bg-sky-500',
+                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-700 ring-1 ring-inset ring-green-200',
+                'border' => 'border-l-4 border-green-500',
+                'dot' => 'bg-green-500',
             ],
-            'BAD' => [
-                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200',
-                'border' => 'border-l-4 border-amber-500',
-                'dot' => 'bg-amber-500',
-            ],
-            'HARM' => [
-                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200',
-                'border' => 'border-l-4 border-rose-500',
-                'dot' => 'bg-rose-500',
+            'CRITICAL' => [
+                'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 ring-1 ring-inset ring-red-200',
+                'border' => 'border-l-4 border-red-500',
+                'dot' => 'bg-red-500',
             ],
             'UNKNOWN' => [
                 'pill' => 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200',
@@ -121,7 +111,7 @@ if (!function_exists('water_status_tokens')) {
 if (!function_exists('water_status_from_metrics')) {
     /**
      * Aggregate metric labels into a row status with shared tokens and culprits.
-     * Uses priority: HARM (>=2), BAD, GOOD, BEST.
+     * Uses priority: CRITICAL, GOOD.
      */
     function water_status_from_metrics(array $metricLabels): array
     {
@@ -130,22 +120,14 @@ if (!function_exists('water_status_from_metrics')) {
             $normalized[$metric] = strtoupper(trim((string) $label));
         }
 
-        $hasHarm = in_array('HARM', $normalized, true);
-        $hasBad = in_array('BAD', $normalized, true);
+        $hasCritical = in_array('CRITICAL', $normalized, true);
         $hasGood = in_array('GOOD', $normalized, true);
-        $allBest = collect($normalized)
-            ->filter(fn($l) => $l !== 'UNKNOWN')
-            ->every(fn($l) => $l === 'BEST');
 
-        // Worst-parameter-wins rule: any HARM makes the overall status HARM.
-        if ($hasHarm) {
-            $status = 'HARM';
-        } elseif ($hasBad) {
-            $status = 'BAD';
+        // Worst-parameter-wins rule: any CRITICAL makes the overall status CRITICAL.
+        if ($hasCritical) {
+            $status = 'CRITICAL';
         } elseif ($hasGood) {
             $status = 'GOOD';
-        } elseif ($allBest) {
-            $status = 'BEST';
         } else {
             $status = 'UNKNOWN';
         }
@@ -162,7 +144,7 @@ if (!function_exists('water_status_from_metrics')) {
         ];
 
         $culprits = [];
-        if (in_array($status, ['HARM', 'BAD', 'GOOD', 'BEST'], true)) {
+        if (in_array($status, ['CRITICAL', 'GOOD'], true)) {
             foreach ($normalized as $metric => $label) {
                 if ($label === $status) {
                     $culprits[] = $metricNames[$metric] ?? ucfirst(str_replace('_', ' ', $metric));
@@ -180,18 +162,16 @@ if (!function_exists('water_status_from_metrics')) {
 
 if (! function_exists('map_classification_to_status')) {
     /**
-     * Map a classification label (e.g. BEST, GOOD, BAD, HARM)
-     * to a normalized status key used by UI (`best`, `good`, `bad`, `harm`, `unknown`).
+     * Map a classification label (e.g. GOOD, CRITICAL)
+     * to a normalized status key used by UI (`good`, `critical`, `unknown`).
      */
     function map_classification_to_status(string $label): string
     {
         $label = trim(strtoupper($label));
 
         return match ($label) {
-            'BEST' => 'best',
             'GOOD' => 'good',
-            'BAD' => 'bad',
-            'HARM' => 'harm',
+            'CRITICAL' => 'critical',
             default => 'unknown',
         };
     }
@@ -207,7 +187,7 @@ if (! function_exists('status_color')) {
         $key = strtolower($statusOrLabel);
 
         // If a raw label was provided, map it first
-        if (! in_array($key, ['best','good','bad','harm','unknown'], true)) {
+        if (! in_array($key, ['good','critical','unknown'], true)) {
             $key = map_classification_to_status($statusOrLabel);
         }
 

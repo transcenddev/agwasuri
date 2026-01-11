@@ -25,7 +25,7 @@ class WaterQualityDataTable extends Component
     public ?string $endTime = null;
     public ?string $startDateTime = null;
     public ?string $endDateTime = null;
-    
+
     protected $queryString = [
         'startDate' => ['as' => 'start', 'except' => ''],
         'endDate' => ['as' => 'end', 'except' => ''],
@@ -148,7 +148,7 @@ class WaterQualityDataTable extends Component
         } catch (\Throwable $e) {
             $this->userId = session('selected_user', Auth::id());
         }
-        
+
         // Initialize date range from URL query params
         if (request()->has('start')) {
             $this->startDate = request('start');
@@ -212,29 +212,19 @@ class WaterQualityDataTable extends Component
             } catch (\Throwable $e) { $salLabel = 'UNKNOWN'; }
 
             // Determine overall row status based on new classification system
-            // Worst-parameter-wins: any HARM downgrades to HARM
+            // Worst-parameter-wins: any CRITICAL downgrades to CRITICAL
             $labels = [$tempLabel, $phLabel, $doLabel, $salLabel];
-            $hasHarm = in_array('HARM', $labels, true);
-            $hasBad = in_array('BAD', $labels, true);
+            $hasCritical = in_array('CRITICAL', $labels, true);
             $hasGood = in_array('GOOD', $labels, true);
-            $allBest = collect($labels)->filter(fn($l) => $l !== 'UNKNOWN')->every(fn($l) => $l === 'BEST');
 
-            if ($hasHarm) {
+            if ($hasCritical) {
                 $statusBorderClass = 'border-l-4 border-red-600';
                 $badgeClass = 'bg-red-100 text-red-800';
-                $statusLabel = 'HARM';
-            } elseif ($hasBad) {
-                $statusBorderClass = 'border-l-4 border-yellow-500';
-                $badgeClass = 'bg-yellow-100 text-yellow-800';
-                $statusLabel = 'BAD';
+                $statusLabel = 'CRITICAL';
             } elseif ($hasGood) {
-                $statusBorderClass = 'border-l-4 border-blue-500';
-                $badgeClass = 'bg-blue-100 text-blue-800';
-                $statusLabel = 'GOOD';
-            } elseif ($allBest) {
                 $statusBorderClass = 'border-l-4 border-green-500';
                 $badgeClass = 'bg-green-100 text-green-800';
-                $statusLabel = 'BEST';
+                $statusLabel = 'GOOD';
             } else {
                 $statusBorderClass = 'border-l-4 border-gray-400';
                 $badgeClass = 'bg-gray-100 text-gray-600';
@@ -248,10 +238,8 @@ class WaterQualityDataTable extends Component
                     return 'text-gray-600';
                 }
                 return match($lab) {
-                    'BEST' => 'text-green-800',
-                    'GOOD' => 'text-blue-800',
-                    'BAD' => 'text-yellow-800',
-                    'HARM' => 'text-red-800',
+                    'GOOD' => 'text-green-800',
+                    'CRITICAL' => 'text-red-800',
                     default => 'text-gray-600',
                 };
             };

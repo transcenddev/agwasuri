@@ -36,7 +36,7 @@
             $doStatus = $this->statusFor('dissolved_oxygen', $this->dissolved_oxygen);
             $phStatus = $this->statusFor('ph_level', $this->ph_level);
 
-            $statusPriority = ['harm', 'bad', 'good', 'best', 'unknown'];
+            $statusPriority = ['critical', 'good', 'unknown'];
             $metricStatuses = [
                 'Temperature' => ['status' => $tempStatus, 'value' => $this->temperature, 'unit' => $this->unitFor('temperature'), 'label' => $temperatureClassification['label'] ?? null, 'classificationKey' => 'temperature_c'],
                 'Salinity' => ['status' => $salStatus, 'value' => $this->salinity, 'unit' => $this->unitFor('salinity'), 'label' => $salinityClassification['label'] ?? null, 'classificationKey' => 'salinity_ppt'],
@@ -55,23 +55,20 @@
 
             $overallKey = strtolower($overallStatus ?? $this->overallStatus);
             $gradient = match($overallKey) {
-                'harm' => 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-                'bad' => 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                'good', 'best' => 'linear-gradient(135deg, #1B651B 0%, #0f4910 100%)',
+                'critical' => 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                'good' => 'linear-gradient(135deg, #1B651B 0%, #0f4910 100%)',
                 default => 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)',
             };
 
             $overallBadgeClass = match($overallKey) {
-                'best' => 'bg-green-100 text-green-800',
-                'good' => 'bg-blue-100 text-blue-800',
-                'bad' => 'bg-yellow-100 text-yellow-800',
-                'harm' => 'bg-red-100 text-red-800',
+                'good' => 'bg-green-100 text-green-800',
+                'critical' => 'bg-red-100 text-red-800',
                 default => 'bg-gray-100 text-gray-800',
             };
 
             $reasonLine = 'All parameters are within acceptable ranges.';
 
-            if (in_array($worstMetric['status'], ['harm', 'bad'], true)) {
+            if (in_array($worstMetric['status'], ['critical'], true)) {
                 $valueFormatted = $worstMetric['value'] === null
                     ? 'n/a'
                     : number_format($worstMetric['value'], $worstMetricName === 'Salinity' ? 2 : ($worstMetricName === 'pH' ? 2 : 1)) . ' ' . $worstMetric['unit'];
@@ -123,7 +120,7 @@
                 {{-- Status icon --}}
                 <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center mb-2 relative z-10">
                     @php
-                        $iconPath = in_array($overallKey, ['harm','bad'], true)
+                        $iconPath = in_array($overallKey, ['critical'], true)
                             ? 'M12 9v2m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z'
                             : 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z';
                     @endphp
@@ -179,17 +176,13 @@
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
                     @php
                         $tempBadgeClass = match(strtoupper($temperatureClassification['label'])) {
-                            'BEST' => 'bg-green-100 text-green-800',
-                            'GOOD' => 'bg-blue-100 text-blue-800',
-                            'BAD' => 'bg-yellow-100 text-yellow-800',
-                            'HARM' => 'bg-red-100 text-red-800',
+                            'GOOD' => 'bg-green-100 text-green-800',
+                            'CRITICAL' => 'bg-red-100 text-red-800',
                             default => 'bg-gray-100 text-gray-600'
                         };
                         $tempSparkClass = match(strtoupper($temperatureClassification['label'])) {
-                            'BEST' => 'text-green-500',
-                            'GOOD' => 'text-blue-500',
-                            'BAD' => 'text-yellow-500',
-                            'HARM' => 'text-red-500',
+                            'GOOD' => 'text-green-500',
+                            'CRITICAL' => 'text-red-500',
                             default => 'text-gray-400'
                         };
                     @endphp
@@ -238,17 +231,13 @@
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
                     @php
                         $salBadgeClass = match(strtoupper($salinityClassification['label'])) {
-                            'BEST' => 'bg-green-100 text-green-800',
-                            'GOOD' => 'bg-blue-100 text-blue-800',
-                            'BAD' => 'bg-yellow-100 text-yellow-800',
-                            'HARM' => 'bg-red-100 text-red-800',
+                            'GOOD' => 'bg-green-100 text-green-800',
+                            'CRITICAL' => 'bg-red-100 text-red-800',
                             default => 'bg-gray-100 text-gray-600'
                         };
-                        $salSparkClass = match(strtoupper($salinityClassification['label'])) {
-                            'BEST' => 'text-green-500',
-                            'GOOD' => 'text-blue-500',
-                            'BAD' => 'text-yellow-500',
-                            'HARM' => 'text-red-500',
+                        $salinitySparkClass = match(strtoupper($salinityClassification['label'])) {
+                            'GOOD' => 'text-green-500',
+                            'CRITICAL' => 'text-red-500',
                             default => 'text-gray-400'
                         };
                     @endphp
@@ -297,17 +286,13 @@
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
                     @php
                         $doBadgeClass = match(strtoupper($dissolvedOxygenClassification['label'])) {
-                            'BEST' => 'bg-green-100 text-green-800',
-                            'GOOD' => 'bg-blue-100 text-blue-800',
-                            'BAD' => 'bg-yellow-100 text-yellow-800',
-                            'HARM' => 'bg-red-100 text-red-800',
+                            'GOOD' => 'bg-green-100 text-green-800',
+                            'CRITICAL' => 'bg-red-100 text-red-800',
                             default => 'bg-gray-100 text-gray-600'
                         };
                         $doSparkClass = match(strtoupper($dissolvedOxygenClassification['label'])) {
-                            'BEST' => 'text-green-500',
-                            'GOOD' => 'text-blue-500',
-                            'BAD' => 'text-yellow-500',
-                            'HARM' => 'text-red-500',
+                            'GOOD' => 'text-green-500',
+                            'CRITICAL' => 'text-red-500',
                             default => 'text-gray-400'
                         };
                     @endphp
@@ -357,17 +342,13 @@
                 <div class="mt-2 flex flex-col items-center gap-1" x-show="!compact">
                     @php
                         $phBadgeClass = match(strtoupper($phClassification['label'])) {
-                            'BEST' => 'bg-green-100 text-green-800',
-                            'GOOD' => 'bg-blue-100 text-blue-800',
-                            'BAD' => 'bg-yellow-100 text-yellow-800',
-                            'HARM' => 'bg-red-100 text-red-800',
+                            'GOOD' => 'bg-green-100 text-green-800',
+                            'CRITICAL' => 'bg-red-100 text-red-800',
                             default => 'bg-gray-100 text-gray-600'
                         };
                         $phSparkClass = match(strtoupper($phClassification['label'])) {
-                            'BEST' => 'text-green-500',
-                            'GOOD' => 'text-blue-500',
-                            'BAD' => 'text-yellow-500',
-                            'HARM' => 'text-red-500',
+                            'GOOD' => 'text-green-500',
+                            'CRITICAL' => 'text-red-500',
                             default => 'text-gray-400'
                         };
                     @endphp

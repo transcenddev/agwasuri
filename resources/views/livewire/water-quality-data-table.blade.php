@@ -93,10 +93,8 @@
 
                                         // Simpler pill classes matching Recent Measurements
                                         $pill = fn($label) => match(strtoupper($label)) {
-                                            'BEST' => 'text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                            'GOOD' => 'text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                            'BAD' => 'text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                            'HARM' => 'text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                                            'GOOD' => 'text-green-800 bg-green-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                                            'CRITICAL' => 'text-red-800 bg-red-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
                                             default => 'text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
                                         };
                                     @endphp
@@ -129,10 +127,8 @@
 
                         $pill = function($label) {
                             return match(strtoupper($label)) {
-                                'BEST' => 'text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                'GOOD' => 'text-blue-800 bg-blue-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                'BAD' => 'text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
-                                'HARM' => 'text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                                'GOOD' => 'text-green-800 bg-green-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                                'CRITICAL' => 'text-red-800 bg-red-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
                                 default => 'text-gray-700 bg-gray-100 px-2.5 py-0.5 rounded-full text-xs font-semibold',
                             };
                         };

@@ -69,6 +69,11 @@ class DatabaseSeeder extends Seeder
         // Seed master fishpond operators (idempotent)
         $this->call(\Database\Seeders\MasterFishpondOperatorsSeeder::class);
 
+        // Live environment CSV seeder (Danilo Ramos)
+        if (class_exists(\Database\Seeders\LiveEnvironmentDataSeeder::class)) {
+            $this->call(\Database\Seeders\LiveEnvironmentDataSeeder::class);
+        }
+
         // Existing water quality data seeder (if present)
         if (class_exists(\Database\Seeders\WaterQualityDataSeeder::class)) {
             $this->call(WaterQualityDataSeeder::class);

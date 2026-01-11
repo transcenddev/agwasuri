@@ -468,54 +468,38 @@ class ClassifyFish extends Component
 
     /**
      * Get water quality status with bilingual badge and color
+     * Updated to use DENR AO 2016-08 and PHILMINAQ standards (GOOD/CRITICAL only)
      */
     public function getWaterQualityStatus(string $parameter, float $value): array
     {
-        $status = ['badge' => 'OKAY', 'badgeTl' => 'OKAY', 'color' => 'gray', 'emoji' => '⚪'];
+        // Use the centralized classification helper
+        $classification = classifyWaterParam($parameter, $value);
+        $label = strtoupper($classification['label'] ?? 'UNKNOWN');
 
-        switch ($parameter) {
-            case 'temperature':
-                if ($value >= 28 && $value <= 32) {
-                    $status = ['badge' => 'GOOD', 'badgeTl' => 'MABUTI', 'color' => 'green', 'emoji' => '🟢'];
-                } elseif (($value >= 25 && $value < 28) || ($value > 32 && $value <= 35)) {
-                    $status = ['badge' => 'MODERATE', 'badgeTl' => 'KATAMTAMAN', 'color' => 'yellow', 'emoji' => '🟡'];
-                } else {
-                    $status = ['badge' => 'POOR', 'badgeTl' => 'HINDI MAGANDA', 'color' => 'red', 'emoji' => '🔴'];
-                }
-                break;
-
-            case 'salinity':
-                if ($value >= 15 && $value <= 25) {
-                    $status = ['badge' => 'GOOD', 'badgeTl' => 'MABUTI', 'color' => 'green', 'emoji' => '🟢'];
-                } elseif (($value >= 10 && $value < 15) || ($value > 25 && $value <= 30)) {
-                    $status = ['badge' => 'MODERATE', 'badgeTl' => 'KATAMTAMAN', 'color' => 'yellow', 'emoji' => '🟡'];
-                } else {
-                    $status = ['badge' => 'POOR', 'badgeTl' => 'HINDI MAGANDA', 'color' => 'red', 'emoji' => '🔴'];
-                }
-                break;
-
-            case 'dissolved_oxygen':
-                if ($value > 5) {
-                    $status = ['badge' => 'GOOD', 'badgeTl' => 'MABUTI', 'color' => 'green', 'emoji' => '🟢'];
-                } elseif ($value >= 3 && $value <= 5) {
-                    $status = ['badge' => 'MODERATE', 'badgeTl' => 'KATAMTAMAN', 'color' => 'yellow', 'emoji' => '🟡'];
-                } else {
-                    $status = ['badge' => 'LOW', 'badgeTl' => 'MABABA', 'color' => 'red', 'emoji' => '🔴'];
-                }
-                break;
-
-            case 'ph_level':
-                if ($value >= 7 && $value <= 8.5) {
-                    $status = ['badge' => 'GOOD', 'badgeTl' => 'MABUTI', 'color' => 'green', 'emoji' => '🟢'];
-                } elseif (($value >= 6.5 && $value < 7) || ($value > 8.5 && $value <= 9)) {
-                    $status = ['badge' => 'MODERATE', 'badgeTl' => 'KATAMTAMAN', 'color' => 'yellow', 'emoji' => '🟡'];
-                } else {
-                    $status = ['badge' => 'POOR', 'badgeTl' => 'HINDI MAGANDA', 'color' => 'red', 'emoji' => '🔴'];
-                }
-                break;
+        // Map to bilingual status with color
+        if ($label === 'GOOD') {
+            return [
+                'badge' => 'GOOD',
+                'badgeTl' => 'MABUTI',
+                'color' => 'green',
+                'emoji' => '🟢'
+            ];
+        } elseif ($label === 'CRITICAL') {
+            return [
+                'badge' => 'CRITICAL',
+                'badgeTl' => 'KRITIKAL',
+                'color' => 'red',
+                'emoji' => '🔴'
+            ];
         }
 
-        return $status;
+        // Unknown/default - treat as critical for safety
+        return [
+            'badge' => 'CRITICAL',
+            'badgeTl' => 'KRITIKAL',
+            'color' => 'red',
+            'emoji' => '🔴'
+        ];
     }
 
     /**
