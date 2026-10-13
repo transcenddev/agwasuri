@@ -38,7 +38,7 @@
     {
         "id": 7,
         "title": "Update README and developer docs",
-        "description": "Document frontend redesign notes, new dev-start steps, and asset handling in `README.md` and `docs/WEB_DESIGN.md`; include commands to start dev stack and troubleshooting tips for PowerShell.",
+        "description": "Document frontend redesign notes, new dev-start steps, and asset handling in `README.md` and `notes/design/WEB_DESIGN.md`; include commands to start dev stack and troubleshooting tips for PowerShell.",
         "status": "not-started"
     },
     {

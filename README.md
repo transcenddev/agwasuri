@@ -18,7 +18,7 @@ Water quality monitoring system for fishponds using IoT sensors, real-time broad
 ## Quick Links
 
 -   [GitHub Repository](https://github.com/lokodata/agwasuri_prod)
--   [Architecture Diagram](docs/architecture.md)
+-   [Architecture Diagram](notes/architecture.md)
 -   [Water Quality Config](config/water_quality.php)
 -   [Sensor Data Controller](app/Http/Controllers/Api/WaterQualityDataController.php)
 -   [User Model](app/Models/User.php)
@@ -178,7 +178,7 @@ Event payload example:
 }
 ```
 
-See the architecture diagram in [docs/architecture.md](docs/architecture.md) for a rendered Mermaid diagram and component explanations.
+See the architecture diagram in [notes/architecture.md](notes/architecture.md) for a rendered Mermaid diagram and component explanations. Additional project notes live in [notes/agwasuri_notes.md](notes/agwasuri_notes.md).
 
 ## Testing
 
@@ -231,7 +231,7 @@ Contributions are welcome. Please follow these guidelines:
 -   Include screenshots and reproduction steps for UI changes.
 -   Use small, focused pull requests — maintainers will run CI (Pest tests, static analysis) before merging.
 
-See [CONTRIBUTORS.md](CONTRIBUTORS.md) for project credits.
+See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for project credits and contribution guidelines.
 
 ## License
 

@@ -300,7 +300,7 @@ If anything above is unclear, tell me which files or behaviors you want expanded
 
 Last updated: 2025-12-16
 
-See design guidance and UX documentation in `docs/WEB_DESIGN.md` for UI/UX, sitemap, visual tokens, and handoff checklists.
+See design guidance and UX documentation in `notes/design/WEB_DESIGN.md` for UI/UX, sitemap, visual tokens, and handoff checklists.
 
 ## Project Overview
 

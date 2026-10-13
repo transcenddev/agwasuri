@@ -35,7 +35,7 @@ return [
     ],
 
     'meta' => [
-        'source' => 'docs/WATER_QUALITY_SCALES.md',
+        'source' => 'notes/reference/WATER_QUALITY_SCALES.md',
         'notes' => 'Ranges derived from project documentation and DENR guidance; overlapping entries capture both regulatory optimal ranges and observed typical ranges.',
     ],
     // Handy numeric thresholds used for chart annotations and quick reference

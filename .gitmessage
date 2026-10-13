@@ -1,6 +1,12 @@
-refactor(data-table): move cause to tooltip on status badge
-
-- Remove inline cause text from Recorded At column for cleaner layout
-- Add hover/focus tooltip on Status badge showing cause (desktop)
-- Add click tooltip on Status badge for mobile
-- Consistent with Recent Measurements tooltip behavior
+# <type>(<scope>): <subject>   (<= 50 chars)
+#
+# Why is this change needed?
+# (wrap body at ~72 chars; explain what and why, not how)
+#
+# Refs: #<issue>
+#
+# --- COMMIT END ---
+# type: feat | fix | docs | style | refactor | test | chore | perf | build | ci
+# subject: imperative mood, no trailing period
+# separate subject and body with a blank line
+# -----------------

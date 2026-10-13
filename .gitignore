@@ -21,3 +21,10 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Local backup / scratch artifacts
+*.bak
+*.backup
+*.before-*
+*.orig
+*~
