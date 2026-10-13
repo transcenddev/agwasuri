@@ -1,6 +1,6 @@
 # Agwasuri
 
-Water quality monitoring system for fishponds using IoT sensors, real-time broadcasting, and AI-driven fish recommendations.
+A solar-powered IoT and machine-learning system that monitors water quality in real time and recommends suitable aquaculture species for fishponds.
 
 ## Table of Contents
 
@@ -17,7 +17,7 @@ Water quality monitoring system for fishponds using IoT sensors, real-time broad
 
 ## Quick Links
 
--   [GitHub Repository](https://github.com/lokodata/agwasuri_prod)
+-   [GitHub Repository](https://github.com/transcenddev/agwasuri)
 -   [Architecture Diagram](notes/architecture.md)
 -   [Water Quality Config](config/water_quality.php)
 -   [Sensor Data Controller](app/Http/Controllers/Api/WaterQualityDataController.php)
@@ -27,7 +27,7 @@ Water quality monitoring system for fishponds using IoT sensors, real-time broad
 
 ## Background
 
-Agwasuri helps small-scale aquaculture operators, researchers, and municipal officers collect, visualize, and act on pond water-quality data. It combines sensor ingestion (ESP32/Arduino devices), real-time broadcasts (Laravel Reverb), and a lightweight ML service to recommend suitable fish species and reduce stock loss.
+Agwasuri helps small-scale aquaculture operators, researchers, and municipal officers collect, visualize, and act on pond water-quality data. It combines solar-powered sensor ingestion (ESP32/Arduino devices), real-time broadcasts (Laravel Reverb), and a lightweight ML service to recommend suitable fish species and reduce stock loss.
 
 Goals:
 
@@ -37,6 +37,7 @@ Goals:
 
 ## Features
 
+-   Solar-powered sensor nodes for off-grid pond deployments
 -   Real-time ingestion of temperature, pH, dissolved oxygen, and salinity
 -   Live charts and dashboards (Livewire + Tailwind)
 -   AI-driven fish-species recommendations (external ML service)
@@ -59,8 +60,8 @@ Follow these steps to get a development instance running. The PowerShell example
 1. Clone and install dependencies
 
 ```pwsh
-git clone https://github.com/lokodata/agwasuri_prod.git
-cd agwasuri_prod
+git clone https://github.com/transcenddev/agwasuri.git
+cd agwasuri
 composer install
 npm install
 ```
@@ -161,7 +162,7 @@ A brief overview of the main components and important files:
 -   Controller: [app/Http/Controllers/Api/WaterQualityDataController.php](app/Http/Controllers/Api/WaterQualityDataController.php) - validates requests, authenticates via `Authorization: Bearer <API_KEY>` (matching `user_id` + `api_key`), creates `WaterQualityData` records and broadcasts `WaterQualityCreated` events
 -   Models: [app/Models/WaterQualityData.php](app/Models/WaterQualityData.php), [app/Models/User.php](app/Models/User.php) (primary key: `user_id`), [app/Models/ModelMetadata.php](app/Models/ModelMetadata.php)
 -   Events: [app/Events/WaterQualityCreated.php](app/Events/WaterQualityCreated.php) - broadcasts on channel `water-quality-data-created` (ShouldBroadcastNow)
--   Livewire: [app/Livewire/ClassifyFish.php](app/Livewire/ClassifyFish.php) - calls external ML endpoints (`/predict` and `/train_model` at `https://api.agwasuri.app`)
+-   Livewire: [app/Livewire/ClassifyFish.php](app/Livewire/ClassifyFish.php) - calls external ML endpoints (`/predict` and `/train_model`) configured via `config/services.php` (`services.ml.base_url`)
 
 Event payload example:
 
@@ -206,7 +207,7 @@ Notes:
 The project centralizes UI status styling in the `status_map` config entry so views and Livewire components render consistent badges, value coloring and row borders.
 
 -   **Location:** [config/water_quality.php](config/water_quality.php)
--   **Canonical keys:** `GOOD`, `BAD`, `HARMFUL`
+-   **Canonical keys:** `GOOD`, `CRITICAL`
 -   **Each entry contains:** `badge` (badge classes), `value` (value text classes), `border` (row border classes)
 
 Example (simplified):
@@ -214,8 +215,7 @@ Example (simplified):
 ```php
 'status_map' => [
     'GOOD' => ['badge' => 'text-green-700 bg-green-50', 'value' => 'text-green-700', 'border' => 'border-l-4 border-green-100'],
-    'BAD' => ['badge' => 'text-amber-700 bg-amber-50', ...],
-    'HARMFUL' => ['badge' => 'text-red-700 bg-red-50', ...],
+    'CRITICAL' => ['badge' => 'text-red-700 bg-red-50', 'value' => 'text-red-700 font-semibold', 'border' => 'border-l-4 border-red-200'],
 ]
 ```
 
