@@ -74,7 +74,7 @@ agwasuri/
 ├─ bootstrap/app.php        # App config: routing, middleware aliases, CSRF exceptions
 ├─ config/                  # app, auth, broadcasting, cache, database, filesystems,
 │                           # logging, mail, queue, reverb, services, session,
-│                           # water_quality
+│                           # water_colors, water_quality
 ├─ database/
 │  ├─ migrations/           # users, cache, jobs, water_quality_data, model_metadata,
 │  │                        # fishpond_operators
@@ -445,17 +445,19 @@ real-time tests may need `php artisan reverb:start`.
 
 Findings worth tracking (documented, not yet fixed):
 
-1. **Missing `config/water_colors.php`** — `config('water_colors.series')` is used in
-   `WaterQualityChart`, `WaterQualityCard`, `helpers.php`, and
-   `resources/views/layouts/app.blade.php`, but no such config file exists. Colors
-   always fall back to hardcoded defaults (`#EF4444`, `#14B8A6`, `#2563EB`, `#8B5CF6`).
-2. **`status_colors` not defined** — `status_color()` and
-   `WaterQualityChart::loadData()` read `config('water_quality.status_colors')`, which
-   is absent from `config/water_quality.php`; the helper falls back to gray.
-3. **Status vocabulary drift** — `status_map` in `config/water_quality.php` uses
+7. **`config/water_colors.php` (resolved)** — added with the canonical `series`
+   values (`#EF4444`, `#14B8A6`, `#2563EB`, `#8B5CF6`), matching the previous
+   hardcoded fallbacks used by `WaterQualityChart`, `WaterQualityCard`, `helpers.php`,
+   and `layouts/app.blade.php`.
+8. **`status_colors` (resolved)** — added to `config/water_quality.php` with
+   `good/warning/harmful/critical/unknown` so helpers, CSS variables, and the chart
+   payload no longer fall back to gray. Purely additive (these consumers are defined
+   but not yet wired into rendered output).
+9. **Status vocabulary drift** — `status_map` in `config/water_quality.php` uses
    `GOOD`/`CRITICAL`, while the top-level `README.md` documents
    `GOOD`/`BAD`/`HARMFUL`, and `WATER_QUALITY_SCALES.md` uses
-   `GOOD`/`BAD`/`HARMFUL`. Reconcile to a single canonical set.
+   `GOOD`/`BAD`/`HARMFUL`. `status_colors` now carries both vocabularies; reconcile
+   to a single canonical set.
 4. **Docs relocation (resolved)** — the former `docs/` directory was moved into a
    grouped `notes/` tree (see §16), and `README.md` links were repointed to `notes/`.
    `CONTRIBUTORS.md` is still absent (credits now point to `.github/CONTRIBUTING.md`).
@@ -547,6 +549,22 @@ held one leftover commit message). Activate it with
 `git config commit.template .gitmessage` if you want Git to use it. Links in
 `README.md`, this file, `.github/instructions/copilot-instructions.md`, and
 `notes/planning/todo.json` were updated to the new paths.
+
+### Font + CI pass
+
+- `resources/css/app.css`: dropped the missing `Wulkan-Display-Medium.woff` /
+  `Wulkan-Display-Black.woff` URLs (use the shipped `.otf` files).
+- Removed the stray `resources/fonts/wulkan-display-2-0-font` blob and the dead
+  duplicate `public/assets/font/` tree (~1.46 MB, unreferenced).
+- Added `.github/workflows/ci.yml` (MySQL 8 service, PHP 8.3, Node 20; runs
+  `composer install`, `npm run build`, `php artisan test`).
+
+### Color config pass
+
+- Added `config/water_colors.php` (`series` for temperature/salinity/do/ph) and
+  `water_quality.status_colors` (good/warning/harmful/critical/unknown). Values
+  match the previous hardcoded fallbacks, so rendering is unchanged; this removes the
+  silent gray fallbacks in `status_color()` and the missing `water_colors` lookups.
 
 ---
 
