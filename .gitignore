@@ -27,4 +27,32 @@ yarn-error.log
 *.backup
 *.before-*
 *.orig
-*~
+*~# Laravel runtime caches
+/bootstrap/cache/*.php
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*.log
+
+# OS / Editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Local env variants
+.env.local
+.env.*.local
+
+# Database dumps
+*.sqlite
+*.sql
+
+# Docker
+docker-compose.override.yml
+
+# Vite
+.vite/
+
+# Test coverage
+/coverage/

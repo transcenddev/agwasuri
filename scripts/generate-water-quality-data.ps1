@@ -32,7 +32,7 @@ param(
   [int]$Count = 100,
   [int]$IntervalMs = 2000,
   [string]$Start = $(Get-Date).ToString('yyyy-MM-dd HH:mm:ss'),
-  [string]$ApiKey = 'UIAQaKS1V4MWzuptW1EtDRc4C9zchyf2',
+  [string]$ApiKey = $env:WATER_QUALITY_API_KEY,
   [string]$Url = 'http://127.0.0.1:8000/store-water-quality-data',
   [int]$Retries = 3,
   [int]$RetryDelayMs = 1000,
@@ -42,6 +42,12 @@ param(
   [switch]$Infinite,
   [switch]$DryRun
 )
+
+# Validate API key is provided
+if (-not $ApiKey) {
+  Write-Error "API key required. Set WATER_QUALITY_API_KEY environment variable or pass -ApiKey parameter."
+  exit 1
+}
 
 function Get-RandomFloat([double]$min, [double]$max, [int]$round = 2) {
     $r = (Get-Random -Minimum 0 -Maximum 10000) / 10000.0
