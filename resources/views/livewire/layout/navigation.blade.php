@@ -19,7 +19,7 @@ $logout = function (Logout $logout) {
 
                 <!-- Logo -->
                 <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="flex items-center gap-2 text-2xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-opacity">
-                    <img src="{{ asset('assets/agwasuri-logo.svg') }}" alt="AgwaSuri" class="w-6 h-6 object-contain" />
+                    <img src="{{ asset('assets/logo/agwasuri-logo.svg') }}" alt="AgwaSuri" class="w-6 h-6 object-contain" />
                     <span class="text-cvsu dark:text-cvsu-400">AgwaSuri</span>
                 </a>
             </div>

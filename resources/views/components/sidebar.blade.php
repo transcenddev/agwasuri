@@ -11,7 +11,7 @@
             <div class="absolute left-0 right-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
             <div class="flex items-center gap-3" :class="expanded ? '' : 'justify-center'">
                 <div class="w-10 h-10 flex-shrink-0">
-                    <img src="{{ asset('assets/agwasuri-logo.svg') }}" alt="AgwaSuri logo" class="w-10 h-10 object-contain" />
+                    <img src="{{ asset('assets/logo/agwasuri-logo.svg') }}" alt="AgwaSuri logo" class="w-10 h-10 object-contain" />
                 </div>
                 <div x-show="(typeof expanded !== 'undefined' && expanded)" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                     <a href="{{ route('dashboard', ['user' => request('user')]) }}" wire:navigate class="text-xl font-serif font-normal md:font-medium tracking-normal hover:opacity-80 transition-all duration-200">

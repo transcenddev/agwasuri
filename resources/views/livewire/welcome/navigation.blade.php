@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between h-16">
             <!-- Logo + Brand -->
             <a href="{{ url('/') }}" wire:navigate class="flex items-center gap-2 hover:opacity-90 transition-all duration-200">
-                <img src="{{ asset('assets/agwasuri-logo.svg') }}" alt="AgwaSuri" class="w-10 h-10 object-contain" />
+                <img src="{{ asset('assets/logo/agwasuri-logo.svg') }}" alt="AgwaSuri" class="w-10 h-10 object-contain" />
                 <span class="text-2xl font-serif font-normal md:font-medium tracking-normal hidden sm:block text-white">AgwaSuri</span>
                 <span class="sr-only">Agwasuri home</span>
             </a>
