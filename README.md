@@ -2,6 +2,15 @@
 
 A solar-powered IoT and machine-learning system that monitors water quality in real time and recommends suitable aquaculture species for fishponds.
 
+## Built With
+
+- **Backend:** [PHP 8.3+](https://php.net) · [Laravel 11](https://laravel.com) · [Laravel Reverb](https://reverb.laravel.com) (real-time)
+- **Frontend:** [Livewire 3](https://livewire.laravel.com) · [Tailwind CSS](https://tailwindcss.com) · [Alpine.js](https://alpinejs.dev) · [Vite](https://vitejs.dev)
+- **Charts:** [ApexCharts](https://apexcharts.com) · [Chart.js](https://www.chartjs.org)
+- **Testing:** [Pest](https://pestphp.com)
+- **Database:** SQLite / MySQL / PostgreSQL
+- **IoT:** ESP32 / Arduino (sensor nodes)
+
 ## Table of Contents
 
 -   [Background](#background)
