@@ -301,9 +301,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Wulkan Display Font Family */
 @font-face {
   font-family: 'Wulkan Display';
-  /* Prefer available opentype first to avoid dev-server 404s when .woff is missing */
-  src: url('../fonts/Wulkan-Display-Medium.otf') format('opentype'),
-    url('../fonts/Wulkan-Display-Medium.woff') format('woff');
+  /* OpenType only: no .woff is shipped for this weight */
+  src: url('../fonts/Wulkan-Display-Medium.otf') format('opentype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -320,8 +319,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @font-face {
   font-family: 'Wulkan Display';
-  src: url('../fonts/Wulkan-Display-Black.otf') format('opentype'),
-    url('../fonts/Wulkan-Display-Black.woff') format('woff');
+  /* OpenType only: no .woff is shipped for this weight */
+  src: url('../fonts/Wulkan-Display-Black.otf') format('opentype');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
